@@ -9,6 +9,7 @@ impl std::fmt::Display for TestStruct {
 }
 
 fn main() {
+    html! {};
     html! { "" };
     html! { "Hello world!" };
     html! { 'a' };
