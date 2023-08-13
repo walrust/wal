@@ -9,15 +9,15 @@ impl std::fmt::Display for TestStruct {
 }
 
 fn main() {
-    html! {""};
-    html! {"Hello world!"};
-    html! {'a'};
-    html! {15};
-    html! {15.0};
-    html! {String::from("Hello world!")};
+    html! { "" };
+    html! { "Hello world!" };
+    html! { 'a' };
+    html! { 15 };
+    html! { 15.0 };
+    html! { String::from("Hello world!") };
     let val = "Hello world!";
-    html! {val};
+    html! { val };
     let t = TestStruct { field: 15 };
-    html! {t};
-    html! {<div>{ TestStruct { field: 15 } }</div>};
+    html! { t };
+    html! { <div>{ TestStruct { field: 15 } }</div> };
 }
