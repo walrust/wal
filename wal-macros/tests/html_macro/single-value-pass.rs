@@ -19,4 +19,5 @@ fn main() {
     html! {val};
     let t = TestStruct { field: 15 };
     html! {t};
+    html! {<div>{ TestStruct { field: 15 } }</div>};
 }

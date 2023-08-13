@@ -9,6 +9,8 @@ impl std::fmt::Display for TestStruct {
 }
 
 fn main() {
+    html! {<div></div>};
+    html! {<div>{  }</div>};
     html! {<div>{ "" }</div>};
     html! {<div>{ "Hello world!" }</div>};
     html! {<div>{ 'a' }</div>};
@@ -19,4 +21,5 @@ fn main() {
     html! {<div>{ val }</div>};
     let t = TestStruct { field: 15 };
     html! {<div>{ t }</div>};
+    html! {<div>{ TestStruct { field: 15 } }</div>};
 }
