@@ -24,4 +24,6 @@ fn main() {
 
     let t = TestStruct { field: 15 };
     html! { t };
+
+    html! { TestStruct { field: 15 } };
 }
