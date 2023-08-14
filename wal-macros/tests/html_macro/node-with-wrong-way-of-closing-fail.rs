@@ -1,6 +1,6 @@
+use wal_macros::html;
+
 fn main() {
-    html! { <div/> };
-    html! { <span/> };
     html! { <area></area> };
     html! { <base></base> };
     html! { <br></br> };

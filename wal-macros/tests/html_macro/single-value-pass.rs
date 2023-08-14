@@ -1,3 +1,5 @@
+use wal_macros::html;
+
 struct TestStruct {
     field: i32,
 }
@@ -16,9 +18,12 @@ fn main() {
     html! { 15 };
     html! { 15.0 };
     html! { String::from("Hello world!") };
+
     let val = "Hello world!";
     html! { val };
+
     let t = TestStruct { field: 15 };
     html! { t };
+
     html! { <div>{ TestStruct { field: 15 } }</div> };
 }

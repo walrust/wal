@@ -1,3 +1,5 @@
+use wal_macros::html;
+
 fn main() {
     html! { <div> };
     html! { <div>{ "Hello world!" } };

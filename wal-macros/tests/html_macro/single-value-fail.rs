@@ -1,3 +1,5 @@
+use wal_macros::html;
+
 struct TestStruct {
     field: i32,
 }

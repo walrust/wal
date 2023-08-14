@@ -1,3 +1,5 @@
+use wal_macros::html;
+
 fn main() {
     let empty = || ();
     html! {

@@ -1,3 +1,5 @@
+use wal_macros::html;
+
 fn main() {
     html! { <></> };
     html! {
@@ -7,6 +9,7 @@ fn main() {
         </>
     };
     html! { <key="value"></> };
+    
     let children = vec![html! {<div></div>}, html! {<div></div>}];
     html! { <>{ children }</> };
 }
