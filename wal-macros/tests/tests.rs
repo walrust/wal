@@ -4,9 +4,9 @@ fn html_macro_tests() {
     t.pass("tests/html_macro/single-value-pass.rs");
     //t.compile_fail("tests/html_macro/single-value-fail.rs");
     t.pass("tests/html_macro/single-element-pass.rs");
-    //t.pass("tests/html_macro/single-value-within-element-pass.rs");
+    t.pass("tests/html_macro/single-value-within-element-pass.rs");
     //t.compile_fail("tests/html_macro/single-value-within-element-fail.rs");
-    //t.pass("tests/html_macro/element-tree-pass.rs");
+    t.pass("tests/html_macro/element-tree-pass.rs");
     //t.compile_fail("tests/html_macro/element-without-closing-fail.rs");
     //t.compile_fail("tests/html_macro/element-without-opening-fail.rs");
     t.compile_fail("tests/html_macro/element-with-wrong-way-of-closing-fail.rs");

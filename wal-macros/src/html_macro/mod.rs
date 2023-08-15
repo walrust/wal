@@ -8,7 +8,9 @@ use syn::{
 mod html_element;
 mod single_html_value;
 
-pub enum HtmlTree {
+pub struct HtmlRoot(HtmlTree);
+
+enum HtmlTree {
     Empty,
     Block,
     If,
@@ -30,18 +32,12 @@ enum HtmlType {
     SingleValue,
 }
 
-impl Parse for HtmlTree {
+impl Parse for HtmlRoot {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let html_type = HtmlTree::get_html_type(input);
-        let html_tree = match html_type {
-            HtmlType::Empty => Self::Empty,
-            HtmlType::SingleValue => Self::SingleValue(input.parse()?),
-            HtmlType::Element => Self::Element(input.parse()?),
-            _ => unimplemented!(),
-        };
+        let html_tree = input.parse()?;
 
         if input.is_empty() {
-            Ok(html_tree)
+            Ok(Self(html_tree))
         } else {
             let remaining_stream: proc_macro2::TokenStream = input.parse()?;
             Err(syn::Error::new_spanned(
@@ -52,8 +48,22 @@ impl Parse for HtmlTree {
     }
 }
 
-impl HtmlTree {
-    fn get_html_type(input: ParseStream) -> HtmlType {
+impl Parse for HtmlTree {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let html_type = HtmlType::get(input);
+        let html_tree = match html_type {
+            HtmlType::Empty => Self::Empty,
+            HtmlType::SingleValue => Self::SingleValue(input.parse()?),
+            HtmlType::Element => Self::Element(input.parse()?),
+            _ => unimplemented!(),
+        };
+
+        Ok(html_tree)
+    }
+}
+
+impl HtmlType {
+    fn get(input: ParseStream) -> HtmlType {
         let input = input.fork();
 
         if input.is_empty() {
@@ -66,13 +76,13 @@ impl HtmlTree {
             HtmlType::For
         } else if input.peek(syn::token::Lt) {
             input.parse::<syn::token::Lt>().unwrap();
-            Self::get_html_type_after_lt(&input)
+            Self::get_after_lt(&input)
         } else {
             HtmlType::SingleValue
         }
     }
 
-    fn get_html_type_after_lt(input: ParseStream) -> HtmlType {
+    fn get_after_lt(input: ParseStream) -> HtmlType {
         input.parse::<syn::token::Slash>().ok(); // parsing optional slash character for unmatched closing tags
 
         if input.peek(syn::token::Gt) {
@@ -80,13 +90,13 @@ impl HtmlTree {
         } else if input.peek(syn::token::PathSep) {
             HtmlType::Component
         } else if input.peek(proc_macro2::Ident::peek_any) {
-            Self::get_html_type_where_after_lt_is_ident(input)
+            Self::get_where_after_lt_is_ident(input)
         } else {
             HtmlType::SingleValue
         }
     }
 
-    fn get_html_type_where_after_lt_is_ident(input: ParseStream) -> HtmlType {
+    fn get_where_after_lt_is_ident(input: ParseStream) -> HtmlType {
         let ident = proc_macro2::Ident::parse_any(&input).unwrap();
         let ident = ident.to_string();
 

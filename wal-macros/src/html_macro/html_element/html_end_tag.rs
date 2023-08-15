@@ -1,5 +1,8 @@
 use quote::{quote, ToTokens};
-use syn::{ext::IdentExt, parse::Parse};
+use syn::{
+    ext::IdentExt,
+    parse::{Parse, ParseStream},
+};
 
 pub struct HtmlEndTag {
     lt: syn::token::Lt,
@@ -22,5 +25,20 @@ impl HtmlEndTag {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }
+    }
+
+    pub fn is_end_tag_for(start_tag_name: &proc_macro2::Ident, input: ParseStream) -> bool {
+        let input = input.fork();
+        if input.parse::<syn::token::Lt>().is_err() {
+            return false;
+        }
+        if input.parse::<syn::token::Slash>().is_err() {
+            return false;
+        }
+
+        match proc_macro2::Ident::parse_any(&input) {
+            Ok(end_tag_name) => end_tag_name == *start_tag_name,
+            Err(_) => return false,
+        }
     }
 }

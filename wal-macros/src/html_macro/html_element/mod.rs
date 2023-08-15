@@ -3,13 +3,15 @@ use html_start_tag::HtmlStartTag;
 use proc_macro2::Ident;
 use syn::parse::Parse;
 
+use super::HtmlTree;
+
 mod html_end_tag;
 mod html_start_tag;
 
 pub struct HtmlElement {
     name: Ident,
     //props: ElementProps,
-    //children: Vec<HtmlTree>
+    children: Vec<HtmlTree>,
 }
 
 impl Parse for HtmlElement {
@@ -28,6 +30,7 @@ impl Parse for HtmlElement {
         if html_start_tag.is_self_closing() {
             return Ok(HtmlElement {
                 name: html_start_tag.name,
+                children: Vec::new(),
             });
         }
 
@@ -35,26 +38,37 @@ impl Parse for HtmlElement {
             return Err(syn::Error::new_spanned(
                 html_start_tag.to_spanned(),
                 format!(
-                    "The '<{}>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <{0}/>)",
+                    "The '<{}>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<{0}/>')",
                     html_start_tag.name
                 )
             ));
         }
 
         // here parse children
+        let mut children = Vec::new();
+        loop {
+            if input.is_empty() {
+                return Err(syn::Error::new_spanned(
+                    html_start_tag.to_spanned(),
+                    format!(
+                        "This start tag does not have a coressponding end tag. (hint: try adding '</{}>')",
+                        html_start_tag.name
+                    )
+                ));
+            }
 
-        let html_end_tag = input.parse::<HtmlEndTag>()?;
+            if HtmlEndTag::is_end_tag_for(&html_start_tag.name, input) {
+                break;
+            }
 
-        // after parsing children this code might be unnecessary
-        if html_start_tag.name != html_end_tag.name {
-            return Err(syn::Error::new_spanned(
-                html_end_tag.to_spanned(),
-                "This closing tag does not have a coressponding opening tag",
-            ));
+            children.push(input.parse()?);
         }
+
+        input.parse::<HtmlEndTag>()?;
 
         Ok(HtmlElement {
             name: html_start_tag.name,
+            children,
         })
     }
 }

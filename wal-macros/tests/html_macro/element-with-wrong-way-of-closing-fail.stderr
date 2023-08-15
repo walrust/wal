@@ -1,82 +1,82 @@
-error: The '<area>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <area/>)
+error: The '<area>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<area/>')
  --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:4:13
   |
 4 |     html! { <area></area> };
   |             ^^^^^^
 
-error: The '<base>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <base/>)
+error: The '<base>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<base/>')
  --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:5:13
   |
 5 |     html! { <base></base> };
   |             ^^^^^^
 
-error: The '<br>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <br/>)
+error: The '<br>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<br/>')
  --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:6:13
   |
 6 |     html! { <br></br> };
   |             ^^^^
 
-error: The '<col>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <col/>)
+error: The '<col>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<col/>')
  --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:7:13
   |
 7 |     html! { <col></col> };
   |             ^^^^^
 
-error: The '<embed>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <embed/>)
+error: The '<embed>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<embed/>')
  --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:8:13
   |
 8 |     html! { <embed></embed> };
   |             ^^^^^^^
 
-error: The '<hr>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <hr/>)
+error: The '<hr>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<hr/>')
  --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:9:13
   |
 9 |     html! { <hr></hr> };
   |             ^^^^
 
-error: The '<img>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <img/>)
+error: The '<img>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<img/>')
   --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:10:13
    |
 10 |     html! { <img></img> };
    |             ^^^^^
 
-error: The '<input>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <input/>)
+error: The '<input>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<input/>')
   --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:11:13
    |
 11 |     html! { <input></input> };
    |             ^^^^^^^
 
-error: The '<link>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <link/>)
+error: The '<link>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<link/>')
   --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:12:13
    |
 12 |     html! { <link></link> };
    |             ^^^^^^
 
-error: The '<meta>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <meta/>)
+error: The '<meta>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<meta/>')
   --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:13:13
    |
 13 |     html! { <meta></meta> };
    |             ^^^^^^
 
-error: The '<param>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <param/>)
+error: The '<param>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<param/>')
   --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:14:13
    |
 14 |     html! { <param></param> };
    |             ^^^^^^^
 
-error: The '<source>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <source/>)
+error: The '<source>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<source/>')
   --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:15:13
    |
 15 |     html! { <source></source> };
    |             ^^^^^^^^
 
-error: The '<track>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <track/>)
+error: The '<track>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<track/>')
   --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:16:13
    |
 16 |     html! { <track></track> };
    |             ^^^^^^^
 
-error: The '<wbr>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try <wbr/>)
+error: The '<wbr>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<wbr/>')
   --> tests/html_macro/element-with-wrong-way-of-closing-fail.rs:17:13
    |
 17 |     html! { <wbr></wbr> };
