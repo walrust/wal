@@ -1,3 +1,4 @@
+use quote::{quote, ToTokens};
 use syn::parse::Parse;
 
 pub struct HtmlStartTag {
@@ -47,7 +48,9 @@ impl HtmlStartTag {
             || self.name == "wbr"
     }
 
-    pub fn span(&self) -> proc_macro2::Span {
-        self.lt.span.join(self.gt.span).unwrap_or(self.lt.span)
+    pub fn to_spanned(&self) -> impl ToTokens {
+        let lt = &self.lt;
+        let gt = &self.gt;
+        quote! { #lt #gt }
     }
 }

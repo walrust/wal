@@ -1,3 +1,4 @@
+use quote::{quote, ToTokens};
 use syn::{ext::IdentExt, parse::Parse};
 
 pub struct HtmlEndTag {
@@ -17,7 +18,9 @@ impl Parse for HtmlEndTag {
 }
 
 impl HtmlEndTag {
-    pub fn span(&self) -> proc_macro2::Span {
-        self.lt.span.join(self.gt.span).unwrap_or(self.lt.span)
+    pub fn to_spanned(&self) -> impl ToTokens {
+        let lt = &self.lt;
+        let gt = &self.gt;
+        quote! { #lt #gt }
     }
 }

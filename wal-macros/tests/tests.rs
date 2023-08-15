@@ -9,7 +9,7 @@ fn html_macro_tests() {
     //t.pass("tests/html_macro/element-tree-pass.rs");
     //t.compile_fail("tests/html_macro/element-without-closing-fail.rs");
     //t.compile_fail("tests/html_macro/element-without-opening-fail.rs");
-    //t.compile_fail("tests/html_macro/element-with-wrong-way-of-closing-fail.rs");
+    t.compile_fail("tests/html_macro/element-with-wrong-way-of-closing-fail.rs");
     //t.pass("tests/html_macro/passing-function-pass.rs");
     //t.compile_fail("tests/html_macro/passing-function-fail.rs");
     //t.pass("tests/html_macro/attributes-pass.rs");
