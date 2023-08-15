@@ -65,7 +65,7 @@ impl HtmlTree {
         } else if input.peek(syn::token::For) {
             HtmlType::For
         } else if input.peek(syn::token::Lt) {
-            input.parse::<syn::token::Lt>();
+            input.parse::<syn::token::Lt>().unwrap();
             Self::get_html_type_after_lt(&input)
         } else {
             HtmlType::SingleValue
@@ -73,7 +73,7 @@ impl HtmlTree {
     }
 
     fn get_html_type_after_lt(input: ParseStream) -> HtmlType {
-        input.parse::<Option<syn::token::Slash>>(); // parsing optional slash character for unmatched closing tags
+        input.parse::<syn::token::Slash>().ok(); // parsing optional slash character for unmatched closing tags
 
         if input.peek(syn::token::Gt) {
             HtmlType::List
