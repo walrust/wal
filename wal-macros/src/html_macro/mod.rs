@@ -1,9 +1,11 @@
+use html_element::HtmlElement;
 use single_html_value::SingleHtmlValue;
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
 };
 
+mod html_element;
 mod single_html_value;
 
 pub enum HtmlTree {
@@ -13,7 +15,7 @@ pub enum HtmlTree {
     For,
     List,
     Component,
-    Element,
+    Element(HtmlElement),
     SingleValue(SingleHtmlValue),
 }
 
@@ -34,6 +36,7 @@ impl Parse for HtmlTree {
         let html_tree = match html_type {
             HtmlType::Empty => Self::Empty,
             HtmlType::SingleValue => Self::SingleValue(input.parse()?),
+            HtmlType::Element => Self::Element(input.parse()?),
             _ => unimplemented!(),
         };
 
@@ -62,7 +65,7 @@ impl HtmlTree {
         } else if input.peek(syn::token::For) {
             HtmlType::For
         } else if input.peek(syn::token::Lt) {
-            input.parse::<syn::token::Lt>().unwrap();
+            input.parse::<syn::token::Lt>();
             Self::get_html_type_after_lt(&input)
         } else {
             HtmlType::SingleValue
@@ -70,6 +73,8 @@ impl HtmlTree {
     }
 
     fn get_html_type_after_lt(input: ParseStream) -> HtmlType {
+        input.parse::<Option<syn::token::Slash>>(); // parsing optional slash character for unmatched closing tags
+
         if input.peek(syn::token::Gt) {
             HtmlType::List
         } else if input.peek(syn::token::PathSep) {
