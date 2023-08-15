@@ -12,8 +12,6 @@ fn main() {
     html! { if true {} else if true {} else };
 
     html! { if true { {} } };
-    html! { if true { "hello" } };
-    let value = "hello";
-    html! { if true { value } };
-    html! { if true { { invalid_reference } } };
+    html! { if true { () } };
+    html! { if true { invalid_reference } };
 }

@@ -34,12 +34,12 @@ fn main() {
     html! {
         <>
             <div/>
-            { for empty_vec() }
+            for empty_vec()
         </>
     };
     html! {
         <div>
-            { for empty_vec() }
+            for empty_vec()
         </div>
     };
 }

@@ -7,8 +7,7 @@ fn main() {
     html! { <></div></> };
     html! { </> };
     html! { <div></div><div></div> };
-    html! { <>"invalid content"</> };
-    html! { <>{ invalid_reference }</> };
+    html! { <> invalid_reference </> };
     html! { <key="key"></key> };
     html! { <key=></> };
     html! { <key="key1" key="key2"></> };
