@@ -17,13 +17,18 @@ fn main() {
     html! { 'a' };
     html! { 15 };
     html! { 15.0 };
-    html! { String::from("Hello world!") };
 
+    html! { String::from("Hello world!") };
     let val = "Hello world!";
     html! { val };
-
     let t = TestStruct { field: 15 };
     html! { t };
-
     html! { TestStruct { field: 15 } };
+
+    html! { { String::from("Hello world!") } };
+    let val = "Hello world!";
+    html! { { val } };
+    let t = TestStruct { field: 15 };
+    html! { { t } };
+    html! { { TestStruct { field: 15 } } };
 }

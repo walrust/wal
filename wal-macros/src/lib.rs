@@ -1,4 +1,4 @@
-use html_macro::HtmlRoot;
+use html_macro::html_root::HtmlRoot;
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
 

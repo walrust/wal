@@ -1,9 +1,8 @@
+use super::html_tree::HtmlTree;
 use html_end_tag::HtmlEndTag;
 use html_start_tag::HtmlStartTag;
 use proc_macro2::Ident;
 use syn::parse::Parse;
-
-use super::HtmlTree;
 
 mod html_end_tag;
 mod html_start_tag;
@@ -44,7 +43,6 @@ impl Parse for HtmlElement {
             ));
         }
 
-        // here parse children
         let mut children = Vec::new();
         loop {
             if input.is_empty() {
