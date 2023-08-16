@@ -1,4 +1,4 @@
-use super::{html_element::HtmlElement, literal::Literal};
+use super::{html_element::HtmlElement, html_list::HtmlList, literal::Literal};
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
@@ -7,7 +7,7 @@ use syn::{
 pub enum HtmlTree {
     If,
     For,
-    List,
+    List(HtmlList),
     Component,
     Element(HtmlElement),
     Literal(Literal),
@@ -29,10 +29,11 @@ impl Parse for HtmlTree {
         let html_type = HtmlType::get(input);
 
         let html_tree = match html_type {
+            HtmlType::List => Self::List(input.parse()?),
             HtmlType::Element => Self::Element(input.parse()?),
             HtmlType::Literal => Self::Literal(input.parse()?),
             HtmlType::ExpressionBlock => Self::ExpressionBlock(input.parse()?),
-            _ => unimplemented!()
+            _ => unimplemented!(),
         };
 
         Ok(html_tree)

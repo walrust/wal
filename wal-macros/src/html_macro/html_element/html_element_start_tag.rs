@@ -1,7 +1,7 @@
 use quote::{quote, ToTokens};
 use syn::parse::Parse;
 
-pub struct HtmlStartTag {
+pub struct HtmlElementStartTag {
     lt: syn::token::Lt,
     pub name: proc_macro2::Ident,
     // properties: ElementProperties,
@@ -9,7 +9,7 @@ pub struct HtmlStartTag {
     gt: syn::token::Gt,
 }
 
-impl Parse for HtmlStartTag {
+impl Parse for HtmlElementStartTag {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let lt = input.parse()?;
         let name = input.parse()?;
@@ -17,7 +17,7 @@ impl Parse for HtmlStartTag {
         let slash = input.parse().ok();
         let gt = input.parse()?;
 
-        Ok(HtmlStartTag {
+        Ok(HtmlElementStartTag {
             lt,
             name,
             slash,
@@ -26,7 +26,7 @@ impl Parse for HtmlStartTag {
     }
 }
 
-impl HtmlStartTag {
+impl HtmlElementStartTag {
     pub fn is_self_closing(&self) -> bool {
         self.slash.is_some()
     }
