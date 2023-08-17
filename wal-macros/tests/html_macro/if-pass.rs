@@ -8,7 +8,6 @@ fn main() {
     html! { if true { <div/> } };
     html! { if true { <div/><div/> } };
     html! { if true { html! {} } };
-    html! { if true { { let _x = 1; html! {} } } }; // not sure about this double brackets. Can it be ommited?
 
     html! { if true { "hello1" } else { "hello2" } };
     html! { if true { "hello1" } else if true { "hello2" } };
@@ -39,7 +38,4 @@ fn main() {
     let x = 1;
     html! { if x == 1 {} };
     html! { if x == 1 { "hello1" } else if x == 1 { "hello2" } };
-
-    html! { if { let _x = 1; true } {} };
-    html! { if { let _x = 1; true } {} else if { let _x = 1; true } {} };
 }

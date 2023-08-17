@@ -7,6 +7,7 @@ fn html_macro_tests() {
     t.pass("tests/html_macro/single-value-within-element-pass.rs");
     //t.compile_fail("tests/html_macro/single-value-within-element-fail.rs");
     t.pass("tests/html_macro/element-tree-pass.rs");
+    t.pass("tests/html_macro/element-forest-pass.rs");
     t.pass("tests/html_macro/element-tree-with-multiple-values-pass.rs");
     t.compile_fail("tests/html_macro/element-without-closing-fail.rs");
     t.compile_fail("tests/html_macro/element-without-opening-fail.rs");
@@ -14,8 +15,8 @@ fn html_macro_tests() {
     t.pass("tests/html_macro/passing-function-pass.rs");
     //t.compile_fail("tests/html_macro/passing-function-fail.rs");
     //t.pass("tests/html_macro/attributes-pass.rs");
-    //t.pass("tests/html_macro/list-of-elements-pass.rs");
-    //t.compile_fail("tests/html_macro/list-of-elements-fail.rs");
+    //t.pass("tests/html_macro/fragment-pass.rs");
+    //t.compile_fail("tests/html_macro/fragment-fail.rs");
     //t.pass("tests/html_macro/for-loop-pass.rs");
     //t.compile_fail("tests/html_macro/for-loop-fail.rs");
     //t.pass("tests/html_macro/if-pass.rs");

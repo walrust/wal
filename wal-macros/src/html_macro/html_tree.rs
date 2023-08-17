@@ -1,4 +1,4 @@
-use super::{html_element::HtmlElement, html_list::HtmlList, literal::Literal};
+use super::{html_element::HtmlElement, html_fragment::HtmlFragment, literal::Literal};
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
@@ -7,21 +7,11 @@ use syn::{
 pub enum HtmlTree {
     If,
     For,
-    List(HtmlList),
+    Fragment(HtmlFragment),
     Component,
     Element(HtmlElement),
     Literal(Literal),
     ExpressionBlock(syn::ExprBlock),
-}
-
-pub enum HtmlType {
-    If,
-    For,
-    List,
-    Component,
-    Element,
-    Literal,
-    ExpressionBlock,
 }
 
 impl Parse for HtmlTree {
@@ -29,7 +19,7 @@ impl Parse for HtmlTree {
         let html_type = HtmlType::get(input);
 
         let html_tree = match html_type {
-            HtmlType::List => Self::List(input.parse()?),
+            HtmlType::Fragment => Self::Fragment(input.parse()?),
             HtmlType::Element => Self::Element(input.parse()?),
             HtmlType::Literal => Self::Literal(input.parse()?),
             HtmlType::ExpressionBlock => Self::ExpressionBlock(input.parse()?),
@@ -38,6 +28,16 @@ impl Parse for HtmlTree {
 
         Ok(html_tree)
     }
+}
+
+pub enum HtmlType {
+    If,
+    For,
+    Fragment,
+    Component,
+    Element,
+    Literal,
+    ExpressionBlock,
 }
 
 impl HtmlType {
@@ -61,7 +61,7 @@ impl HtmlType {
 
     fn get_after_lt(input: ParseStream) -> HtmlType {
         if input.peek(syn::token::Gt) {
-            HtmlType::List
+            HtmlType::Fragment
         } else if input.peek(syn::token::PathSep) {
             HtmlType::Component
         } else if input.peek(proc_macro2::Ident::peek_any) {
@@ -76,7 +76,7 @@ impl HtmlType {
         let ident = ident.to_string();
 
         if input.peek(syn::token::Eq) {
-            HtmlType::List
+            HtmlType::Fragment
         } else if ident
             .chars()
             .next()

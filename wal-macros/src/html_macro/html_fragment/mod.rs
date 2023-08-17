@@ -1,17 +1,17 @@
 use super::html_tree::HtmlTree;
-use html_list_end_tag::HtmlListEndTag;
-use html_list_start_tag::HtmlListStartTag;
+use html_fragment_end_tag::HtmlFragmentEndTag;
+use html_fragment_start_tag::HtmlFragmentStartTag;
 use syn::parse::Parse;
 
-mod html_list_end_tag;
-mod html_list_start_tag;
+mod html_fragment_end_tag;
+mod html_fragment_start_tag;
 
-pub struct HtmlList(Vec<HtmlTree>);
+pub struct HtmlFragment(Vec<HtmlTree>);
 
-impl Parse for HtmlList {
+impl Parse for HtmlFragment {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         if input.peek2(syn::token::Slash) {
-            return match input.parse::<HtmlListEndTag>() {
+            return match input.parse::<HtmlFragmentEndTag>() {
                 Ok(html_end_tag) => Err(syn::Error::new_spanned(
                     html_end_tag.to_spanned(),
                     "This closing fragment does not have a corresponding opening fragment. (hint: try adding '<>')",
@@ -20,10 +20,10 @@ impl Parse for HtmlList {
             };
         }
 
-        let start_tag = input.parse::<HtmlListStartTag>()?;
+        let start_tag = input.parse::<HtmlFragmentStartTag>()?;
 
         let mut children = Vec::new();
-        while !HtmlListEndTag::peek(input) {
+        while !HtmlFragmentEndTag::peek(input) {
             if input.is_empty() {
                 return Err(syn::Error::new_spanned(
                     start_tag.to_spanned(),
@@ -34,8 +34,8 @@ impl Parse for HtmlList {
             children.push(input.parse()?);
         }
 
-        input.parse::<HtmlListEndTag>()?;
+        input.parse::<HtmlFragmentEndTag>()?;
 
-        Ok(HtmlList(children))
+        Ok(HtmlFragment(children))
     }
 }
