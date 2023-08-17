@@ -12,7 +12,9 @@ fn main() {
                 { String::from("Hello world4") }
                 <div></div>
             </div>
+            <></>
             <div/>
         </div>
+        <span/>
     };
 }

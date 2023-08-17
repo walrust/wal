@@ -1,6 +1,6 @@
 use wal_macros::html;
 
-struct TestStruct {
+struct TestNonDisplayStruct {
     field: i32,
 }
 
@@ -10,7 +10,7 @@ fn main() {
         empty()
     };
 
-    let not_node = || TestStruct { field: 0 };
+    let not_node = || TestNonDisplayStruct { field: 0 };
     html! {
         not_node()
     };

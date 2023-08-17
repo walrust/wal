@@ -6,7 +6,6 @@ fn main() {
     html! { <><div></> };
     html! { <></div></> };
     html! { </> };
-    html! { <div></div><div></div> };
     html! { <> invalid_reference </> };
     html! { <key="key"></key> };
     html! { <key=></> };

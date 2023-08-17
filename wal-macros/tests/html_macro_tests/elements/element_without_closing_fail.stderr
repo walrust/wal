@@ -1,23 +1,23 @@
 error: This start tag does not have a coressponding end tag. (hint: try adding '</div>')
- --> tests/html_macro/element-without-closing-fail.rs:4:13
+ --> tests/html_macro_tests/elements/element_without_closing_fail.rs:4:13
   |
 4 |     html! { <div> };
   |             ^^^^^
 
 error: This start tag does not have a coressponding end tag. (hint: try adding '</div>')
- --> tests/html_macro/element-without-closing-fail.rs:5:13
+ --> tests/html_macro_tests/elements/element_without_closing_fail.rs:5:13
   |
 5 |     html! { <div> "Hello world!" };
   |             ^^^^^
 
 error: This start tag does not have a coressponding end tag. (hint: try adding '</div>')
- --> tests/html_macro/element-without-closing-fail.rs:6:13
+ --> tests/html_macro_tests/elements/element_without_closing_fail.rs:6:13
   |
 6 |     html! { <div> { String::from("Hello world") } };
   |             ^^^^^
 
 error: This start tag does not have a coressponding end tag. (hint: try adding '</div>')
- --> tests/html_macro/element-without-closing-fail.rs:7:13
+ --> tests/html_macro_tests/elements/element_without_closing_fail.rs:7:13
   |
 7 |     html! { <div><div></div> };
   |             ^^^^^
