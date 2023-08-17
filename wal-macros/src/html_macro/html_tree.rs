@@ -1,5 +1,6 @@
 use super::{
-    html_element::HtmlElement, html_fragment::HtmlFragment, html_if::HtmlIf, literal::Literal,
+    html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment, html_if::HtmlIf,
+    literal::Literal,
 };
 use syn::{
     ext::IdentExt,
@@ -8,7 +9,7 @@ use syn::{
 
 pub enum HtmlTree {
     If(HtmlIf),
-    For,
+    For(HtmlFor<syn::ExprBlock>),
     Fragment(HtmlFragment),
     Component,
     Element(HtmlElement),
@@ -22,6 +23,7 @@ impl Parse for HtmlTree {
 
         let html_tree = match html_type {
             HtmlType::If => Self::If(input.parse()?),
+            HtmlType::For => Self::For(input.parse()?),
             HtmlType::Fragment => Self::Fragment(input.parse()?),
             HtmlType::Element => Self::Element(input.parse()?),
             HtmlType::Literal => Self::Literal(input.parse()?),

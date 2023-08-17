@@ -1,5 +1,4 @@
 use super::html_root::HtmlRoot;
-use quote::spanned::Spanned;
 use syn::parse::{Parse, ParseStream};
 
 pub struct HtmlIf {

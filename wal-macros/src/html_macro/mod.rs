@@ -1,4 +1,5 @@
 mod html_element;
+mod html_for;
 mod html_forest;
 mod html_fragment;
 mod html_if;
