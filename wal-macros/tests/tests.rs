@@ -26,6 +26,6 @@ fn html_macro_tests() {
     //t.compile_fail("tests/html_macro_tests/ifs/if_fail.rs");
     t.pass("tests/html_macro_tests/ifs/if_let_pass.rs");
     //t.compile_fail("tests/html_macro_tests/ifs/if_let_fail.rs");
-    //t.pass("tests/html_macro_tests/ifs/if_and_if_let_pass.rs");
+    t.pass("tests/html_macro_tests/ifs/if_and_if_let_pass.rs");
     t.pass("tests/html_macro_tests/complex_example_pass.rs");
 }
