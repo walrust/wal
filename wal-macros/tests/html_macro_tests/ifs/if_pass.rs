@@ -15,13 +15,6 @@ fn main() {
     html! { if true { "hello1" } else if true { "hello2" } else if true { "hello3" } else { "hello4" } };
 
     html! {
-        </>
-            <div/>
-            if true {}
-            <div/>
-        </>
-    };
-    html! {
         <div>
             if true {}
         </div>

@@ -22,7 +22,7 @@ fn html_macro_tests() {
     //t.compile_fail("tests/html_macro_tests/fragments/fragment_fail.rs");
     //t.pass("tests/html_macro_tests/for/for_loop_pass.rs");
     //t.compile_fail("tests/html_macro_tests/for/for_loop_fail.rs");
-    //t.pass("tests/html_macro_tests/ifs/if_pass.rs");
+    t.pass("tests/html_macro_tests/ifs/if_pass.rs");
     //t.compile_fail("tests/html_macro_tests/ifs/if_fail.rs");
     //t.pass("tests/html_macro_tests/ifs/if_let_pass.rs");
     //t.compile_fail("tests/html_macro_tests/ifs/if_let_fail.rs");

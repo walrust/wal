@@ -1,11 +1,13 @@
-use super::{html_element::HtmlElement, html_fragment::HtmlFragment, literal::Literal};
+use super::{
+    html_element::HtmlElement, html_fragment::HtmlFragment, html_if::HtmlIf, literal::Literal,
+};
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
 };
 
 pub enum HtmlTree {
-    If,
+    If(HtmlIf),
     For,
     Fragment(HtmlFragment),
     Component,
@@ -19,6 +21,7 @@ impl Parse for HtmlTree {
         let html_type = HtmlType::get(input);
 
         let html_tree = match html_type {
+            HtmlType::If => Self::If(input.parse()?),
             HtmlType::Fragment => Self::Fragment(input.parse()?),
             HtmlType::Element => Self::Element(input.parse()?),
             HtmlType::Literal => Self::Literal(input.parse()?),
