@@ -16,7 +16,14 @@ impl Parse for HtmlFragmentStartTag {
         let attribute = input.parse::<HtmlAttribute>().ok();
 
         if !input.peek(syn::token::Gt) {
-            return Err(input.error("Fragment supports only a single `key` attribute"));
+            let error_message = "Fragment supports only a single `key` attribute";
+            if let Some(attribute) = &attribute {
+                if attribute.ident == "key" {
+                    return Err(input.error(error_message));
+                } else {
+                    return Err(syn::Error::new(attribute.ident.span(), error_message));
+                }
+            }
         }
 
         if let Some(attribute) = &attribute {

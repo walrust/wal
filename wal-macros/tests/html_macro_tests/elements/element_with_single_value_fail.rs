@@ -13,6 +13,6 @@ fn main() {
     let val = "Hello world!";
     html! { <div> val </div> };
     let t = TestNonDisplayStruct { field: 15 };
-    html! { <div> t </div> };
-    html! { <div> TestNonDisplayStruct { field: 15 } </div> };
+    html! { <div> { t } </div> };
+    html! { <div> { TestNonDisplayStruct { field: 15 } } </div> };
 }
