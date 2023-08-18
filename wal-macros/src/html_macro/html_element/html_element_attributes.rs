@@ -2,8 +2,8 @@ use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
 use std::collections::HashMap;
 
 pub struct HtmlElementAttributes {
-    attributes: Vec<HtmlAttribute>,
-    key: Option<HtmlAttributeValue>,
+    _attributes: Vec<HtmlAttribute>,
+    _key: Option<HtmlAttributeValue>,
 }
 
 impl HtmlElementAttributes {
@@ -14,11 +14,11 @@ impl HtmlElementAttributes {
         ));
 
         HtmlElementAttributes {
-            attributes: attributes
+            _attributes: attributes
                 .into_iter()
                 .map(|(ident, value)| HtmlAttribute { ident, value })
                 .collect(),
-            key,
+            _key: key,
         }
     }
 }

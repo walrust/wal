@@ -2,10 +2,10 @@ use super::html_root::HtmlRoot;
 use syn::parse::{Parse, ParseStream};
 
 pub struct HtmlIf {
-    condition: syn::Expr,
-    body: HtmlRoot,
-    else_ifs: Vec<HtmlElseIf>,
-    else_body: Option<HtmlRoot>,
+    _condition: syn::Expr,
+    _body: HtmlRoot,
+    _else_ifs: Vec<HtmlElseIf>,
+    _else_body: Option<HtmlRoot>,
 }
 
 impl Parse for HtmlIf {
@@ -27,17 +27,17 @@ impl Parse for HtmlIf {
         };
 
         Ok(HtmlIf {
-            condition,
-            body,
-            else_ifs,
-            else_body,
+            _condition: condition,
+            _body: body,
+            _else_ifs: else_ifs,
+            _else_body: else_body,
         })
     }
 }
 
 struct HtmlElseIf {
-    condition: syn::Expr,
-    body: HtmlRoot,
+    _condition: syn::Expr,
+    _body: HtmlRoot,
 }
 
 impl Parse for HtmlElseIf {
@@ -47,7 +47,10 @@ impl Parse for HtmlElseIf {
         let condition = parse_condition(input)?;
         let body = parse_body(input)?;
 
-        Ok(HtmlElseIf { condition, body })
+        Ok(HtmlElseIf {
+            _condition: condition,
+            _body: body,
+        })
     }
 }
 

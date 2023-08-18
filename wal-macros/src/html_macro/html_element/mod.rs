@@ -1,3 +1,4 @@
+use self::html_element_attributes::HtmlElementAttributes;
 use super::html_tree::HtmlTree;
 use html_element_end_tag::HtmlElementEndTag;
 use html_element_start_tag::HtmlElementStartTag;
@@ -9,9 +10,9 @@ mod html_element_end_tag;
 mod html_element_start_tag;
 
 pub struct HtmlElement {
-    name: Ident,
-    //props: ElementProps,
-    children: Vec<HtmlTree>,
+    _name: Ident,
+    _attributes: HtmlElementAttributes,
+    _children: Vec<HtmlTree>,
 }
 
 impl Parse for HtmlElement {
@@ -32,8 +33,9 @@ impl Parse for HtmlElement {
         let start_tag = input.parse::<HtmlElementStartTag>()?;
         if start_tag.is_self_closing() {
             return Ok(HtmlElement {
-                name: start_tag.name,
-                children: Vec::new(),
+                _name: start_tag.name,
+                _attributes: start_tag.attributes,
+                _children: Vec::new(),
             });
         }
 
@@ -69,8 +71,9 @@ impl Parse for HtmlElement {
         input.parse::<HtmlElementEndTag>()?;
 
         Ok(HtmlElement {
-            name: start_tag.name,
-            children,
+            _name: start_tag.name,
+            _attributes: start_tag.attributes,
+            _children: children,
         })
     }
 }

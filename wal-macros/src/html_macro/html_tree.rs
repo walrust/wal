@@ -11,7 +11,7 @@ pub enum HtmlTree {
     If(HtmlIf),
     For(HtmlFor<syn::ExprBlock>),
     Fragment(HtmlFragment),
-    Component,
+    _Component,
     Element(HtmlElement),
     Literal(HtmlLiteral),
     ExpressionBlock(syn::ExprBlock),

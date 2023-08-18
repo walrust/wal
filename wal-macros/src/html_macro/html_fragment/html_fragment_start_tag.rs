@@ -5,7 +5,7 @@ use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
 
 pub struct HtmlFragmentStartTag {
     lt: syn::token::Lt,
-    key: Option<HtmlAttributeValue>,
+    _key: Option<HtmlAttributeValue>,
     gt: syn::token::Gt,
 }
 
@@ -16,7 +16,7 @@ impl Parse for HtmlFragmentStartTag {
         if input.peek(syn::token::Gt) {
             return Ok(HtmlFragmentStartTag {
                 lt,
-                key: None,
+                _key: None,
                 gt: input.parse()?,
             });
         }
@@ -43,7 +43,7 @@ impl Parse for HtmlFragmentStartTag {
 
         Ok(HtmlFragmentStartTag {
             lt,
-            key: Some(attribute.value),
+            _key: Some(attribute.value),
             gt,
         })
     }

@@ -1,13 +1,13 @@
 use super::html_element_attributes::HtmlElementAttributes;
 use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
 use quote::{quote, ToTokens};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use syn::parse::Parse;
 
 pub struct HtmlElementStartTag {
     lt: syn::token::Lt,
     pub name: proc_macro2::Ident,
-    attributes: HtmlElementAttributes,
+    pub attributes: HtmlElementAttributes,
     slash: Option<syn::token::Slash>,
     gt: syn::token::Gt,
 }
