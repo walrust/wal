@@ -17,7 +17,13 @@ impl Parse for HtmlAttribute {
         let value = if input.peek(syn::Lit) {
             HtmlAttributeValue::Literal(input.parse()?)
         } else {
-            HtmlAttributeValue::ExpressionBlock(input.parse()?)
+            let expr_block = input.parse::<syn::ExprBlock>();
+
+            if expr_block.is_err() {
+                return Err(input.error("Expected a literal or an expression block"));
+            }
+
+            HtmlAttributeValue::ExpressionBlock(expr_block.unwrap())
         };
 
         Ok(HtmlAttribute { ident, value })
