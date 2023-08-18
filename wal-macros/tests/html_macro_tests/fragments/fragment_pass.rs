@@ -15,6 +15,6 @@ fn main() {
     }
     html! { <key="value"></> };
 
-    let children = vec![html! {<div></div>}, html! {<div></div>}];
-    html! { <> children </> };
+    let children = vec![1, 2];
+    html! { <> { children } </> };
 }

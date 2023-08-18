@@ -1,3 +1,4 @@
+mod html_attribute;
 mod html_element;
 mod html_for;
 mod html_forest;
