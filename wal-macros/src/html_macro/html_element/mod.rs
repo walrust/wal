@@ -4,6 +4,7 @@ use html_element_start_tag::HtmlElementStartTag;
 use proc_macro2::Ident;
 use syn::parse::Parse;
 
+mod html_element_attributes;
 mod html_element_end_tag;
 mod html_element_start_tag;
 

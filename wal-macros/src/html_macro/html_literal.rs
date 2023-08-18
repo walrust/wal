@@ -14,7 +14,7 @@ impl Parse for HtmlLiteral {
         };
 
         if let Some(msg) = error_message {
-            return Err(syn::Error::new_spanned(lit, msg));
+            return Err(syn::Error::new(lit.span(), msg));
         };
 
         Ok(Self(lit))

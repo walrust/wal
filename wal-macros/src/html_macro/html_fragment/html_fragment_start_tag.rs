@@ -13,22 +13,22 @@ impl Parse for HtmlFragmentStartTag {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let lt = input.parse()?;
 
-        let key = input.parse::<HtmlAttribute>().ok();
+        let attribute = input.parse::<HtmlAttribute>().ok();
 
         if !input.peek(syn::token::Gt) {
             return Err(input.error("Fragment supports only a single `key` attribute"));
         }
 
-        if let Some(key_attr) = &key {
-            if key_attr.ident != "key" {
-                return Err(syn::Error::new_spanned(
-                    key_attr.to_spanned(),
+        if let Some(attribute) = &attribute {
+            if attribute.ident != "key" {
+                return Err(syn::Error::new(
+                    attribute.ident.span(),
                     "Fragment supports only the `key` attribute",
                 ));
             }
         }
 
-        let key = key.map(|key| key.value);
+        let key = attribute.map(|attr| attr.value);
 
         let gt = input.parse()?;
 
