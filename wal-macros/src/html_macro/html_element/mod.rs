@@ -20,7 +20,7 @@ impl Parse for HtmlElement {
                 Ok(html_end_tag) => Err(syn::Error::new_spanned(
                     html_end_tag.to_spanned(),
                     format!(
-                        "This closing tag does not have a corresponding opening tag. (hint: try adding '<{}>')",
+                        "This closing tag does not have a corresponding opening tag. (hint: try adding `<{}>`)",
                         html_end_tag.name
                     )
                 )),
@@ -40,7 +40,7 @@ impl Parse for HtmlElement {
             return Err(syn::Error::new_spanned(
                 start_tag.to_spanned(),
                 format!(
-                    "The '<{}>' tag is a void element. Void elements should be self closing (they can not have children). (hint: try '<{0}/>')",
+                    "The `<{}>` tag is a void element. Void elements should be self closing (they can not have children). (hint: try `<{0}/>`)",
                     start_tag.name
                 )
             ));
@@ -52,7 +52,7 @@ impl Parse for HtmlElement {
                 return Err(syn::Error::new_spanned(
                     start_tag.to_spanned(),
                     format!(
-                        "This start tag does not have a coressponding end tag. (hint: try adding '</{}>')",
+                        "This start tag does not have a coressponding end tag. (hint: try adding `</{}>`)",
                         start_tag.name
                     )
                 ));

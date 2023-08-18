@@ -14,7 +14,7 @@ impl Parse for HtmlFragment {
             return match input.parse::<HtmlFragmentEndTag>() {
                 Ok(html_end_tag) => Err(syn::Error::new_spanned(
                     html_end_tag.to_spanned(),
-                    "This closing fragment does not have a corresponding opening fragment. (hint: try adding '<>')",
+                    "This closing fragment does not have a corresponding opening fragment. (hint: try adding `<>`)",
                 )),
                 Err(err) => Err(err),
             };
@@ -27,7 +27,7 @@ impl Parse for HtmlFragment {
             if input.is_empty() {
                 return Err(syn::Error::new_spanned(
                     start_tag.to_spanned(),
-                    "This opening fragment does not have a coressponding closing fragment. (hint: try adding '</>')",
+                    "This opening fragment does not have a coressponding closing fragment. (hint: try adding `</>`)",
                 ));
             }
 

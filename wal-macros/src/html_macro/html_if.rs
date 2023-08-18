@@ -64,7 +64,7 @@ fn parse_condition(input: ParseStream) -> syn::Result<syn::Expr> {
         syn::Expr::Block(syn::ExprBlock { block, .. }) if block.stmts.is_empty() => {
             Err(syn::Error::new_spanned(
                 &condition,
-                "Expected condition for 'if' expression, found empty block",
+                "Expected condition for `if` expression, found empty block",
             ))
         }
         _ => Ok(condition),
