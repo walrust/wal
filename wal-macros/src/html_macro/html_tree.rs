@@ -1,6 +1,6 @@
 use super::{
     html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment, html_if::HtmlIf,
-    literal::Literal,
+    html_literal::HtmlLiteral,
 };
 use syn::{
     ext::IdentExt,
@@ -13,7 +13,7 @@ pub enum HtmlTree {
     Fragment(HtmlFragment),
     Component,
     Element(HtmlElement),
-    Literal(Literal),
+    Literal(HtmlLiteral),
     ExpressionBlock(syn::ExprBlock),
 }
 

@@ -5,7 +5,7 @@ pub enum HtmlRoot {
     Empty,
     Expression(syn::Expr),
     For(HtmlFor<syn::Expr>),
-    HtmlForest(HtmlForest),
+    Forest(HtmlForest),
 }
 
 impl Parse for HtmlRoot {
@@ -23,7 +23,7 @@ impl Parse for HtmlRoot {
         if expr.is_ok() {
             Ok(Self::Expression(input.parse()?))
         } else {
-            Ok(Self::HtmlForest(input.parse()?))
+            Ok(Self::Forest(input.parse()?))
         }
     }
 }

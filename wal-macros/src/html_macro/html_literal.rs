@@ -1,8 +1,8 @@
 use syn::parse::{Parse, ParseStream};
 
-pub struct Literal(syn::Lit);
+pub struct HtmlLiteral(syn::Lit);
 
-impl Parse for Literal {
+impl Parse for HtmlLiteral {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let lit = input.parse()?;
 

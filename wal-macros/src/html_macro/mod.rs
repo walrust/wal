@@ -6,4 +6,4 @@ mod html_fragment;
 mod html_if;
 pub mod html_root;
 mod html_tree;
-mod literal;
+mod html_literal;
