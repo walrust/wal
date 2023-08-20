@@ -3,7 +3,7 @@ pub extern crate wal;
 use gloo::utils::document;
 use wal::virtual_dom::*;
 use wasm_bindgen::prelude::*;
-use web_sys::Node;
+use web_sys::{Element, Node};
 
 fn log<T>(text: &T)
 where
@@ -19,37 +19,74 @@ fn log_node(node: &Node) {
 // TODO: Finish the goddamn VDOM: https://www.youtube.com/watch?v=85gJMUEcnkc
 // to watch: https://www.youtube.com/watch?v=l2Tu0NqH0qU
 
+fn create_elem(count: i32) -> VNode {
+    let velement = VElement {
+        tag_name: "div".into(),
+        attr: [
+            ("id".to_string(), "app".to_string()),
+            ("dataCount".to_string(), count.to_string()),
+        ]
+        .into(),
+        children: vec![
+            VNode::Text {
+                vtext: VText::new(count.to_string()),
+            },
+            VNode::Element {
+                velement: VElement {
+                    tag_name: "img".to_string(),
+                    attr: [(
+                        "src".to_string(),
+                        "https://media.giphy.com/media/xUPGGL6TieAUk10oNO/giphy.gif".to_string(),
+                    )]
+                    .into(),
+                    children: vec![],
+                },
+            },
+        ],
+    };
+    log(&velement);
+
+    VNode::Element { velement }
+}
+
 #[wasm_bindgen(start)]
 fn start() {
     web_sys::console::log_1(&"WALRUST TIME".into());
 
-    let el = VNode {
-        tag_name: "div",
-        attr: [("id", "app"), ("dataCount", "0")].into(),
-        children: vec![VNode {
-            tag_name: "img",
-            attr: [(
-                "src",
-                "https://media.giphy.com/media/xUPGGL6TieAUk10oNO/giphy.gif",
-            )]
-            .into(),
-            children: vec![],
-        }],
-    };
-    log(&el);
+    let mut count = 0;
+    let mut current = document().get_element_by_id("app").unwrap();
 
-    let app = match render(el) {
+    let mut el = create_elem(count);
+    let mut app = match el.render() {
         Ok(val) => val,
         Err(err) => {
             web_sys::console::log_1(&err);
             return;
         }
     };
-    log_node(&app);
-
-    let current = document().get_element_by_id("app").unwrap();
-    match mount(app, current) {
-        Ok(_) => todo!(),
+    match mount(&app, &current) {
+        Ok(_) => (),
         Err(_) => todo!(),
-    }
+    };
+    current = Element::from(JsValue::from(app.clone()));
+    let int = gloo::timers::callback::Interval::new(1000, move || {
+        count += 1;
+        el = create_elem(count);
+        app = match el.render() {
+            Ok(val) => val,
+            Err(err) => {
+                web_sys::console::log_1(&err);
+                return;
+            }
+        };
+        match mount(&app, &current) {
+            Ok(_) => (),
+            Err(err) => {
+                web_sys::console::log_1(&err);
+                return;
+            }
+        };
+        current = Element::from(JsValue::from(app.clone()));
+    });
+    int.forget();
 }
