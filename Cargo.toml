@@ -2,5 +2,6 @@
 members = [
     "wal-macros",
     "wal-vdom",
+    "wal-component",
     "examples/*",
 ]
