@@ -1,4 +1,5 @@
 use super::{html_for::HtmlFor, html_forest::HtmlForest};
+use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 
 pub enum HtmlRoot {
@@ -24,6 +25,23 @@ impl Parse for HtmlRoot {
             Ok(Self::Expression(input.parse()?))
         } else {
             Ok(Self::Forest(input.parse()?))
+        }
+    }
+}
+
+impl ToTokens for HtmlRoot {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            Self::Empty => {}
+            Self::Expression(expr) => {
+                expr.to_tokens(tokens);
+            }
+            Self::For(html_for) => {
+                html_for.to_tokens(tokens);
+            }
+            Self::Forest(html_forest) => {
+                html_forest.to_tokens(tokens);
+            }
         }
     }
 }
