@@ -1,7 +1,5 @@
-pub extern crate wal;
-
-use gloo::utils::document;
-use wal::virtual_dom::*;
+use gloo::{utils::document, timers::callback::Interval};
+use wal_vdom::virtual_dom::{VNode, VElement, VText, mount};
 use wasm_bindgen::prelude::*;
 use web_sys::{Element, Node};
 
@@ -69,7 +67,7 @@ fn start() {
         Err(_) => todo!(),
     };
     current = Element::from(JsValue::from(app.clone()));
-    let int = gloo::timers::callback::Interval::new(1000, move || {
+    let int = Interval::new(1000, move || {
         count += 1;
         el = create_elem(count);
         app = match el.render() {
