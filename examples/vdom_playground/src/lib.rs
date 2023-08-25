@@ -1,3 +1,5 @@
+use std::{rc::Rc, cell::RefCell};
+
 use gloo::{utils::document, timers::callback::Interval};
 use wal_vdom::virtual_dom::{VNode, VElement, VText, mount};
 use wasm_bindgen::prelude::*;
@@ -53,42 +55,17 @@ fn create_elem(count: i32) -> VNode {
 fn start() {
     web_sys::console::log_1(&"WALRUST TIME".into());
 
-    let curr = create_elem(0);
-
-    //let mut count = 0;
-    //let mut current = document().get_element_by_id("app").unwrap();
-
-    //let mut el = create_elem(count);
-    //let mut app = match el.render() {
-    //    Ok(val) => val,
-    //    Err(err) => {
-    //        web_sys::console::log_1(&err);
-    //        return;
-    //    }
-    //};
-    //match mount(&app, &current) {
-    //    Ok(_) => (),
-    //    Err(_) => todo!(),
-    //};
-    //current = Element::from(JsValue::from(app.clone()));
-    //let int = Interval::new(1000, move || {
-    //    count += 1;
-    //    el = create_elem(count);
-    //    app = match el.render() {
-    //        Ok(val) => val,
-    //        Err(err) => {
-    //            web_sys::console::log_1(&err);
-    //            return;
-    //        }
-    //    };
-    //    match mount(&app, &current) {
-    //        Ok(_) => (),
-    //        Err(err) => {
-    //            web_sys::console::log_1(&err);
-    //            return;
-    //        }
-    //    };
-    //    current = Element::from(JsValue::from(app.clone()));
-    //});
-    //int.forget();
+    let mut count = 0;
+    let root = document().get_element_by_id("app").unwrap();
+    let mut curr = create_elem(count);
+    curr.patch(None, &root);
+    let mut curr = Some(curr);
+    web_sys::console::log_1(&format!("{:#?}", curr).into());
+    let int = Interval::new(1000, move || {
+        count += 1;
+        let mut now = create_elem(count);
+        now.patch(curr.take(), &root);
+        curr = Some(now);
+    });
+    int.forget();
 }

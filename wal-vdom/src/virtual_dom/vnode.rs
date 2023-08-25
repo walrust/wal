@@ -1,10 +1,13 @@
-use gloo::utils::document;
+use gloo::{
+    console::{__macro::JsValue, log},
+    utils::document,
+};
 use serde::Serialize;
 use web_sys::{Element, Node, Text};
 
 use super::{VElement, VText};
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub enum VNode {
     Element {
         #[serde(skip_serializing)]
@@ -25,12 +28,14 @@ impl VNode {
                 ref mut concrete,
                 ref mut virt,
             } => {
+                log!("Patching element");
                 let mut old_virt: Option<VElement> = None;
                 match last {
                     // First creating the node
                     Some(VNode::Element { concrete: None, .. })
                     | Some(VNode::Text { concrete: None, .. })
                     | None => {
+                        log!("\tCreating the node from the bottom");
                         let new_el = document()
                             .create_element(&virt.tag_name)
                             .expect("Couldnt create new element");
@@ -45,6 +50,7 @@ impl VNode {
                         concrete: Some(el),
                         virt,
                     }) => {
+                        log!("\tCopying existing node");
                         *concrete = Some(el);
                         old_virt = Some(virt);
                     }
@@ -54,6 +60,7 @@ impl VNode {
                         concrete: Some(text),
                         ..
                     }) => {
+                        log!("\tSwaping existing node");
                         let new_el = document()
                             .create_element(&virt.tag_name)
                             .expect("Couldnt create new element");
@@ -65,51 +72,49 @@ impl VNode {
                 };
 
                 // Render over concrete new element
-                let target = concrete.as_ref().expect("It shouldnt be none");
-                virt.render(target, old_virt);
+                let target = concrete.as_mut().expect("It shouldnt be none");
+                virt.render(target, old_virt.as_ref());
 
                 // Handle children
-                let mut children = &virt.children;
+                let mut children: Vec<Option<&mut VNode>> =
+                    virt.children.iter_mut().map(|x| Some(x)).collect();
+                let mut old_children: Vec<Option<VNode>> = match old_virt {
+                    Some(ref mut el) => el.children.drain(..).map(|x| Some(x)).collect(),
+                    None => Vec::new(),
+                };
 
-                match old_virt {
-                    // Editing already existing node
-                    Some(ref mut old_virt) => {
-                        let mut old_children = &old_virt.children;
-                        let min_len = children.len().min(old_children.len());
-                        let mut i = 0;
+                // More elegant and rust-style like approach
+                let len_diff = children.len() as i64 - old_children.len() as i64;
 
-                        // patch first min_len children
-                        while i < min_len {
-                            children[i].patch(Some(old_children[i]), target);
-                            i += 1;
-                        }
+                if len_diff < 0 {
+                    let mut appendix = (0..len_diff.abs()).map(|_| None).collect::<Vec<_>>();
+                    children.append(&mut appendix);
+                } else if len_diff > 0 {
+                    let mut appendix = (0..len_diff.abs()).map(|_| None).collect::<Vec<_>>();
+                    old_children.append(&mut appendix);
+                }
 
-                        if min_len == children.len() {
-                            // remove unnecessary children
-                            for child in old_children[min_len..].iter() {
-                                let node = match child {
-                                    VNode::Element { concrete, virt: _ } => {
-                                        concrete.map(|x| Node::from(x))
-                                    }
-                                    VNode::Text { concrete, virt: _ } => {
-                                        concrete.map(|x| Node::from(x))
-                                    }
-                                };
-                                if let Some(node) = node {
-                                    target
-                                        .remove_child(&node)
-                                        .expect("Couldnt remove child from node");
+                for pair in children.into_iter().zip(old_children) {
+                    match pair {
+                        (None, Some(node)) => {
+                            // child doesnt exist anymore
+                            if let Some(node) = match node {
+                                VNode::Element { concrete, .. } => {
+                                    concrete.map(|x| Node::from(x))
                                 }
-                            }
-                        } else {
-                            // add new children
-                            for child in children[min_len..].iter() {
-                                child.patch(None, target);
+                                VNode::Text { concrete, .. } => concrete.map(|x| Node::from(x)),
+                            } {
+                                target.remove_child(&node).expect("Couldnt remove child");
                             }
                         }
-                    }
-                    // Create the node and all of the children
-                    None => {
+                        (Some(node), old) => {
+                            //patch child
+                            node.patch(old, target);
+                        },
+                        (None, None) => {
+                            log!("Impossible redundant loop");
+                            panic!("Impossible redundant loop");
+                        }
                     }
                 }
             }
@@ -160,7 +165,7 @@ impl VNode {
 
                 // Render over concrete element
                 let target = concrete
-                    .as_ref()
+                    .as_mut()
                     .expect("No concrete dom struct cannot be none");
 
                 virt.render(target, old_virt);
