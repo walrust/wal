@@ -1,10 +1,9 @@
-use std::collections::HashMap;
-use gloo::{utils::document, console::__macro::JsValue};
+use gloo::{console::log, utils::document};
 use serde::Serialize;
-use web_sys::Node;
+use std::collections::HashMap;
+use web_sys::Element;
 
 use super::VNode;
-
 
 #[derive(Serialize)]
 pub struct VElement {
@@ -14,11 +13,8 @@ pub struct VElement {
 }
 
 impl VElement {
-    pub fn new(
-        tag_name: String,
-        attr: HashMap<String, String>,
-        children: Vec<VNode>,
-    ) -> VElement {
+    // TODO: maybe some types for attributes and children
+    pub fn new(tag_name: String, attr: HashMap<String, String>, children: Vec<VNode>) -> VElement {
         VElement {
             tag_name,
             attr,
@@ -26,20 +22,13 @@ impl VElement {
         }
     }
 
-    pub fn render(&self) -> Result<Node, JsValue> {
-        let el = document()
-            .create_element(self.tag_name.as_str())?;
-
-        // set attributes
-        for (key, val) in self.attr.iter() {
-            el.set_attribute(key, val)?;
-        }
-        // appending children
-        for v_child in self.children.iter() {
-            let child = v_child.render()?;
-            el.append_child(&child)?;
-        }
-
-        Ok(el.into())
+    // TODO: Implement it
+    /// Renders virtual Element into concrete DOM Element object. Diffs on tag name,
+    /// attributes and children
+    pub fn render(&self, target: &Element, last: Option<VElement>) {
+        log!("TODO: implement velement rendering");
+        let test = document().create_element("div").unwrap();
+        test.set_attribute("test", "test");
+        target.replace_with_with_node_1(&test).expect("Why doesnt test work wtf");
     }
 }
