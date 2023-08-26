@@ -14,6 +14,9 @@ pub struct VElement {
 
 impl VElement {
     // TODO: maybe some types for attributes and children
+    // List of attributes - https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
+    //                    - https://www.w3schools.com/tags/ref_attributes.asp
+    // Maybe some oop approach with defined types for attributes and types for elements?
     pub fn new(tag_name: String, attr: HashMap<String, String>, children: Vec<VNode>) -> VElement {
         VElement {
             tag_name,
@@ -22,7 +25,6 @@ impl VElement {
         }
     }
 
-    // TODO: Implement it
     /// Renders virtual Element into concrete DOM Element object. Diffs on tag name,
     /// attributes and children
     pub fn render(&self, target: &mut Element, last: Option<&VElement>) {
@@ -31,16 +33,20 @@ impl VElement {
                 log!("\t\tComparing attrs");
                 // Compare attributes
                 for (key, val) in self.attr.iter() {
-                    target.set_attribute(key, val).expect("Couldnt set attribute");
+                    target
+                        .set_attribute(key, val)
+                        .expect("Couldnt set attribute");
                 }
                 for (key, _val) in last.attr.iter() {
                     if !self.attr.contains_key(key) {
-                        target.remove_attribute(key).expect("Couldnt remove attribute");
+                        target
+                            .remove_attribute(key)
+                            .expect("Couldnt remove attribute");
                     }
                 }
-            },
+            }
             _ => {
-                // inverted check, if last == None || last = Some(x) that x.tag_name ==
+                // inverted check, if last == None || last = Some(x) that x.tag_name !=
                 // self.tag_name => Swap whole element
                 log!("\t\tRendering new node");
                 let new_el = document()
@@ -49,12 +55,16 @@ impl VElement {
 
                 // add attributes
                 for (key, val) in self.attr.iter() {
-                    new_el.set_attribute(key, val).expect("Couldnt set attribute");
+                    new_el
+                        .set_attribute(key, val)
+                        .expect("Couldnt set attribute");
                 }
 
-                target.replace_with_with_node_1(&new_el).expect("Couldnt replace whole node");
+                target
+                    .replace_with_with_node_1(&new_el)
+                    .expect("Couldnt replace whole node");
                 *target = new_el;
-            },
+            }
         }
     }
 }

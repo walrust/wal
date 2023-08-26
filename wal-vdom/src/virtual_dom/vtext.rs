@@ -1,4 +1,4 @@
-use gloo::{console::log, utils::document};
+use gloo::utils::document;
 use serde::Serialize;
 use web_sys::Text;
 
@@ -9,12 +9,10 @@ pub struct VText {
 }
 
 impl VText {
-    // TODO: consider replacing String with trait ToString
-    pub fn new(text: String) -> VText {
-        VText{ text }
+    pub fn new<T: ToString> (text: T) -> VText {
+        VText{ text: text.to_string() }
     }
 
-    // TODO: Implement :))
     /// Renders virtual text node over concrete DOM Text object. If the last VText
     /// isnt None and text value is the same, function does nothing
     pub fn render(&self, target: &mut Text, last: Option<VText>) {
