@@ -36,34 +36,10 @@ impl Parse for HtmlIfExpression {
 
 impl ToTokens for HtmlIfExpression {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let condition = &self.html_if.condition;
-        let body = &self.html_if.body;
-        let if_tokens = quote_spanned! {self.html_if.if_token.span() =>
-            if #condition {
-                #body
-            }
-        };
-
-        let else_ifs_tokens: Vec<proc_macro2::TokenStream> = self
-            .else_ifs
-            .iter()
-            .map(|else_if| {
-                let condition = &else_if.condition;
-                let body = &else_if.body;
-
-                quote_spanned! {else_if.if_token.span() =>
-                    else if #condition {
-                        #body
-                    }
-                }
-            })
-            .collect();
-
+        let html_if = &self.html_if;
+        let else_ifs = &self.else_ifs;
         let else_tokens = match &self.html_else {
-            Some(html_else) => {
-                let body = &html_else.body;
-                quote_spanned! { html_else.else_token.span() => else { #body } }
-            }
+            Some(html_else) => html_else.into_token_stream(),
             None => {
                 let default_else_body = &HtmlRoot::Empty;
                 quote! { else { #default_else_body } }
@@ -71,8 +47,8 @@ impl ToTokens for HtmlIfExpression {
         };
 
         tokens.extend(quote_spanned! {self.html_if.if_token.span() =>
-            #if_tokens
-            #(#else_ifs_tokens)*
+            #html_if
+            #(#else_ifs)*
             #else_tokens
         });
     }
@@ -95,6 +71,18 @@ impl Parse for HtmlIf {
             condition,
             body,
         })
+    }
+}
+
+impl ToTokens for HtmlIf {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let condition = &self.condition;
+        let body = &self.body;
+        tokens.extend(quote_spanned! {self.if_token.span() =>
+            if #condition {
+                #body
+            }
+        });
     }
 }
 
@@ -125,6 +113,19 @@ impl HtmlElseIf {
     }
 }
 
+impl ToTokens for HtmlElseIf {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let condition = &self.condition;
+        let body = &self.body;
+
+        tokens.extend(quote_spanned! {self.if_token.span() =>
+            else if #condition {
+                #body
+            }
+        });
+    }
+}
+
 struct HtmlElse {
     else_token: syn::token::Else,
     body: HtmlRoot,
@@ -136,6 +137,13 @@ impl Parse for HtmlElse {
         let body = parse_body(input)?;
 
         Ok(HtmlElse { else_token, body })
+    }
+}
+
+impl ToTokens for HtmlElse {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let body = &self.body;
+        tokens.extend(quote_spanned! { self.else_token.span() => else { #body } });
     }
 }
 
