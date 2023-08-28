@@ -35,15 +35,13 @@ impl Parse for HtmlRoot {
 impl ToTokens for HtmlRoot {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            Self::Empty => {} // TODO: Should we add VList::new() here?
+            Self::Empty => unimplemented!(), // TODO: Probably we should add VList::new() here
             Self::Expression(expr) => {
                 tokens.extend(
                     quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::VText(::wal_vdom::virtual_dom::VText::new(#expr))),
                 );
             }
-            Self::For(html_for) => {
-                // Here we should also use VList
-            }
+            Self::For(html_for) => unimplemented!(), // TODO: Probably we should add VList here
             Self::Forest(html_forest) => {
                 html_forest.to_tokens(tokens);
             }
