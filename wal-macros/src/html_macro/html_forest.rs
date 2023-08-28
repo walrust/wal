@@ -25,7 +25,7 @@ impl ToTokens for HtmlForest {
             .collect();
 
         if html_trees_tokens.len() == 1 {
-            tokens.extend(html_trees_tokens[0]);
+            tokens.extend(html_trees_tokens[0].clone());
         } else {
             unimplemented!(); // TODO: here we should wrap the html_trees_tokens in a VList
         }

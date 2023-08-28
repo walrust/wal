@@ -1,6 +1,6 @@
 use super::{
-    html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment, html_if::HtmlIf,
-    html_literal::HtmlLiteral,
+    html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment,
+    html_if::HtmlIfExpression, html_literal::HtmlLiteral,
 };
 use quote::ToTokens;
 use syn::{
@@ -9,7 +9,7 @@ use syn::{
 };
 
 pub enum HtmlTree {
-    If(HtmlIf),
+    If(HtmlIfExpression),
     For(HtmlFor<syn::ExprBlock>),
     Fragment(HtmlFragment),
     _Component,
@@ -39,7 +39,7 @@ impl Parse for HtmlTree {
 impl ToTokens for HtmlTree {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            Self::If(html_if) => unimplemented!(),
+            Self::If(html_if) => html_if.to_tokens(tokens),
             Self::For(html_for) => unimplemented!(),
             Self::Fragment(html_fragment) => unimplemented!(),
             Self::_Component => unimplemented!(),

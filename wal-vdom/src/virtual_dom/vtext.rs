@@ -8,7 +8,6 @@ pub struct VText {
 }
 
 impl VText {
-    // TODO: consider replacing String with trait ToString
     pub fn new<T: ToString>(text: T) -> VText {
         VText {
             text: text.to_string(),
