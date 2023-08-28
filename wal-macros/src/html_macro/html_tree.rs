@@ -2,6 +2,7 @@ use super::{
     html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment, html_if::HtmlIf,
     html_literal::HtmlLiteral,
 };
+use quote::ToTokens;
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
@@ -32,6 +33,20 @@ impl Parse for HtmlTree {
         };
 
         Ok(html_tree)
+    }
+}
+
+impl ToTokens for HtmlTree {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            Self::If(html_if) => html_if.to_tokens(tokens),
+            Self::For(html_for) => html_for.to_tokens(tokens),
+            Self::Fragment(html_fragment) => html_fragment.to_tokens(tokens),
+            Self::_Component => unimplemented!(),
+            Self::Element(html_element) => html_element.to_tokens(tokens),
+            Self::Literal(html_literal) => html_literal.to_tokens(tokens),
+            Self::ExpressionBlock(expr_block) => expr_block.to_tokens(tokens),
+        }
     }
 }
 

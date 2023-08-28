@@ -1,6 +1,9 @@
 use super::{html_for::HtmlFor, html_forest::HtmlForest};
-use quote::ToTokens;
-use syn::parse::{Parse, ParseStream};
+use quote::{quote_spanned, ToTokens};
+use syn::{
+    parse::{Parse, ParseStream},
+    spanned::Spanned,
+};
 
 pub enum HtmlRoot {
     Empty,
@@ -32,16 +35,18 @@ impl Parse for HtmlRoot {
 impl ToTokens for HtmlRoot {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            Self::Empty => {}
+            Self::Empty => {} // TODO: Should we add VList::new() here?
             Self::Expression(expr) => {
-                expr.to_tokens(tokens);
+                tokens.extend(
+                    quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::VText(::wal_vdom::virtual_dom::VText::new(#expr))),
+                );
             }
             Self::For(html_for) => {
-                html_for.to_tokens(tokens);
+                // Here we should also use VList
             }
             Self::Forest(html_forest) => {
                 html_forest.to_tokens(tokens);
             }
-        }
+        };
     }
 }

@@ -1,5 +1,6 @@
 use html_macro::html_root::HtmlRoot;
 use proc_macro::TokenStream;
+use quote::ToTokens;
 use syn::parse_macro_input;
 
 mod html_macro;
