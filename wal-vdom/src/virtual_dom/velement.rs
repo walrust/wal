@@ -1,10 +1,9 @@
-use std::collections::HashMap;
-use gloo::{utils::document, console::__macro::JsValue};
+use gloo::{console::__macro::JsValue, utils::document};
 use serde::Serialize;
+use std::collections::HashMap;
 use web_sys::Node;
 
 use super::VNode;
-
 
 #[derive(Serialize)]
 pub struct VElement {
@@ -14,11 +13,21 @@ pub struct VElement {
 }
 
 impl VElement {
-    pub fn new(
+    pub fn new(tag_name: String, attr: HashMap<String, String>, children: Vec<VNode>) -> VElement {
+        VElement {
+            tag_name,
+            attr,
+            children,
+        }
+    }
+
+    pub fn new2(
         tag_name: String,
-        attr: HashMap<String, String>,
+        attr_keys: Vec<String>,
+        attr_values: Vec<String>,
         children: Vec<VNode>,
     ) -> VElement {
+        let attr = attr_keys.into_iter().zip(attr_values.into_iter()).collect();
         VElement {
             tag_name,
             attr,
@@ -27,8 +36,7 @@ impl VElement {
     }
 
     pub fn render(&self) -> Result<Node, JsValue> {
-        let el = document()
-            .create_element(self.tag_name.as_str())?;
+        let el = document().create_element(self.tag_name.as_str())?;
 
         // set attributes
         for (key, val) in self.attr.iter() {

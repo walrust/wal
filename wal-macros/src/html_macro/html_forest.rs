@@ -29,5 +29,7 @@ impl ToTokens for HtmlForest {
         } else {
             unimplemented!(); // TODO: here we should wrap the html_trees_tokens in a VList
         }
+
+        // TODO: we could rewrite it using quote only
     }
 }

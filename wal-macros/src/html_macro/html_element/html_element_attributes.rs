@@ -1,9 +1,9 @@
-use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
+use crate::html_macro::html_attribute::HtmlAttributeValue;
 use std::collections::HashMap;
 
 pub struct HtmlElementAttributes {
-    _attributes: Vec<HtmlAttribute>,
-    _key: Option<HtmlAttributeValue>,
+    attributes: HashMap<proc_macro2::Ident, HtmlAttributeValue>,
+    key: Option<HtmlAttributeValue>,
 }
 
 impl HtmlElementAttributes {
@@ -13,12 +13,22 @@ impl HtmlElementAttributes {
             proc_macro2::Span::call_site(),
         ));
 
-        HtmlElementAttributes {
-            _attributes: attributes
-                .into_iter()
-                .map(|(ident, value)| HtmlAttribute { ident, value })
-                .collect(),
-            _key: key,
+        HtmlElementAttributes { attributes, key }
+    }
+}
+
+impl From<&HtmlElementAttributes> for Vec<(String, String)> {
+    fn from(attrs: &HtmlElementAttributes) -> Vec<(String, String)> {
+        let mut attributes: Vec<(String, String)> = attrs
+            .attributes
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect();
+
+        if let Some(key_val) = &attrs.key {
+            attributes.push((String::from("key"), key_val.to_string()));
         }
+
+        attributes
     }
 }

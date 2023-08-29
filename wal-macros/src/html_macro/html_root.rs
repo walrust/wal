@@ -41,7 +41,7 @@ impl ToTokens for HtmlRoot {
                     quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::VText(::wal_vdom::virtual_dom::VText::new(#expr))),
                 );
             }
-            Self::For(html_for) => unimplemented!(), // TODO: Probably we should add VList here
+            Self::For(_html_for) => unimplemented!(), // TODO: Probably we should add VList here
             Self::Forest(html_forest) => {
                 html_forest.to_tokens(tokens);
             }

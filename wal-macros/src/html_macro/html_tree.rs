@@ -40,12 +40,12 @@ impl ToTokens for HtmlTree {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
             Self::If(html_if) => html_if.to_tokens(tokens),
-            Self::For(html_for) => unimplemented!(),
-            Self::Fragment(html_fragment) => unimplemented!(),
+            Self::For(_html_for) => unimplemented!(),
+            Self::Fragment(_html_fragment) => unimplemented!(),
             Self::_Component => unimplemented!(),
-            Self::Element(html_element) => unimplemented!(),
-            Self::Literal(html_literal) => unimplemented!(),
-            Self::ExpressionBlock(expr_block) => unimplemented!(),
+            Self::Element(html_element) => html_element.to_tokens(tokens),
+            Self::Literal(_html_literal) => unimplemented!(),
+            Self::ExpressionBlock(_expr_block) => unimplemented!(),
         }
     }
 }

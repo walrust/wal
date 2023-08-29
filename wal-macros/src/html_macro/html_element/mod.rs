@@ -3,6 +3,7 @@ use super::html_tree::HtmlTree;
 use html_element_end_tag::HtmlElementEndTag;
 use html_element_start_tag::HtmlElementStartTag;
 use proc_macro2::Ident;
+use quote::{quote_spanned, ToTokens};
 use syn::parse::Parse;
 
 mod html_element_attributes;
@@ -10,9 +11,9 @@ mod html_element_end_tag;
 mod html_element_start_tag;
 
 pub struct HtmlElement {
-    _name: Ident,
-    _attributes: HtmlElementAttributes,
-    _children: Vec<HtmlTree>,
+    name: Ident,
+    attributes: HtmlElementAttributes,
+    children: Vec<HtmlTree>,
 }
 
 impl Parse for HtmlElement {
@@ -33,9 +34,9 @@ impl Parse for HtmlElement {
         let start_tag = input.parse::<HtmlElementStartTag>()?;
         if start_tag.is_self_closing() {
             return Ok(HtmlElement {
-                _name: start_tag.name,
-                _attributes: start_tag.attributes,
-                _children: Vec::new(),
+                name: start_tag.name,
+                attributes: start_tag.attributes,
+                children: Vec::new(),
             });
         }
 
@@ -71,9 +72,28 @@ impl Parse for HtmlElement {
         input.parse::<HtmlElementEndTag>()?;
 
         Ok(HtmlElement {
-            _name: start_tag.name,
-            _attributes: start_tag.attributes,
-            _children: children,
+            name: start_tag.name,
+            attributes: start_tag.attributes,
+            children,
         })
+    }
+}
+
+impl ToTokens for HtmlElement {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let name = &self.name;
+        let attributes: Vec<(String, String)> = (&self.attributes).into();
+        let (attributes_keys, attributes_values): (Vec<String>, Vec<String>) =
+            attributes.into_iter().unzip();
+        let children = &self.children;
+
+        tokens.extend(quote_spanned!(self.name.span() =>
+            ::wal_vdom::virtual_dom::VNode::VElement(
+                ::wal_vdom::virtual_dom::VElement::new2(
+                    #name,
+                    #(#attributes_keys)*,
+                    #(#attributes_values)*,
+                    #(#children)*)
+        )));
     }
 }

@@ -1,4 +1,4 @@
-use std::hash::Hash;
+use quote::ToTokens;
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
@@ -36,22 +36,16 @@ impl HtmlAttribute {
     }
 }
 
-// We want to guarantee uniqueness of attributes. Attributes are considered the same if their idents are the same.
-impl PartialEq for HtmlAttribute {
-    fn eq(&self, other: &Self) -> bool {
-        self.ident == other.ident
-    }
-}
-
-impl Eq for HtmlAttribute {}
-
-impl Hash for HtmlAttribute {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.ident.hash(state);
-    }
-}
-
 pub enum HtmlAttributeValue {
     Literal(syn::Lit),
     ExpressionBlock(syn::ExprBlock),
+}
+
+impl ToString for HtmlAttributeValue {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Literal(lit) => lit.into_token_stream().to_string(),
+            Self::ExpressionBlock(expr_block) => expr_block.into_token_stream().to_string(),
+        }
+    }
 }
