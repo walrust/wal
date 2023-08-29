@@ -2,10 +2,11 @@ use super::{
     html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment,
     html_if::HtmlIfExpression, html_literal::HtmlLiteral,
 };
-use quote::ToTokens;
+use quote::{quote_spanned, ToTokens};
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
+    spanned::Spanned,
 };
 
 pub enum HtmlTree {
@@ -44,8 +45,10 @@ impl ToTokens for HtmlTree {
             Self::Fragment(_html_fragment) => unimplemented!(), // TODO: VList needed
             Self::_Component => unimplemented!(),     // TODO: Component parsing needed
             Self::Element(html_element) => html_element.to_tokens(tokens),
-            Self::Literal(_html_literal) => unimplemented!(),
-            Self::ExpressionBlock(_expr_block) => unimplemented!(),
+            Self::Literal(html_literal) => html_literal.to_tokens(tokens),
+            Self::ExpressionBlock(expr_block) => tokens.extend(
+                quote_spanned!(expr_block.span() => ::wal_vdom::virtual_dom::VNode::VText(::wal_vdom::virtual_dom::VText::new(#expr_block))),
+            ),
         }
     }
 }

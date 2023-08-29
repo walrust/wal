@@ -1,3 +1,4 @@
+use quote::{quote_spanned, ToTokens};
 use syn::parse::{Parse, ParseStream};
 
 pub struct HtmlLiteral(syn::Lit);
@@ -18,5 +19,13 @@ impl Parse for HtmlLiteral {
         };
 
         Ok(Self(lit))
+    }
+}
+
+impl ToTokens for HtmlLiteral {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        tokens.extend(quote_spanned!(self.0.span() =>
+            ::wal_vdom::virtual_dom::VNode::VText(::wal_vdom::virtual_dom::VText::new(#self))
+        ));
     }
 }
