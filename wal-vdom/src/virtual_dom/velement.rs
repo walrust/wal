@@ -21,18 +21,14 @@ impl VElement {
         }
     }
 
-    pub fn new2(
+    pub fn new_attrs_as_vecs(
         tag_name: String,
         attr_keys: Vec<String>,
         attr_values: Vec<String>,
         children: Vec<VNode>,
     ) -> VElement {
         let attr = attr_keys.into_iter().zip(attr_values.into_iter()).collect();
-        VElement {
-            tag_name,
-            attr,
-            children,
-        }
+        Self::new(tag_name, attr, children)
     }
 
     pub fn render(&self) -> Result<Node, JsValue> {

@@ -38,7 +38,9 @@ impl ToTokens for HtmlRoot {
             Self::Empty => unimplemented!(), // TODO: VList::new() needed
             Self::Expression(expr) => {
                 tokens.extend(
-                    quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::VText(::wal_vdom::virtual_dom::VText::new(#expr))),
+                    quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::Text {
+                        vtext: ::wal_vdom::virtual_dom::VText::new(#expr)
+                    }),
                 );
             }
             Self::For(_html_for) => unimplemented!(), // TODO: VList needed

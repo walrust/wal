@@ -24,8 +24,10 @@ impl Parse for HtmlLiteral {
 
 impl ToTokens for HtmlLiteral {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        tokens.extend(quote_spanned!(self.0.span() =>
-            ::wal_vdom::virtual_dom::VNode::VText(::wal_vdom::virtual_dom::VText::new(#self))
-        ));
+        tokens.extend(
+            quote_spanned!(self.0.span() => ::wal_vdom::virtual_dom::VNode::Text {
+                    text: ::wal_vdom::virtual_dom::VText::new(#self)
+            }),
+        );
     }
 }

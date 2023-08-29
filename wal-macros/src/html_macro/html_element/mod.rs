@@ -1,5 +1,5 @@
 use self::html_element_attributes::HtmlElementAttributes;
-use super::html_tree::HtmlTree;
+use super::{html_literal::HtmlLiteral, html_tree::HtmlTree};
 use html_element_end_tag::HtmlElementEndTag;
 use html_element_start_tag::HtmlElementStartTag;
 use proc_macro2::Ident;
@@ -81,19 +81,21 @@ impl Parse for HtmlElement {
 
 impl ToTokens for HtmlElement {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let name = &self.name;
+        let name = &self.name.to_string();
         let attributes: Vec<(String, String)> = (&self.attributes).into();
         let (attributes_keys, attributes_values): (Vec<String>, Vec<String>) =
             attributes.into_iter().unzip();
         let children = &self.children;
 
-        tokens.extend(quote_spanned!(self.name.span() =>
-            ::wal_vdom::virtual_dom::VNode::VElement(
-                ::wal_vdom::virtual_dom::VElement::new2(
+        tokens.extend(
+            quote_spanned!(self.name.span() => ::wal_vdom::virtual_dom::VNode::Element {
+                velement: ::wal_vdom::virtual_dom::VElement::new_attrs_as_vecs(
                     #name,
-                    #(#attributes_keys)*,
-                    #(#attributes_values)*,
-                    #(#children)*)
-        )));
+                    ::std::vec![#(#attributes_keys,)*],
+                    ::std::vec![#(#attributes_values,)*],
+                    ::std::vec![#(#children,)*],
+                )
+            }),
+        );
     }
 }
