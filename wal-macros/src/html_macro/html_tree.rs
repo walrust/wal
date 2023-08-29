@@ -29,7 +29,7 @@ impl Parse for HtmlTree {
             HtmlType::Element => Self::Element(input.parse()?),
             HtmlType::Literal => Self::Literal(input.parse()?),
             HtmlType::ExpressionBlock => Self::ExpressionBlock(input.parse()?),
-            _ => unimplemented!(),
+            _ => unimplemented!(), // TODO: Component parsing needed
         };
 
         Ok(html_tree)
@@ -40,9 +40,9 @@ impl ToTokens for HtmlTree {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
             Self::If(html_if) => html_if.to_tokens(tokens),
-            Self::For(_html_for) => unimplemented!(),
-            Self::Fragment(_html_fragment) => unimplemented!(),
-            Self::_Component => unimplemented!(),
+            Self::For(_html_for) => unimplemented!(), // TODO: VList needed
+            Self::Fragment(_html_fragment) => unimplemented!(), // TODO: VList needed
+            Self::_Component => unimplemented!(),     // TODO: Component parsing needed
             Self::Element(html_element) => html_element.to_tokens(tokens),
             Self::Literal(_html_literal) => unimplemented!(),
             Self::ExpressionBlock(_expr_block) => unimplemented!(),
