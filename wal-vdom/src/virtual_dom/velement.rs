@@ -23,15 +23,13 @@ impl VElement {
 
     pub fn new_attrs_as_vecs(
         tag_name: &str,
-        attr_keys: Vec<&str>,
-        attr_values: Vec<&str>,
+        attr: HashMap<&str, &str>,
         children: Vec<VNode>,
     ) -> VElement {
         let tag_name = tag_name.to_string();
-        let attr = attr_keys
+        let attr = attr
             .into_iter()
-            .map(|key| key.to_string())
-            .zip(attr_values.into_iter().map(|val| val.to_string()))
+            .map(|(key, value)| (key.to_string(), value.to_string()))
             .collect();
         Self::new(tag_name, attr, children)
     }

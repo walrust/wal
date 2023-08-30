@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use self::html_element_attributes::HtmlElementAttributes;
 use super::{html_literal::HtmlLiteral, html_tree::HtmlTree};
 use html_element_end_tag::HtmlElementEndTag;
@@ -82,17 +84,20 @@ impl Parse for HtmlElement {
 impl ToTokens for HtmlElement {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let name = &self.name.to_string();
-        let attributes: Vec<(String, String)> = (&self.attributes).into();
-        let (attributes_keys, attributes_values): (Vec<String>, Vec<String>) =
-            attributes.into_iter().unzip();
+        let attributes: HashMap<String, String> = (&self.attributes).into();
+        let attributes: Vec<proc_macro2::TokenStream> = attributes
+            .iter()
+            .map(|(k, v)| quote_spanned!(self.name.span() => (#k, #v)))
+            .collect();
         let children = &self.children;
 
         tokens.extend(
             quote_spanned!(self.name.span() => ::wal_vdom::virtual_dom::VNode::Element {
                 velement: ::wal_vdom::virtual_dom::VElement::new_attrs_as_vecs(
                     #name,
-                    ::std::vec![#(#attributes_keys,)*],
-                    ::std::vec![#(#attributes_values,)*],
+                    ::std::collections::HashMap::from([
+                        #(#attributes,)*
+                    ]),
                     ::std::vec![#(#children,)*],
                 )
             }),

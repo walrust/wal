@@ -17,16 +17,16 @@ impl HtmlElementAttributes {
     }
 }
 
-impl From<&HtmlElementAttributes> for Vec<(String, String)> {
-    fn from(attrs: &HtmlElementAttributes) -> Vec<(String, String)> {
-        let mut attributes: Vec<(String, String)> = attrs
+impl From<&HtmlElementAttributes> for HashMap<String, String> {
+    fn from(element_attributes: &HtmlElementAttributes) -> HashMap<String, String> {
+        let mut attributes: HashMap<String, String> = element_attributes
             .attributes
             .iter()
             .map(|(k, v)| (k.to_string(), v.to_string()))
             .collect();
 
-        if let Some(key_val) = &attrs.key {
-            attributes.push((String::from("key"), key_val.to_string()));
+        if let Some(key_val) = &element_attributes.key {
+            attributes.insert(String::from("key"), key_val.to_string());
         }
 
         attributes
