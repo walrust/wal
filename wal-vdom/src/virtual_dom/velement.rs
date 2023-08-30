@@ -22,12 +22,17 @@ impl VElement {
     }
 
     pub fn new_attrs_as_vecs(
-        tag_name: String,
-        attr_keys: Vec<String>,
-        attr_values: Vec<String>,
+        tag_name: &str,
+        attr_keys: Vec<&str>,
+        attr_values: Vec<&str>,
         children: Vec<VNode>,
     ) -> VElement {
-        let attr = attr_keys.into_iter().zip(attr_values.into_iter()).collect();
+        let tag_name = tag_name.to_string();
+        let attr = attr_keys
+            .into_iter()
+            .map(|key| key.to_string())
+            .zip(attr_values.into_iter().map(|val| val.to_string()))
+            .collect();
         Self::new(tag_name, attr, children)
     }
 
