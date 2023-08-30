@@ -36,14 +36,11 @@ impl ToTokens for HtmlRoot {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
             Self::Empty => tokens.extend(quote!(::wal_vdom::virtual_dom::VNode::List {
-                nodes: Vec::new()
+                vlist: ::wal_vdom::virtual_dom::VList::new_empty()
             })),
-            Self::Expression(expr) => tokens.extend(
-                quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::Text {
-                    vtext: ::wal_vdom::virtual_dom::VText::new(#expr)
-                }),
-            ),
-            Self::For(_html_for) => unimplemented!(), // TODO: VList needed
+            Self::Expression(expr) => tokens
+                .extend(quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::from(#expr))),
+            Self::For(html_for) => html_for.to_tokens(tokens),
             Self::Forest(html_forest) => html_forest.to_tokens(tokens),
         };
     }
