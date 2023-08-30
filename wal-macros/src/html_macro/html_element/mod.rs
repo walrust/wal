@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use self::html_element_attributes::HtmlElementAttributes;
-use super::{html_literal::HtmlLiteral, html_tree::HtmlTree};
+use super::html_tree::HtmlTree;
 use html_element_end_tag::HtmlElementEndTag;
 use html_element_start_tag::HtmlElementStartTag;
 use proc_macro2::Ident;
