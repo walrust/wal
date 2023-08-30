@@ -1,5 +1,5 @@
 use super::{html_for::HtmlFor, html_forest::HtmlForest};
-use quote::{quote_spanned, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
@@ -35,18 +35,16 @@ impl Parse for HtmlRoot {
 impl ToTokens for HtmlRoot {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            Self::Empty => unimplemented!(), // TODO: VList::new() needed
-            Self::Expression(expr) => {
-                tokens.extend(
-                    quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::Text {
-                        vtext: ::wal_vdom::virtual_dom::VText::new(#expr)
-                    }),
-                );
-            }
+            Self::Empty => tokens.extend(quote!(::wal_vdom::virtual_dom::VNode::List {
+                nodes: Vec::new()
+            })),
+            Self::Expression(expr) => tokens.extend(
+                quote_spanned!(expr.span() => ::wal_vdom::virtual_dom::VNode::Text {
+                    vtext: ::wal_vdom::virtual_dom::VText::new(#expr)
+                }),
+            ),
             Self::For(_html_for) => unimplemented!(), // TODO: VList needed
-            Self::Forest(html_forest) => {
-                html_forest.to_tokens(tokens);
-            }
+            Self::Forest(html_forest) => html_forest.to_tokens(tokens),
         };
     }
 }
