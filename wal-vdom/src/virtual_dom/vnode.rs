@@ -46,3 +46,11 @@ impl<T: ToString> From<T> for VNode {
         }
     }
 }
+
+impl<T: Into<VNode>> FromIterator<T> for VNode {
+    fn from_iter<U: IntoIterator<Item = T>>(iter: U) -> Self {
+        Self::List {
+            vlist: VList::new(iter.into_iter().map(|t| t.into()).collect()),
+        }
+    }
+}
