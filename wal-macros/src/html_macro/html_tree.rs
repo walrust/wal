@@ -30,7 +30,7 @@ impl Parse for HtmlTree {
             HtmlType::Element => Self::Element(input.parse()?),
             HtmlType::Literal => Self::Literal(input.parse()?),
             HtmlType::ExpressionBlock => Self::ExpressionBlock(input.parse()?),
-            _ => unimplemented!(), // TODO: Component parsing needed
+            HtmlType::Component => unimplemented!(), // TODO: Component parsing needed
         };
 
         Ok(html_tree)
@@ -42,7 +42,7 @@ impl ToTokens for HtmlTree {
         match self {
             Self::If(html_if) => html_if.to_tokens(tokens),
             Self::For(html_for) => html_for.to_tokens(tokens),
-            Self::Fragment(html_fragment) => html_fragment.to_tokens(tokens), // TODO: VList needed
+            Self::Fragment(html_fragment) => html_fragment.to_tokens(tokens),
             Self::_Component => unimplemented!(),     // TODO: Component parsing needed
             Self::Element(html_element) => html_element.to_tokens(tokens),
             Self::Literal(html_literal) => html_literal.to_tokens(tokens),
