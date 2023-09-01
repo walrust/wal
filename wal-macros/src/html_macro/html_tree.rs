@@ -88,7 +88,7 @@ impl ToTokens for HtmlTree {
             Self::Element(html_element) => html_element.to_tokens(tokens),
             Self::Literal(html_literal) => html_literal.to_tokens(tokens),
             Self::ExpressionBlock(expr_block) => tokens.extend(
-                quote_spanned!(expr_block.span() => ::wal_vdom::virtual_dom::VNode::from(#expr_block)),
+                quote_spanned! { expr_block.span() => ::wal_vdom::virtual_dom::VNode::from(#expr_block) },
             ),
         }
     }

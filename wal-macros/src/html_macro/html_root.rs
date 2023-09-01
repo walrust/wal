@@ -39,9 +39,9 @@ impl ToTokens for HtmlRoot {
                     vlist: ::wal_vdom::virtual_dom::VList::new_empty()
                 }
             }),
-            Self::Expression(expr) => tokens.extend(quote_spanned! {
-                expr.span() => ::wal_vdom::virtual_dom::VNode::from(#expr)
-            }),
+            Self::Expression(expr) => tokens.extend(
+                quote_spanned! { expr.span() => ::wal_vdom::virtual_dom::VNode::from(#expr) },
+            ),
             Self::For(html_for) => html_for.to_tokens(tokens),
             Self::Forest(html_forest) => html_forest.to_tokens(tokens),
         };
