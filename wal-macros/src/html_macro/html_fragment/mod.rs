@@ -1,12 +1,17 @@
 use super::html_tree::HtmlTree;
 use html_fragment_end_tag::HtmlFragmentEndTag;
 use html_fragment_start_tag::HtmlFragmentStartTag;
-use syn::parse::Parse;
+use quote::{quote, quote_spanned, ToTokens};
+use syn::{parse::Parse, spanned::Spanned};
 
 mod html_fragment_end_tag;
 mod html_fragment_start_tag;
 
-pub struct HtmlFragment(Vec<HtmlTree>);
+pub struct HtmlFragment {
+    start_tag: HtmlFragmentStartTag,
+    children: Vec<HtmlTree>,
+    end_tag: HtmlFragmentEndTag,
+}
 
 impl Parse for HtmlFragment {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
@@ -34,8 +39,26 @@ impl Parse for HtmlFragment {
             children.push(input.parse()?);
         }
 
-        input.parse::<HtmlFragmentEndTag>()?;
+        let end_tag = input.parse::<HtmlFragmentEndTag>()?;
 
-        Ok(HtmlFragment(children))
+        Ok(HtmlFragment {
+            start_tag,
+            children,
+            end_tag,
+        })
+    }
+}
+
+impl ToTokens for HtmlFragment {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let children = &self.children;
+
+        let start_spanned = self.start_tag.to_spanned();
+        let end_spanned = self.end_tag.to_spanned();
+        let spanned = quote!(#start_spanned #end_spanned);
+
+        tokens.extend(quote_spanned! {spanned.span() =>
+            ::wal_vdom::virtual_dom::VNode::from_iter::<::std::vec::Vec<::wal_vdom::virtual_dom::VNode>>(vec![#(#children),*])
+        });
     }
 }
