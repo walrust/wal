@@ -1,9 +1,10 @@
-use super::html_root::HtmlRoot;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
 };
+
+use super::html_root::HtmlRoot;
 
 pub struct HtmlIfExpression {
     html_if: HtmlIf,

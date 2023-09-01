@@ -24,11 +24,11 @@ impl<Expr: Parse + ExprInFor> Parse for HtmlFor<Expr> {
 
 impl HtmlFor<syn::Expr> {
     pub fn peek(input: ParseStream) -> bool {
-        let input = input.fork();
+        let forked_input = input.fork();
 
-        input.parse::<syn::token::For>().is_ok()
-            && input.parse::<syn::Expr>().is_ok()
-            && input.is_empty()
+        forked_input.parse::<syn::token::For>().is_ok()
+            && forked_input.parse::<syn::Expr>().is_ok()
+            && forked_input.is_empty()
     }
 }
 

@@ -1,9 +1,10 @@
-use super::{html_for::HtmlFor, html_forest::HtmlForest};
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
 };
+
+use super::{html_for::HtmlFor, html_forest::HtmlForest};
 
 pub enum HtmlRoot {
     Empty,

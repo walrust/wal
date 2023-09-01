@@ -1,8 +1,9 @@
-use super::html_element_attributes::HtmlElementAttributes;
-use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
 use quote::{quote, ToTokens};
 use std::collections::HashMap;
 use syn::parse::Parse;
+
+use super::html_element_attributes::HtmlElementAttributes;
+use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
 
 pub struct HtmlElementStartTag {
     lt: syn::token::Lt,
@@ -53,20 +54,11 @@ impl HtmlElementStartTag {
     }
 
     pub fn is_void(&self) -> bool {
-        self.name == "area"
-            || self.name == "base"
-            || self.name == "br"
-            || self.name == "col"
-            || self.name == "embed"
-            || self.name == "hr"
-            || self.name == "img"
-            || self.name == "input"
-            || self.name == "link"
-            || self.name == "meta"
-            || self.name == "param"
-            || self.name == "source"
-            || self.name == "track"
-            || self.name == "wbr"
+        const VOID_ELEMENTS: [&str; 14] = [
+            "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param",
+            "source", "track", "wbr",
+        ];
+        VOID_ELEMENTS.contains(&self.name.to_string().as_str())
     }
 
     pub fn to_spanned(&self) -> impl ToTokens {

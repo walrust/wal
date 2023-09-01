@@ -1,5 +1,6 @@
-use crate::html_macro::html_attribute::HtmlAttributeValue;
 use std::collections::HashMap;
+
+use crate::html_macro::html_attribute::HtmlAttributeValue;
 
 pub struct HtmlElementAttributes {
     attributes: HashMap<proc_macro2::Ident, HtmlAttributeValue>,

@@ -1,8 +1,9 @@
-use super::html_tree::HtmlTree;
 use html_fragment_end_tag::HtmlFragmentEndTag;
 use html_fragment_start_tag::HtmlFragmentStartTag;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{parse::Parse, spanned::Spanned};
+
+use super::html_tree::HtmlTree;
 
 mod html_fragment_end_tag;
 mod html_fragment_start_tag;

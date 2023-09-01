@@ -1,12 +1,13 @@
-use super::{
-    html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment,
-    html_if::HtmlIfExpression, html_literal::HtmlLiteral,
-};
 use quote::{quote_spanned, ToTokens};
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
     spanned::Spanned,
+};
+
+use super::{
+    html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment,
+    html_if::HtmlIfExpression, html_literal::HtmlLiteral,
 };
 
 pub enum HtmlTree {

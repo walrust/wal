@@ -1,6 +1,7 @@
-use super::html_tree::HtmlTree;
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
+
+use super::html_tree::HtmlTree;
 
 pub struct HtmlForest(Vec<HtmlTree>);
 
