@@ -36,9 +36,13 @@ impl Parse for HtmlIfExpression {
 
 impl ToTokens for HtmlIfExpression {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let html_if = &self.html_if;
-        let else_ifs = &self.else_ifs;
-        let else_tokens = match &self.html_else {
+        let HtmlIfExpression {
+            html_if,
+            else_ifs,
+            html_else,
+        } = self;
+
+        let else_tokens = match html_else {
             Some(html_else) => html_else.into_token_stream(),
             None => {
                 let default_else_body = &HtmlRoot::Empty;
@@ -46,7 +50,7 @@ impl ToTokens for HtmlIfExpression {
             }
         };
 
-        tokens.extend(quote_spanned! {self.html_if.if_token.span() =>
+        tokens.extend(quote_spanned! {html_if.if_token.span() =>
             #html_if
             #(#else_ifs)*
             #else_tokens
@@ -62,23 +66,25 @@ struct HtmlIf {
 
 impl Parse for HtmlIf {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let if_token = input.parse::<syn::token::If>()?;
-        let condition = parse_condition(input)?;
-        let body = parse_body(input)?;
-
         Ok(HtmlIf {
-            if_token,
-            condition,
-            body,
+            if_token: input.parse::<syn::token::If>()?,
+            condition: parse_condition(input)?,
+            body: parse_body(input)?,
         })
     }
 }
 
 impl ToTokens for HtmlIf {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let condition = &self.condition;
-        let body = &self.body;
-        tokens.extend(quote_spanned! {self.if_token.span() =>
+        let HtmlIf {
+            condition,
+            body,
+            if_token,
+        } = self;
+
+        let spanned = quote!(#if_token #body);
+
+        tokens.extend(quote_spanned! {spanned.span() =>
             if #condition {
                 #body
             }
@@ -87,22 +93,20 @@ impl ToTokens for HtmlIf {
 }
 
 struct HtmlElseIf {
-    if_token: syn::token::If,
+    else_token: syn::token::Else,
     condition: syn::Expr,
     body: HtmlRoot,
 }
 
 impl Parse for HtmlElseIf {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        input.parse::<syn::token::Else>()?;
-        let if_token = input.parse::<syn::token::If>()?;
-        let condition = parse_condition(input)?;
-        let body = parse_body(input)?;
+        let else_token = input.parse::<syn::token::Else>()?;
+        input.parse::<syn::token::If>()?;
 
         Ok(HtmlElseIf {
-            if_token,
-            condition,
-            body,
+            else_token,
+            condition: parse_condition(input)?,
+            body: parse_body(input)?,
         })
     }
 }
@@ -115,10 +119,15 @@ impl HtmlElseIf {
 
 impl ToTokens for HtmlElseIf {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let condition = &self.condition;
-        let body = &self.body;
+        let HtmlElseIf {
+            condition,
+            body,
+            else_token,
+        } = self;
 
-        tokens.extend(quote_spanned! {self.if_token.span() =>
+        let spanned = quote!(#else_token #body);
+
+        tokens.extend(quote_spanned! {spanned.span() =>
             else if #condition {
                 #body
             }
@@ -133,36 +142,42 @@ struct HtmlElse {
 
 impl Parse for HtmlElse {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let else_token = input.parse::<syn::token::Else>()?;
-        let body = parse_body(input)?;
-
-        Ok(HtmlElse { else_token, body })
+        Ok(HtmlElse {
+            else_token: input.parse::<syn::token::Else>()?,
+            body: parse_body(input)?,
+        })
     }
 }
 
 impl ToTokens for HtmlElse {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let body = &self.body;
-        tokens.extend(quote_spanned! { self.else_token.span() => else { #body } });
+        let HtmlElse { body, else_token } = self;
+        let spanned = quote!(#else_token #body);
+        tokens.extend(quote_spanned! { spanned.span() =>
+            else {
+                #body
+            }
+        });
     }
 }
 
 fn parse_condition(input: ParseStream) -> syn::Result<syn::Expr> {
     let condition = syn::Expr::parse_without_eager_brace(input)?;
 
-    match &condition {
-        syn::Expr::Block(syn::ExprBlock { block, .. }) if block.stmts.is_empty() => {
-            Err(syn::Error::new_spanned(
+    if let syn::Expr::Block(syn::ExprBlock { block, .. }) = &condition {
+        if block.stmts.is_empty() {
+            return Err(syn::Error::new_spanned(
                 &condition,
-                "Expected condition for `if` expression, found empty block",
-            ))
+                "Expected condition for `if` expression, found an empty block",
+            ));
         }
-        _ => Ok(condition),
     }
+
+    Ok(condition)
 }
 
 fn parse_body(input: ParseStream) -> syn::Result<HtmlRoot> {
     let body;
     syn::braced!(body in input);
-    Ok(body.parse()?)
+    body.parse()
 }
