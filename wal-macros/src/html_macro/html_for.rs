@@ -18,7 +18,6 @@ impl ExprInFor for syn::ExprBlock {}
 impl<Expr: Parse + ExprInFor> Parse for HtmlFor<Expr> {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<syn::token::For>()?;
-
         Ok(HtmlFor(input.parse()?))
     }
 }

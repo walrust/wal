@@ -23,7 +23,15 @@ impl Parse for HtmlAttribute {
                 return Err(input.error("Expected a literal or an expression block"));
             }
 
-            HtmlAttributeValue::ExpressionBlock(expr_block.unwrap())
+            let expr_block = expr_block.unwrap();
+            if expr_block.block.stmts.is_empty() {
+                return Err(syn::Error::new_spanned(
+                    &expr_block,
+                    "Expected a non-empty expression block",
+                ));
+            }
+
+            HtmlAttributeValue::ExpressionBlock(expr_block)
         };
 
         Ok(HtmlAttribute { ident, value })
