@@ -16,13 +16,11 @@ pub struct HtmlFragment {
 impl Parse for HtmlFragment {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         if input.peek2(syn::token::Slash) {
-            return match input.parse::<HtmlFragmentEndTag>() {
-                Ok(html_end_tag) => Err(syn::Error::new_spanned(
-                    html_end_tag.to_spanned(),
-                    "This closing fragment does not have a corresponding opening fragment. (hint: try adding `<>`)",
-                )),
-                Err(err) => Err(err),
-            };
+            let html_end_tag = input.parse::<HtmlFragmentEndTag>()?;
+            return Err(syn::Error::new_spanned(
+                html_end_tag.to_spanned(),
+                "This closing fragment does not have a corresponding opening fragment. (hint: try adding `<>`)",
+            ));
         }
 
         let start_tag = input.parse::<HtmlFragmentStartTag>()?;
