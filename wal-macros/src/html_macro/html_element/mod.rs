@@ -100,7 +100,7 @@ impl ToTokens for HtmlElement {
 
         tokens.extend(quote_spanned! { self.name.span() =>
             ::wal_vdom::virtual_dom::VNode::Element {
-                velement: ::wal_vdom::virtual_dom::VElement::new_attrs_as_vecs(
+                velement: ::wal_vdom::virtual_dom::VElement::new_str(
                     #name,
                     ::std::collections::HashMap::from([
                         #(#attributes,)*

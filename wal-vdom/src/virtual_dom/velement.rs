@@ -21,11 +21,7 @@ impl VElement {
         }
     }
 
-    pub fn new_attrs_as_vecs(
-        tag_name: &str,
-        attr: HashMap<&str, &str>,
-        children: Vec<VNode>,
-    ) -> VElement {
+    pub fn new_str(tag_name: &str, attr: HashMap<&str, &str>, children: Vec<VNode>) -> VElement {
         let tag_name = tag_name.to_string();
         let attr = attr
             .into_iter()
