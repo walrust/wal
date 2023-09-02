@@ -8,7 +8,7 @@ fn html_macro_tests() {
     t.pass("tests/html_macro_tests/elements/multiple_elements_pass.rs");
     t.pass("tests/html_macro_tests/elements/element_with_single_literal_pass.rs");
     t.pass("tests/html_macro_tests/elements/element_with_single_expression_pass.rs");
-    // t.compile_fail("tests/html_macro_tests/elements/element_with_single_value_fail.rs");
+    t.compile_fail("tests/html_macro_tests/elements/element_with_single_expression_fail.rs");
     // t.pass("tests/html_macro_tests/elements/element_tree_pass.rs");
     // t.pass("tests/html_macro_tests/elements/element_forest_pass.rs");
     // t.compile_fail("tests/html_macro_tests/elements/element_without_closing_fail.rs");

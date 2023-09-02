@@ -32,8 +32,10 @@ impl Parse for HtmlTree {
             forked_input.parse::<syn::token::Lt>().unwrap();
             forked_input.parse::<syn::token::Slash>().ok(); // parsing optional slash character for an unmatched closing tag
             Self::parse_after_lt(input, &forked_input)?
-        } else {
+        } else if input.peek(syn::Lit) {
             Self::Literal(input.parse()?)
+        } else {
+            return Err(input.error("Invalid syntax encountered"));
         };
 
         Ok(html_tree)
