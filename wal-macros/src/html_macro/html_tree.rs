@@ -1,13 +1,12 @@
-use quote::{quote_spanned, ToTokens};
+use quote::ToTokens;
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
-    spanned::Spanned,
 };
 
 use super::{
-    html_element::HtmlElement, html_for::HtmlFor, html_fragment::HtmlFragment,
-    html_if::HtmlIfExpression, html_literal::HtmlLiteral,
+    html_element::HtmlElement, html_expression_block::HtmlExpressionBlock, html_for::HtmlFor,
+    html_fragment::HtmlFragment, html_if::HtmlIfExpression, html_literal::HtmlLiteral,
 };
 
 pub enum HtmlTree {
@@ -17,7 +16,7 @@ pub enum HtmlTree {
     _Component, // TODO: Implement component
     Element(HtmlElement),
     Literal(HtmlLiteral),
-    ExpressionBlock(syn::ExprBlock),
+    ExpressionBlock(HtmlExpressionBlock),
 }
 
 impl Parse for HtmlTree {
@@ -85,12 +84,10 @@ impl ToTokens for HtmlTree {
             Self::If(html_if) => html_if.to_tokens(tokens),
             Self::For(html_for) => html_for.to_tokens(tokens),
             Self::Fragment(html_fragment) => html_fragment.to_tokens(tokens),
-            Self::_Component => unimplemented!(),     // TODO: implement totokens for component
+            Self::_Component => unimplemented!(), // TODO: implement totokens for component
             Self::Element(html_element) => html_element.to_tokens(tokens),
             Self::Literal(html_literal) => html_literal.to_tokens(tokens),
-            Self::ExpressionBlock(expr_block) => tokens.extend(
-                quote_spanned! { expr_block.span() => ::wal_vdom::virtual_dom::VNode::from(#expr_block) },
-            ),
+            Self::ExpressionBlock(html_expr_block) => html_expr_block.to_tokens(tokens),
         }
     }
 }
