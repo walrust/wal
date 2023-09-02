@@ -38,3 +38,22 @@ error[E0277]: `TestNonDisplayStruct` doesn't implement `std::fmt::Display`
              <VNode as From<VText>>
    = note: required for `TestNonDisplayStruct` to implement `ToString`
    = note: required for `VNode` to implement `From<TestNonDisplayStruct>`
+
+error[E0277]: `TestNonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/html_macro_tests/expressions/single_expression_fail.rs:12:13
+   |
+12 |     html! { node() };
+   |             ----^^
+   |             |
+   |             `TestNonDisplayStruct` cannot be formatted with the default formatter
+   |             required by a bound introduced by this call
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `TestNonDisplayStruct`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the following other types implement trait `From<T>`:
+             <VNode as From<T>>
+             <VNode as From<VElement>>
+             <VNode as From<VList>>
+             <VNode as From<VText>>
+   = note: required for `TestNonDisplayStruct` to implement `ToString`
+   = note: required for `VNode` to implement `From<TestNonDisplayStruct>`

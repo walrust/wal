@@ -14,4 +14,6 @@ fn main() {
     let t = TestNonDisplayStruct { field: 15 };
     html! { <div> { t } </div> };
     html! { <div> { TestNonDisplayStruct { field: 15 } } </div> };
+    let node = || TestNonDisplayStruct { field: 15 };
+    html! { <div> { node() } </div> };
 }
