@@ -9,8 +9,7 @@ impl Parse for HtmlLiteral {
 
         let error_message = match lit {
             syn::Lit::ByteStr(_) => Some("Byte string literals are not supported"),
-            syn::Lit::Byte(_) => Some("Byte literals are not supported"),
-            syn::Lit::Verbatim(_) => Some("Raw token literala are not supported"),
+            syn::Lit::Verbatim(_) => Some("Raw token literals are not supported"),
             _ => None,
         };
 

@@ -24,8 +24,10 @@ impl Parse for HtmlRoot {
         }
 
         let forked_input = input.fork();
-        if forked_input.parse::<syn::Expr>().is_ok() && forked_input.is_empty() {
-            return Ok(Self::Expression(input.parse()?));
+        if let Ok(expr) = forked_input.parse::<syn::Expr>() {
+            if forked_input.is_empty() && !matches!(expr, syn::Expr::Lit(_)) {
+                return Ok(Self::Expression(input.parse()?));
+            }
         }
 
         Ok(Self::Forest(input.parse()?))
