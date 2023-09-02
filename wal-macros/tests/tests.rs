@@ -12,7 +12,7 @@ fn html_macro_tests() {
     t.pass("tests/html_macro_tests/elements/element_with_single_expression_pass.rs");
     t.compile_fail("tests/html_macro_tests/elements/element_with_single_expression_fail.rs");
     t.pass("tests/html_macro_tests/elements/element_tree_pass.rs");
-    // t.pass("tests/html_macro_tests/elements/element_forest_pass.rs");
+    t.pass("tests/html_macro_tests/elements/element_forest_pass.rs");
     // t.compile_fail("tests/html_macro_tests/elements/element_without_closing_fail.rs");
     // t.compile_fail("tests/html_macro_tests/elements/element_without_opening_fail.rs");
     // t.compile_fail("tests/html_macro_tests/elements/element_with_wrong_way_of_closing_fail.rs");
