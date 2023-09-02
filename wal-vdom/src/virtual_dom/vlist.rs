@@ -2,7 +2,7 @@ use serde::Serialize;
 
 use super::VNode;
 
-#[derive(Serialize)]
+#[derive(Serialize, PartialEq, Debug)]
 pub struct VList {
     nodes: Vec<VNode>,
 }

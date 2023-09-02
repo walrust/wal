@@ -5,7 +5,7 @@ use web_sys::Node;
 
 use super::VNode;
 
-#[derive(Serialize)]
+#[derive(Serialize, PartialEq, Debug)]
 pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,

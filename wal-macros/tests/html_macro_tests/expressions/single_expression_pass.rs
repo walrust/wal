@@ -1,4 +1,5 @@
 use wal_macros::html;
+use wal_vdom::virtual_dom::{VNode, VText};
 
 struct TestDisplayStruct {
     field: i32,
@@ -11,10 +12,48 @@ impl std::fmt::Display for TestDisplayStruct {
 }
 
 fn main() {
-    html! { String::from("Hello world!") };
+    isolated_expression();
+    referance_expression();
+    displayable_struct_expression();
+}
+
+fn isolated_expression() {
+    let html = html! { String::from("Hello world!") };
+    assert_eq!(
+        html,
+        VNode::Text {
+            vtext: VText::new("Hello world!")
+        }
+    );
+}
+
+fn referance_expression() {
     let val = "Hello world!";
-    html! { val };
-    let t = TestDisplayStruct { field: 15 };
-    html! { t };
-    html! { TestDisplayStruct { field: 15 } };
+    let html = html! { val };
+    assert_eq!(
+        html,
+        VNode::Text {
+            vtext: VText::new("Hello world!")
+        }
+    );
+}
+
+fn displayable_struct_expression() {
+    let html = html! { TestDisplayStruct { field: 15 } };
+    assert_eq!(
+        html,
+        VNode::Text {
+            vtext: VText::new(TestDisplayStruct { field: 15 })
+        }
+    );
+}
+
+fn expression_block() {
+    let html = html! { { let s = "Hello world!"; String::from(s) } };
+    assert_eq!(
+        html,
+        VNode::Text {
+            vtext: VText::new("Hello world!")
+        }
+    );
 }

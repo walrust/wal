@@ -1,0 +1,40 @@
+error[E0425]: cannot find value `invalid_reference` in this scope
+ --> tests/html_macro_tests/expressions/single_expression_fail.rs:9:13
+  |
+9 |     html! { invalid_reference };
+  |             ^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0277]: `()` doesn't implement `std::fmt::Display`
+ --> tests/html_macro_tests/expressions/single_expression_fail.rs:8:13
+  |
+8 |     html! { () };
+  |             ^^ `()` cannot be formatted with the default formatter
+  |
+  = help: the trait `std::fmt::Display` is not implemented for `()`
+  = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+  = help: the following other types implement trait `From<T>`:
+            <VNode as From<T>>
+            <VNode as From<VElement>>
+            <VNode as From<VList>>
+            <VNode as From<VText>>
+  = note: required for `()` to implement `ToString`
+  = note: required for `VNode` to implement `From<()>`
+
+error[E0277]: `TestNonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/html_macro_tests/expressions/single_expression_fail.rs:10:13
+   |
+10 |     html! { TestNonDisplayStruct { field: 15 } };
+   |             --------------------^^^^^^^^^^^^^^
+   |             |
+   |             `TestNonDisplayStruct` cannot be formatted with the default formatter
+   |             required by a bound introduced by this call
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `TestNonDisplayStruct`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the following other types implement trait `From<T>`:
+             <VNode as From<T>>
+             <VNode as From<VElement>>
+             <VNode as From<VList>>
+             <VNode as From<VText>>
+   = note: required for `TestNonDisplayStruct` to implement `ToString`
+   = note: required for `VNode` to implement `From<TestNonDisplayStruct>`

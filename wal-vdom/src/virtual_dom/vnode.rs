@@ -4,7 +4,7 @@ use web_sys::Node;
 
 use super::{VElement, VList, VText};
 
-#[derive(Serialize)]
+#[derive(Serialize, PartialEq, Debug)]
 pub enum VNode {
     Element { velement: VElement },
     Text { vtext: VText },

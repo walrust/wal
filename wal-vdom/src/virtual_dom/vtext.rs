@@ -2,7 +2,7 @@ use gloo::{console::__macro::JsValue, utils::document};
 use serde::Serialize;
 use web_sys::Node;
 
-#[derive(Serialize)]
+#[derive(Serialize, PartialEq, Debug)]
 pub struct VText {
     pub text: String,
 }
