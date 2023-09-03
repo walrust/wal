@@ -21,15 +21,6 @@ impl VElement {
         }
     }
 
-    pub fn new_str(tag_name: &str, attr: HashMap<&str, &str>, children: Vec<VNode>) -> VElement {
-        let tag_name = tag_name.to_string();
-        let attr = attr
-            .into_iter()
-            .map(|(key, value)| (key.to_string(), value.to_string()))
-            .collect();
-        Self::new(tag_name, attr, children)
-    }
-
     pub fn render(&self) -> Result<Node, JsValue> {
         let el = document().create_element(self.tag_name.as_str())?;
 

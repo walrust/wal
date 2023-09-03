@@ -49,11 +49,11 @@ pub enum HtmlAttributeValue {
     ExpressionBlock(syn::ExprBlock),
 }
 
-impl ToString for HtmlAttributeValue {
-    fn to_string(&self) -> String {
+impl ToTokens for HtmlAttributeValue {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            Self::Literal(lit) => lit.into_token_stream().to_string(),
-            Self::ExpressionBlock(expr_block) => expr_block.into_token_stream().to_string(),
+            HtmlAttributeValue::Literal(lit) => lit.to_tokens(tokens),
+            HtmlAttributeValue::ExpressionBlock(expr_block) => expr_block.to_tokens(tokens),
         }
     }
 }

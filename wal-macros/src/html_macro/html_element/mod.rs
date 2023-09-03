@@ -2,7 +2,6 @@ use html_element_end_tag::HtmlElementEndTag;
 use html_element_start_tag::HtmlElementStartTag;
 use proc_macro2::Ident;
 use quote::{quote_spanned, ToTokens};
-use std::collections::HashMap;
 use syn::parse::{Parse, ParseStream};
 
 use self::html_element_attributes::HtmlElementAttributes;
@@ -91,17 +90,13 @@ fn parse_children(
 impl ToTokens for HtmlElement {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let name = &self.name.to_string();
-        let attributes: HashMap<String, String> = (&self.attributes).into();
-        let attributes: Vec<proc_macro2::TokenStream> = attributes
-            .iter()
-            .map(|(k, v)| quote_spanned!(self.name.span() => (#k, #v)))
-            .collect();
+        let attributes: Vec<proc_macro2::TokenStream> = (&self.attributes).into();
         let children = &self.children;
 
         tokens.extend(quote_spanned! { self.name.span() =>
             ::wal_vdom::virtual_dom::VNode::Element {
-                velement: ::wal_vdom::virtual_dom::VElement::new_str(
-                    #name,
+                velement: ::wal_vdom::virtual_dom::VElement::new(
+                    ::std::string::String::from(#name),
                     ::std::collections::HashMap::from([
                         #(#attributes,)*
                     ]),
