@@ -1,3 +1,5 @@
+use wal_macros::html;
+
 fn main() {
     html! { if };
     html! { if true };
@@ -10,7 +12,6 @@ fn main() {
     html! { if true {} else if true };
     html! { if true {} else if {} };
     html! { if true {} else if true {} else };
-
     html! { if true { {} } };
     html! { if true { () } };
     html! { if true { invalid_reference } };

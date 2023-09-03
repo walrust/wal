@@ -9,4 +9,9 @@ fn main() {
     html! { for { () } };
     html! { for Vec::<()>::new() };
     html! { for { Vec::<NonDisplayStruct>::new() } };
+    html! {
+        <div>
+            for vec![1, 2, 3]
+        </div>
+    };
 }
