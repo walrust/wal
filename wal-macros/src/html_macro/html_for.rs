@@ -36,6 +36,7 @@ impl<Expr: ExprInFor + ToTokens> ToTokens for HtmlFor<Expr> {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let expr = &self.0;
         tokens.extend(quote_spanned!(expr.span() =>
+            #[allow(unused_braces)]
             ::wal_vdom::virtual_dom::VNode::from_iter(#expr)
         ));
     }
