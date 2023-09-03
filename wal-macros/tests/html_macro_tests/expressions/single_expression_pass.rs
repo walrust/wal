@@ -1,15 +1,7 @@
 use wal_macros::html;
 use wal_vdom::virtual_dom::{VNode, VText};
 
-struct TestDisplayStruct {
-    field: i32,
-}
-
-impl std::fmt::Display for TestDisplayStruct {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "TestStruct {{ field: {} }}", self.field)
-    }
-}
+include!("../utils/display_struct.rs");
 
 fn main() {
     isolated_expression();
@@ -41,11 +33,11 @@ fn referance_expression() {
 }
 
 fn displayable_struct_expression() {
-    let html = html! { TestDisplayStruct { field: 15 } };
+    let html = html! { DisplayStruct };
     assert_eq!(
         html,
         VNode::Text {
-            vtext: VText::new(TestDisplayStruct { field: 15 })
+            vtext: VText::new(DisplayStruct)
         }
     );
 }

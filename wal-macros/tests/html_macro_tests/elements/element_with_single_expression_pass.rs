@@ -2,15 +2,7 @@ use std::collections::HashMap;
 use wal_macros::html;
 use wal_vdom::virtual_dom::{VElement, VNode, VText};
 
-struct TestDisplayStruct {
-    field: i32,
-}
-
-impl std::fmt::Display for TestDisplayStruct {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "TestStruct {{ field: {} }}", self.field)
-    }
-}
+include!("../utils/display_struct.rs");
 
 fn main() {
     element_with_isolated_expression();
@@ -32,8 +24,8 @@ fn element_with_referance_expression() {
 }
 
 fn element_with_struct_expression() {
-    let html = html! { <div> { TestDisplayStruct { field: 15 } } </div> };
-    assert_eq!(html, get_div_with(TestDisplayStruct { field: 15 }));
+    let html = html! { <div> { DisplayStruct } </div> };
+    assert_eq!(html, get_div_with(DisplayStruct));
 }
 
 fn element_with_function_returning_value() {
