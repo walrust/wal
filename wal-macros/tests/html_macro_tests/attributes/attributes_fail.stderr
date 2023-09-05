@@ -1,29 +1,53 @@
 error: expected `=`
- --> tests/html_macro_tests/attributes/attributes_fail.rs:4:22
+ --> tests/html_macro_tests/attributes/attributes_fail.rs:6:22
   |
-4 |     html! { <div attr></> };
+6 |     html! { <div attr></> };
   |                      ^
 
 error: Expected a literal or an expression block
- --> tests/html_macro_tests/attributes/attributes_fail.rs:5:23
+ --> tests/html_macro_tests/attributes/attributes_fail.rs:7:23
   |
-5 |     html! { <div attr=></> };
+7 |     html! { <div attr=></> };
   |                       ^
 
 error: expected `=`
- --> tests/html_macro_tests/attributes/attributes_fail.rs:6:23
+ --> tests/html_macro_tests/attributes/attributes_fail.rs:8:23
   |
-6 |     html! { <div attr "value"></> };
+8 |     html! { <div attr "value"></> };
   |                       ^^^^^^^
 
 error: Duplicate attribute `attr`
- --> tests/html_macro_tests/attributes/attributes_fail.rs:7:30
+ --> tests/html_macro_tests/attributes/attributes_fail.rs:9:30
   |
-7 |     html! { <div attr="key1" attr="key2"></> };
+9 |     html! { <div attr="key1" attr="key2"></> };
   |                              ^^^^
 
 error: Expected a literal or an expression block
- --> tests/html_macro_tests/attributes/attributes_fail.rs:8:25
-  |
-8 |     html! { <div attr1= attr2="key2"></> };
-  |                         ^^^^^
+  --> tests/html_macro_tests/attributes/attributes_fail.rs:10:25
+   |
+10 |     html! { <div attr1= attr2="key2"></> };
+   |                         ^^^^^
+
+error[E0599]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/html_macro_tests/attributes/attributes_fail.rs:11:18
+   |
+11 |     html! { <div attr={NonDisplayStruct}></div> };
+   |                  ^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+  ::: tests/html_macro_tests/attributes/../utils/non_display_struct.rs
+   |
+   | pub struct NonDisplayStruct;
+   | ---------------------------
+   | |
+   | method `to_string` not found for this struct
+   | doesn't satisfy `NonDisplayStruct: ToString`
+   | doesn't satisfy `NonDisplayStruct: std::fmt::Display`
+   |
+   = note: the following trait bounds were not satisfied:
+           `NonDisplayStruct: std::fmt::Display`
+           which is required by `NonDisplayStruct: ToString`
+note: the trait `std::fmt::Display` must be implemented
+  --> $RUST/core/src/fmt/mod.rs
+   |
+   | pub trait Display {
+   | ^^^^^^^^^^^^^^^^^

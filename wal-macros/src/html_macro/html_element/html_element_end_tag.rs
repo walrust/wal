@@ -28,17 +28,16 @@ impl HtmlElementEndTag {
     }
 
     pub fn peek(start_tag_name: &proc_macro2::Ident, input: ParseStream) -> bool {
-        let input = input.fork();
-        if input.parse::<syn::token::Lt>().is_err() {
-            return false;
-        }
-        if input.parse::<syn::token::Slash>().is_err() {
+        let forked_input = input.fork();
+        if forked_input.parse::<syn::token::Lt>().is_err()
+            || forked_input.parse::<syn::token::Slash>().is_err()
+        {
             return false;
         }
 
-        match proc_macro2::Ident::parse_any(&input) {
+        match proc_macro2::Ident::parse_any(&forked_input) {
             Ok(end_tag_name) => end_tag_name == *start_tag_name,
-            Err(_) => return false,
+            Err(_) => false,
         }
     }
 }

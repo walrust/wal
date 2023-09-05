@@ -1,18 +1,17 @@
 use wal_macros::html;
 
-struct TestNonDisplayStruct {
-    field: i32,
-}
+include!("../utils/non_display_struct.rs");
 
 fn main() {
     html! { <div>()</div> };
     html! { <div>{ }</div> };
-    html! { <div> invalid_reference </div> };
-
+    html! { <div> { invalid_reference } </div> };
     html! { <div> String::from("Hello world!") </div> };
     let val = "Hello world!";
     html! { <div> val </div> };
-    let t = TestNonDisplayStruct { field: 15 };
+    let t = NonDisplayStruct;
     html! { <div> { t } </div> };
-    html! { <div> { TestNonDisplayStruct { field: 15 } } </div> };
+    html! { <div> { NonDisplayStruct } </div> };
+    let node = || NonDisplayStruct;
+    html! { <div> { node() } </div> };
 }
