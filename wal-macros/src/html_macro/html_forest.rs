@@ -1,5 +1,7 @@
-use super::html_tree::HtmlTree;
+use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
+
+use super::html_tree::HtmlTree;
 
 pub struct HtmlForest(Vec<HtmlTree>);
 
@@ -12,5 +14,18 @@ impl Parse for HtmlForest {
         }
 
         Ok(HtmlForest(html_forest))
+    }
+}
+
+impl ToTokens for HtmlForest {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self.0.as_slice() {
+            [single_tree] => single_tree.to_tokens(tokens),
+            trees => tokens.extend(quote! {
+                ::wal_vdom::virtual_dom::VNode::List {
+                    vlist: ::wal_vdom::virtual_dom::VList::new(vec![#(#trees),*])
+                }
+            }),
+        }
     }
 }

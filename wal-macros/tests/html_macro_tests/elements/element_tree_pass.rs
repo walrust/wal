@@ -1,7 +1,11 @@
+use std::collections::HashMap;
 use wal_macros::html;
+use wal_vdom::virtual_dom::{VElement, VNode};
+
+include!("../utils/new_element_str.rs");
 
 fn main() {
-    html! {
+    let html = html! {
         <div>
             <div>
                 <input/>
@@ -10,4 +14,32 @@ fn main() {
             <div/>
         </div>
     };
+    assert_eq!(
+        html,
+        VNode::Element {
+            velement: new_velement_str(
+                "div",
+                HashMap::new(),
+                vec![
+                    VNode::Element {
+                        velement: new_velement_str(
+                            "div",
+                            HashMap::new(),
+                            vec![
+                                VNode::Element {
+                                    velement: new_velement_str("input", HashMap::new(), Vec::new()),
+                                },
+                                VNode::Element {
+                                    velement: new_velement_str("div", HashMap::new(), Vec::new()),
+                                },
+                            ],
+                        ),
+                    },
+                    VNode::Element {
+                        velement: new_velement_str("div", HashMap::new(), Vec::new()),
+                    },
+                ],
+            ),
+        }
+    )
 }

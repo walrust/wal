@@ -1,4 +1,4 @@
-use std::hash::Hash;
+use quote::ToTokens;
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
@@ -23,7 +23,15 @@ impl Parse for HtmlAttribute {
                 return Err(input.error("Expected a literal or an expression block"));
             }
 
-            HtmlAttributeValue::ExpressionBlock(expr_block.unwrap())
+            let expr_block = expr_block.unwrap();
+            if expr_block.block.stmts.is_empty() {
+                return Err(syn::Error::new_spanned(
+                    &expr_block,
+                    "Expected a non-empty expression block",
+                ));
+            }
+
+            HtmlAttributeValue::ExpressionBlock(expr_block)
         };
 
         Ok(HtmlAttribute { ident, value })
@@ -36,22 +44,16 @@ impl HtmlAttribute {
     }
 }
 
-// We want to guarantee uniqueness of attributes. Attributes are considered the same if their idents are the same.
-impl PartialEq for HtmlAttribute {
-    fn eq(&self, other: &Self) -> bool {
-        self.ident == other.ident
-    }
-}
-
-impl Eq for HtmlAttribute {}
-
-impl Hash for HtmlAttribute {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.ident.hash(state);
-    }
-}
-
 pub enum HtmlAttributeValue {
     Literal(syn::Lit),
     ExpressionBlock(syn::ExprBlock),
+}
+
+impl ToTokens for HtmlAttributeValue {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        match self {
+            HtmlAttributeValue::Literal(lit) => lit.to_tokens(tokens),
+            HtmlAttributeValue::ExpressionBlock(expr_block) => expr_block.to_tokens(tokens),
+        }
+    }
 }
