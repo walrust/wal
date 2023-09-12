@@ -57,15 +57,16 @@ fn start() {
 
     let mut count = 0;
     let root = document().get_element_by_id("app").unwrap();
-    let mut curr = create_elem(count);
-    curr.patch(None, &root);
-    let mut curr = Some(curr);
-    web_sys::console::log_1(&format!("{:#?}", curr).into());
+    let mut last = create_elem(count);
+    last.patch(None, &root);
+    let mut last = Some(last);
+    web_sys::console::log_1(&format!("{:#?}", last).into());
+
     let int = Interval::new(1000, move || {
         count += 1;
-        let mut now = create_elem(count);
-        now.patch(curr.take(), &root);
-        curr = Some(now);
+        let mut curr = create_elem(count);
+        curr.patch(last.take(), &root);
+        last = Some(curr);
     });
     int.forget();
 }
