@@ -1,22 +1,18 @@
 use wal_macros::html;
+use wal_vdom::virtual_dom::{VNode, VText};
 
 fn main() {
-    html! {
-        if true {}
-        else if let std::option::Option::Some(_value) = std::option::Option::Some("hello") {}
+    let html = html! {
+        if false { "hello1" }
+        else if let Some(..) = None::<i32> { "hello2" }
+        else if 1 == 1 && 1 != 1 { "hello3" }
+        else if let Some(val) = Some("hello4") { val }
+        else { "hello5" }
     };
-    html! {
-        if true {}
-        else if let std::option::Option::Some(_value) = std::option::Option::Some("hello") {}
-        else {}
-    };
-    html! {
-        if let std::option::Option::Some(_value) = std::option::Option::Some("hello") {}
-        else if true {}
-    };
-    html! {
-        if let std::option::Option::Some(_value) = std::option::Option::Some("hello") {}
-        else if true {}
-        else {}
-    };
+    assert_eq!(
+        html,
+        VNode::Text {
+            vtext: VText::new("hello4")
+        }
+    );
 }

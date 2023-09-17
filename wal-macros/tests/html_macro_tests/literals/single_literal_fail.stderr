@@ -1,0 +1,5 @@
+error: Byte string literals are not supported
+ --> tests/html_macro_tests/literals/single_literal_fail.rs:4:13
+  |
+4 |     html! { b"val" };
+  |             ^^^^^^

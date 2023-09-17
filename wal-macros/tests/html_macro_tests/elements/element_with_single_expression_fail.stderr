@@ -1,0 +1,86 @@
+error: Invalid syntax encountered
+ --> tests/html_macro_tests/elements/element_with_single_expression_fail.rs:6:18
+  |
+6 |     html! { <div>()</div> };
+  |                  ^
+
+error: Expected expressions within braces, found an empty block
+ --> tests/html_macro_tests/elements/element_with_single_expression_fail.rs:7:18
+  |
+7 |     html! { <div>{ }</div> };
+  |                  ^^^
+
+error: Invalid syntax encountered
+ --> tests/html_macro_tests/elements/element_with_single_expression_fail.rs:9:19
+  |
+9 |     html! { <div> String::from("Hello world!") </div> };
+  |                   ^^^^^^
+
+error: Invalid syntax encountered
+  --> tests/html_macro_tests/elements/element_with_single_expression_fail.rs:11:19
+   |
+11 |     html! { <div> val </div> };
+   |                   ^^^
+
+error[E0425]: cannot find value `invalid_reference` in this scope
+ --> tests/html_macro_tests/elements/element_with_single_expression_fail.rs:8:21
+  |
+8 |     html! { <div> { invalid_reference } </div> };
+  |                     ^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/html_macro_tests/elements/element_with_single_expression_fail.rs:13:19
+   |
+13 |     html! { <div> { t } </div> };
+   |                   ^^-^^
+   |                   | |
+   |                   | this tail expression is of type `NonDisplayStruct`
+   |                   `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the following other types implement trait `From<T>`:
+             <VNode as From<T>>
+             <VNode as From<VElement>>
+             <VNode as From<VList>>
+             <VNode as From<VText>>
+   = note: required for `NonDisplayStruct` to implement `ToString`
+   = note: required for `VNode` to implement `From<NonDisplayStruct>`
+
+error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/html_macro_tests/elements/element_with_single_expression_fail.rs:14:19
+   |
+14 |     html! { <div> { NonDisplayStruct } </div> };
+   |                   ^^----------------^^
+   |                   | |
+   |                   | this tail expression is of type `NonDisplayStruct`
+   |                   `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the following other types implement trait `From<T>`:
+             <VNode as From<T>>
+             <VNode as From<VElement>>
+             <VNode as From<VList>>
+             <VNode as From<VText>>
+   = note: required for `NonDisplayStruct` to implement `ToString`
+   = note: required for `VNode` to implement `From<NonDisplayStruct>`
+
+error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/html_macro_tests/elements/element_with_single_expression_fail.rs:16:19
+   |
+16 |     html! { <div> { node() } </div> };
+   |                   ^^------^^
+   |                   | |
+   |                   | this tail expression is of type `NonDisplayStruct`
+   |                   `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the following other types implement trait `From<T>`:
+             <VNode as From<T>>
+             <VNode as From<VElement>>
+             <VNode as From<VList>>
+             <VNode as From<VText>>
+   = note: required for `NonDisplayStruct` to implement `ToString`
+   = note: required for `VNode` to implement `From<NonDisplayStruct>`

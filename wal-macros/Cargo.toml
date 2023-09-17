@@ -12,6 +12,7 @@ path = "tests/tests.rs"
 
 [dev-dependencies]
 trybuild = { version = "1.0", features = ["diff"] }
+wal-vdom = { path = "../wal-vdom" }
 
 [dependencies]
 proc-macro2 = "1.0"

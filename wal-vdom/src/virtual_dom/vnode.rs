@@ -2,20 +2,13 @@ use gloo::{console::log, utils::document};
 use serde::Serialize;
 use web_sys::{Element, Node, Text};
 
-use super::{VElement, VText};
+use super::{VElement, VList, VText};
 
-#[derive(Debug, Serialize)]
+#[derive(Serialize, PartialEq, Debug)]
 pub enum VNode {
-    Element {
-        #[serde(skip_serializing)]
-        concrete: Option<Element>,
-        virt: VElement,
-    },
-    Text {
-        #[serde(skip_serializing)]
-        concrete: Option<Text>,
-        virt: VText,
-    },
+    Element { velement: VElement, concrete: Option<Element> },
+    Text { vtext: VText, concrete: Option<Text> },
+    List { vlist: VList },
 }
 
 impl VNode {
@@ -23,12 +16,13 @@ impl VNode {
         match self {
             VNode::Element {
                 ref mut concrete,
-                virt,
+                velement,
             } => VNode::patch_element(concrete, virt, last, ancestor),
             VNode::Text {
                 ref mut concrete,
-                virt,
+                vtext,
             } => VNode::patch_text(concrete, virt, last, ancestor),
+            VNode::List { .. } => unimplemented!(),
         };
     }
 
@@ -56,7 +50,7 @@ impl VNode {
             }
 
             // Just copy
-            Some(VNode::Element { concrete: Some(el), virt, }) => {
+            Some(VNode::Element { concrete: Some(el), velement, }) => {
                 log!("\tCopying existing node");
                 *concrete = Some(el);
                 old_virt = Some(virt);
@@ -73,6 +67,8 @@ impl VNode {
                     .expect("Couldnt replace child with a new node");
                 *concrete = Some(new_el);
             }
+
+            Some(VNode::List { .. }) => unimplemented!(),
         };
 
         // Render over concrete new element
@@ -90,8 +86,8 @@ impl VNode {
         let mut old_virt: Option<VText> = None;
         match last {
             // First creating the node
-            Some(VNode::Text { concrete: None, virt: _, })
-            | Some(VNode::Element { concrete: None, virt: _, })
+            Some(VNode::Text { concrete: None, vtext: _, })
+            | Some(VNode::Element { concrete: None, velement: _, })
             | None => {
                 let new_el = document().create_text_node(&virt.text);
                 ancestor
@@ -101,7 +97,7 @@ impl VNode {
             }
 
             // Just copy reference
-            Some(VNode::Text { concrete: Some(text), virt, }) => {
+            Some(VNode::Text { concrete: Some(text), vtext, }) => {
                 old_virt = Some(virt);
                 *concrete = Some(text);
             }
@@ -114,6 +110,8 @@ impl VNode {
                     .expect("Couldnt append child");
                 *concrete = Some(new_el);
             }
+
+            Some(VNode::List { .. }) => unimplemented!(),
         };
 
         // Render over concrete element
@@ -154,6 +152,7 @@ impl VNode {
                     if let Some(node) = match node {
                         VNode::Element { concrete, .. } => concrete.map(Node::from),
                         VNode::Text { concrete, .. } => concrete.map(Node::from),
+                        VNode::List { .. } => unimplemented!(),
                     } {
                         target.remove_child(&node).expect("Couldnt remove child");
                     }
@@ -167,6 +166,41 @@ impl VNode {
                     panic!("Impossible redundant loop");
                 }
             }
+        }
+    }
+}
+
+impl From<VElement> for VNode {
+    fn from(velement: VElement) -> Self {
+        Self::Element { velement, concrete: None }
+    }
+}
+
+impl From<VText> for VNode {
+    fn from(vtext: VText) -> Self {
+        Self::Text { vtext, concrete: None }
+    }
+}
+
+impl From<VList> for VNode {
+    fn from(vlist: VList) -> Self {
+        Self::List { vlist }
+    }
+}
+
+impl<T: ToString> From<T> for VNode {
+    fn from(t: T) -> Self {
+        Self::Text {
+            vtext: VText::new(t),
+            concrete: None,
+        }
+    }
+}
+
+impl<T: Into<VNode>> FromIterator<T> for VNode {
+    fn from_iter<U: IntoIterator<Item = T>>(iter: U) -> Self {
+        Self::List {
+            vlist: VList::new(iter.into_iter().map(|t| t.into()).collect()),
         }
     }
 }
