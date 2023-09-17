@@ -28,12 +28,8 @@ fn create_elem(count: i32) -> VNode {
         ]
         .into(),
         children: vec![
-            VNode::Text {
-                virt: VText::new(count.to_string()),
-                concrete: None,
-            },
-            VNode::Element {
-                virt: VElement {
+                VText::new(count.to_string()).into(),
+                VElement {                    
                     tag_name: "img".to_string(),
                     attr: [(
                         "src".to_string(),
@@ -41,14 +37,12 @@ fn create_elem(count: i32) -> VNode {
                     )]
                     .into(),
                     children: vec![],
-                },
-                concrete: None,
-            },
+                }.into(),
         ],
     };
     log(&velement);
 
-    VNode::Element { virt: velement, concrete: None }
+    VNode::Element { velement, concrete: None }
 }
 
 #[wasm_bindgen(start)]

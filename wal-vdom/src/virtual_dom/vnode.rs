@@ -6,8 +6,16 @@ use super::{VElement, VList, VText};
 
 #[derive(Serialize, PartialEq, Debug)]
 pub enum VNode {
-    Element { velement: VElement, concrete: Option<Element> },
-    Text { vtext: VText, concrete: Option<Text> },
+    Element { 
+        velement: VElement, 
+        #[serde(skip_serializing)]
+        concrete: Option<Element> 
+    },
+    Text { 
+        vtext: VText, 
+        #[serde(skip_serializing)]
+        concrete: Option<Text> 
+    },
     List { vlist: VList },
 }
 
@@ -17,18 +25,18 @@ impl VNode {
             VNode::Element {
                 ref mut concrete,
                 velement,
-            } => VNode::patch_element(concrete, virt, last, ancestor),
+            } => VNode::patch_element(concrete, velement, last, ancestor),
             VNode::Text {
                 ref mut concrete,
                 vtext,
-            } => VNode::patch_text(concrete, virt, last, ancestor),
+            } => VNode::patch_text(concrete, vtext, last, ancestor),
             VNode::List { .. } => unimplemented!(),
         };
     }
 
     fn patch_element(
         concrete: &mut Option<Element>,
-        virt: &mut VElement,
+        velement: &mut VElement,
         last: Option<VNode>,
         ancestor: &Node,
     ) {
@@ -41,7 +49,7 @@ impl VNode {
             | None => {
                 log!("\tCreating the node from the bottom");
                 let new_el = document()
-                    .create_element(&virt.tag_name)
+                    .create_element(&velement.tag_name)
                     .expect("Couldnt create new element");
                 ancestor
                     .append_child(&new_el)
@@ -53,14 +61,14 @@ impl VNode {
             Some(VNode::Element { concrete: Some(el), velement, }) => {
                 log!("\tCopying existing node");
                 *concrete = Some(el);
-                old_virt = Some(virt);
+                old_virt = Some(velement);
             }
 
             // Swap nodes
             Some(VNode::Text { concrete: Some(text), .. }) => {
                 log!("\tSwaping existing node");
                 let new_el = document()
-                    .create_element(&virt.tag_name)
+                    .create_element(&velement.tag_name)
                     .expect("Couldnt create new element");
                 ancestor
                     .replace_child(&text, &new_el)
@@ -73,13 +81,13 @@ impl VNode {
 
         // Render over concrete new element
         let target = concrete.as_mut().expect("It shouldnt be none");
-        virt.render(target, old_virt.as_ref());
-        VNode::handle_children(virt, old_virt, target);
+        velement.render(target, old_virt.as_ref());
+        VNode::handle_children(velement, old_virt, target);
     }
 
     fn patch_text(
         concrete: &mut Option<Text>,
-        virt: &mut VText,
+        vtext: &mut VText,
         last: Option<VNode>,
         ancestor: &Node,
     ) {
@@ -89,7 +97,7 @@ impl VNode {
             Some(VNode::Text { concrete: None, vtext: _, })
             | Some(VNode::Element { concrete: None, velement: _, })
             | None => {
-                let new_el = document().create_text_node(&virt.text);
+                let new_el = document().create_text_node(&vtext.text);
                 ancestor
                     .append_child(&new_el)
                     .expect("Couldnt append child");
@@ -98,13 +106,13 @@ impl VNode {
 
             // Just copy reference
             Some(VNode::Text { concrete: Some(text), vtext, }) => {
-                old_virt = Some(virt);
+                old_virt = Some(vtext);
                 *concrete = Some(text);
             }
 
             // Replace node
             Some(VNode::Element { concrete: Some(el), .. }) => {
-                let new_el = document().create_text_node(&virt.text);
+                let new_el = document().create_text_node(&vtext.text);
                 ancestor
                     .replace_child(&el, &new_el)
                     .expect("Couldnt append child");
@@ -119,7 +127,7 @@ impl VNode {
             .as_mut()
             .expect("No concrete dom struct cannot be none");
 
-        virt.render(target, old_virt);
+        vtext.render(target, old_virt);
     }
 
     fn handle_children(
