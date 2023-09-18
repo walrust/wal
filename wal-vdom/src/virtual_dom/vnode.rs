@@ -2,7 +2,7 @@ use gloo::{console::log, utils::document};
 use serde::Serialize;
 use web_sys::{Element, Node, Text};
 
-use super::{VElement, VList, VText};
+use super::{VElement, VList, VText, vchild::VChild};
 
 #[derive(Serialize, PartialEq, Debug)]
 pub enum VNode {
@@ -17,7 +17,10 @@ pub enum VNode {
         concrete: Option<Text> 
     },
     List { vlist: VList },
+    //Child{ vchild: VChild },
 }
+
+
 
 impl VNode {
     pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {

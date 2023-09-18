@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "wal",
     "wal-macros",
     "wal-vdom",
     "wal-component",

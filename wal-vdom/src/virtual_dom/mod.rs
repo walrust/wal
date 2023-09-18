@@ -2,6 +2,7 @@ pub mod velement;
 pub mod vlist;
 pub mod vnode;
 pub mod vtext;
+pub mod vchild;
 
 use gloo::console::__macro::JsValue;
 use web_sys::{Element, Node};

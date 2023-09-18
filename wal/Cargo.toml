@@ -1,14 +1,12 @@
 [package]
-name = "wal-component"
+name = "wal"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wal-vdom = { path = "../wal-vdom" }
-wal-macros = {path = "../wal-macros" }
-gloo = { version = "0.10.0", features = ["utils"] }
+wal-component = {path = "../wal-component"}
 
 [dependencies.web-sys]
 version = "0.3.64"
