@@ -1,3 +1,5 @@
+use std::{rc::Rc, cell::RefCell};
+
 use gloo::{utils::document, timers::callback::Interval};
 use wal_vdom::virtual_dom::{VNode, VElement, VText, mount};
 use wasm_bindgen::prelude::*;
@@ -26,11 +28,8 @@ fn create_elem(count: i32) -> VNode {
         ]
         .into(),
         children: vec![
-            VNode::Text {
-                vtext: VText::new(count.to_string()),
-            },
-            VNode::Element {
-                velement: VElement {
+                VText::new(count.to_string()).into(),
+                VElement {                    
                     tag_name: "img".to_string(),
                     attr: [(
                         "src".to_string(),
@@ -38,13 +37,12 @@ fn create_elem(count: i32) -> VNode {
                     )]
                     .into(),
                     children: vec![],
-                },
-            },
+                }.into(),
         ],
     };
     log(&velement);
 
-    VNode::Element { velement }
+    VNode::Element { velement, concrete: None }
 }
 
 #[wasm_bindgen(start)]
@@ -52,39 +50,17 @@ fn start() {
     web_sys::console::log_1(&"WALRUST TIME".into());
 
     let mut count = 0;
-    let mut current = document().get_element_by_id("app").unwrap();
+    let root = document().get_element_by_id("app").unwrap();
+    let mut last = create_elem(count);
+    last.patch(None, &root);
+    let mut last = Some(last);
+    web_sys::console::log_1(&format!("{:#?}", last).into());
 
-    let mut el = create_elem(count);
-    let mut app = match el.render() {
-        Ok(val) => val,
-        Err(err) => {
-            web_sys::console::log_1(&err);
-            return;
-        }
-    };
-    match mount(&app, &current) {
-        Ok(_) => (),
-        Err(_) => todo!(),
-    };
-    current = Element::from(JsValue::from(app.clone()));
     let int = Interval::new(1000, move || {
         count += 1;
-        el = create_elem(count);
-        app = match el.render() {
-            Ok(val) => val,
-            Err(err) => {
-                web_sys::console::log_1(&err);
-                return;
-            }
-        };
-        match mount(&app, &current) {
-            Ok(_) => (),
-            Err(err) => {
-                web_sys::console::log_1(&err);
-                return;
-            }
-        };
-        current = Element::from(JsValue::from(app.clone()));
+        let mut curr = create_elem(count);
+        curr.patch(last.take(), &root);
+        last = Some(curr);
     });
     int.forget();
 }
