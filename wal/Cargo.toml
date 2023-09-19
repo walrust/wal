@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 wal-component = {path = "../wal-component"}
+wal-vdom = {path = "../wal-vdom"}
 
 [dependencies.web-sys]
 version = "0.3.64"

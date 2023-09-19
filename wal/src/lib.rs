@@ -10,6 +10,7 @@ pub fn start(root: &impl Component) {
 #[cfg(test)]
 mod tests {
     use wal_component::{Component, Html};
+    use wal_vdom::virtual_dom::{VText, VNode};
 
     use crate::start;
 
@@ -26,10 +27,8 @@ mod tests {
                 todo!()
             }
 
-            fn view(&self) -> Html {
-                html! {
-                    <MyComponent dupsko=Dupa::Łysa, mama:NieTwoja::ahah, koń:"zwalony" />
-                }
+            fn view(&self) -> VNode {
+                todo!()
             }
 
             fn update(&mut self, message: Self::Message) -> bool {
