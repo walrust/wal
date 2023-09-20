@@ -48,7 +48,7 @@ fn start() {
     web_sys::console::log_1(&"WALRUST TIME".into());
 
     let mut count = 0;
-    let root = document().get_element_by_id("app").unwrap();
+    let root = document().body().unwrap();
     let mut last = create_elem(count);
     last.patch(None, &root);
     let mut last = Some(last);
