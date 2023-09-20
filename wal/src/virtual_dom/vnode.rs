@@ -14,7 +14,7 @@ pub enum VNode {
         concrete: Option<Text> 
     },
     List { vlist: VList },
-    //Child{ vchild: VChild },
+    Child{ vchild: VChild },
 }
 
 
@@ -30,7 +30,8 @@ impl VNode {
                 ref mut concrete,
                 vtext,
             } => VNode::patch_text(concrete, vtext, last, ancestor),
-            VNode::List { .. } => unimplemented!(),
+            VNode::List { .. } => todo!(),
+            VNode::Child { .. } => todo!(),
         };
     }
 
@@ -76,7 +77,8 @@ impl VNode {
                 *concrete = Some(new_el);
             }
 
-            Some(VNode::List { .. }) => unimplemented!(),
+            Some(VNode::List { .. }) => todo!(),
+            Some(VNode::Child { .. }) => todo!(),
         };
 
         // Render over concrete new element
@@ -119,7 +121,8 @@ impl VNode {
                 *concrete = Some(new_el);
             }
 
-            Some(VNode::List { .. }) => unimplemented!(),
+            Some(VNode::List { .. }) => todo!(),
+            Some(VNode::Child { .. }) => todo!(),
         };
 
         // Render over concrete element
@@ -160,7 +163,8 @@ impl VNode {
                     if let Some(node) = match node {
                         VNode::Element { concrete, .. } => concrete.map(Node::from),
                         VNode::Text { concrete, .. } => concrete.map(Node::from),
-                        VNode::List { .. } => unimplemented!(),
+                        VNode::List { .. } => todo!(),
+                        VNode::Child { .. } => todo!(),
                     } {
                         target.remove_child(&node).expect("Couldnt remove child");
                     }

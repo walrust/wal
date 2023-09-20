@@ -1,4 +1,22 @@
-use wal_component::{Component, App};
+
+pub struct App<Root>
+    where Root: Component 
+{
+    #[allow(dead_code)]
+    root: Root,
+    vdom: VNode,
+    dom: Node,
+}
+
+impl<Root> App<Root>
+    where Root: Component
+{
+    pub fn new(root: Root) -> App<Root> {
+        let vdom = root.view();
+        //App { root }
+        todo!()
+    } 
+}
 
 pub fn start(root: &impl Component) {
    //let app = App {
@@ -8,33 +26,4 @@ pub fn start(root: &impl Component) {
 
 #[cfg(test)]
 mod tests {
-    use wal_component::{Component, Html};
-    use wal_vdom::virtual_dom::{VText, VNode};
-
-    use crate::start;
-
-    #[test]
-    fn test_start() {
-        struct Comp {
-
-        }
-        impl Component for Comp {
-            type Message = ();
-            type Properties = ();
-
-            fn new(prop: Self::Properties) -> Self {
-                todo!()
-            }
-
-            fn view(&self) -> VNode {
-                todo!()
-            }
-
-            fn update(&mut self, message: Self::Message) -> bool {
-                todo!()
-            }
-        }
-        let c = Comp::new(());
-        start(&c);
-    }
 }

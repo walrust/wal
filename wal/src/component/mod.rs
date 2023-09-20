@@ -1,31 +1,14 @@
+pub mod callback;
+pub mod any_props;
+
+use std::hash::Hash;
 use crate::virtual_dom::VNode;
-use web_sys::Node;
+use callback::Callback;
 
-
-pub struct Callback<IN> {
-    #[allow(dead_code)]
-    wrapper: Box<dyn Fn(IN)>,
-}
-
-impl<IN> Callback<IN> {
-    fn new<F>(wrapper: F) -> Self
-    where
-        F: Fn(IN) + 'static,
-    {
-        Callback {
-            wrapper: Box::new(wrapper),
-        }
-    }
-
-    #[allow(dead_code)]
-    fn emit(&self, input: IN) {
-        (self.wrapper)(input);
-    }
-}
 
 pub trait Component {
    type Message;
-   type Properties: PartialEq;
+   type Properties: Hash;
 
     fn new(props: Self::Properties) -> Self;
     fn view(&self) -> VNode;
@@ -42,26 +25,6 @@ pub trait Component {
     }
 }
 
-pub type Html = VNode;
-
-pub struct App<Root>
-    where Root: Component 
-{
-    #[allow(dead_code)]
-    root: Root,
-    vdom: VNode,
-    dom: Node,
-}
-
-impl<Root> App<Root>
-    where Root: Component
-{
-    pub fn new(root: Root) -> App<Root> {
-        let vdom = root.view();
-        //App { root }
-        todo!()
-    } 
-}
 
 #[cfg(test)]
 mod tests {

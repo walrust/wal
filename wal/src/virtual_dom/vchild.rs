@@ -1,7 +1,23 @@
-type PropertiesHash = u64;
+use std::fmt;
+use crate::component::any_props::AnyProps;
+use super::VNode;
 
-#[derive(Debug, PartialEq)]
+
+type GeneratorParameters = AnyProps;
 pub struct VChild
 {
-    hash: PropertiesHash,
+    props: AnyProps,
+    _generator: Box<dyn FnOnce(GeneratorParameters) -> VNode + 'static>,
+}
+
+impl fmt::Debug for VChild {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("VChild").field("props", &self.props).finish()
+    }
+}
+
+impl PartialEq for VChild {
+    fn eq(&self, _other: &Self) -> bool {
+        todo!()
+    }
 }
