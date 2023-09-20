@@ -111,6 +111,8 @@ mod tests {
         let props1 = any_props1.into::<MyComp>();
         let props2 = any_props2.into::<MyComp>();
         assert_ne!(props1, props2);
+        //html!{ <MyComp props= { MyComp::Properties{ x = 1, y = 2 } }/> }
+        //let x = Props { };
     }
 
     struct MyComp2;
