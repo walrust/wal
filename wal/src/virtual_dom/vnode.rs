@@ -1,23 +1,20 @@
 use gloo::{console::log, utils::document};
-use serde::Serialize;
 use web_sys::{Element, Node, Text};
 
 use super::{VElement, VList, VText, vchild::VChild};
 
-#[derive(Serialize, PartialEq, Debug)]
+#[derive(PartialEq, Debug)]
 pub enum VNode {
     Element { 
         velement: VElement, 
-        #[serde(skip_serializing)]
         concrete: Option<Element> 
     },
     Text { 
         vtext: VText, 
-        #[serde(skip_serializing)]
         concrete: Option<Text> 
     },
     List { vlist: VList },
-    //Child{ vchild: VChild },
+    Child{ vchild: VChild },
 }
 
 
@@ -33,7 +30,8 @@ impl VNode {
                 ref mut concrete,
                 vtext,
             } => VNode::patch_text(concrete, vtext, last, ancestor),
-            VNode::List { .. } => unimplemented!(),
+            VNode::List { .. } => todo!(),
+            VNode::Child { .. } => todo!(),
         };
     }
 
@@ -79,7 +77,8 @@ impl VNode {
                 *concrete = Some(new_el);
             }
 
-            Some(VNode::List { .. }) => unimplemented!(),
+            Some(VNode::List { .. }) => todo!(),
+            Some(VNode::Child { .. }) => todo!(),
         };
 
         // Render over concrete new element
@@ -122,7 +121,8 @@ impl VNode {
                 *concrete = Some(new_el);
             }
 
-            Some(VNode::List { .. }) => unimplemented!(),
+            Some(VNode::List { .. }) => todo!(),
+            Some(VNode::Child { .. }) => todo!(),
         };
 
         // Render over concrete element
@@ -163,7 +163,8 @@ impl VNode {
                     if let Some(node) = match node {
                         VNode::Element { concrete, .. } => concrete.map(Node::from),
                         VNode::Text { concrete, .. } => concrete.map(Node::from),
-                        VNode::List { .. } => unimplemented!(),
+                        VNode::List { .. } => todo!(),
+                        VNode::Child { .. } => todo!(),
                     } {
                         target.remove_child(&node).expect("Couldnt remove child");
                     }

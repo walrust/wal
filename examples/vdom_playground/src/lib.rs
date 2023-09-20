@@ -1,18 +1,16 @@
-use std::{rc::Rc, cell::RefCell};
-
 use gloo::{utils::document, timers::callback::Interval};
-use wal_vdom::virtual_dom::{VNode, VElement, VText, mount};
+use wal::virtual_dom::{VNode, VElement, VText};
 use wasm_bindgen::prelude::*;
-use web_sys::{Element, Node};
+use web_sys::Node;
 
-fn log<T>(text: &T)
+fn _log<T>(text: &T)
 where
     T: serde::ser::Serialize + ?Sized,
 {
     web_sys::console::log_1(&serde_wasm_bindgen::to_value(text).unwrap());
 }
 
-fn log_node(node: &Node) {
+fn _log_node(node: &Node) {
     web_sys::console::log_1(&JsValue::from(node));
 }
 
@@ -40,7 +38,7 @@ fn create_elem(count: i32) -> VNode {
                 }.into(),
         ],
     };
-    log(&velement);
+    //log_node(&velement);
 
     VNode::Element { velement, concrete: None }
 }
