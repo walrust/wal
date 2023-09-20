@@ -1,8 +1,6 @@
-use serde::Serialize;
-
 type PropertiesHash = u64;
 
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct VChild
 {
     hash: PropertiesHash,

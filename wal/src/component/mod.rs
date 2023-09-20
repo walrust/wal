@@ -1,5 +1,4 @@
-use gloo::utils::document;
-use wal_vdom::virtual_dom::VNode;
+use crate::virtual_dom::VNode;
 use web_sys::Node;
 
 
@@ -67,4 +66,3 @@ impl<Root> App<Root>
 #[cfg(test)]
 mod tests {
 }
-

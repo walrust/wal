@@ -1,8 +1,7 @@
 use gloo::utils::document;
-use serde::Serialize;
 use web_sys::Text;
 
-#[derive(Serialize, PartialEq, Debug)]
+#[derive(PartialEq, Debug)]
 pub struct VText {
     pub text: String,
 }

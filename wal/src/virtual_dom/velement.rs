@@ -1,11 +1,10 @@
 use gloo::{console::log, utils::document};
-use serde::Serialize;
 use std::collections::HashMap;
 use web_sys::Element;
 
 use super::VNode;
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq)]
 pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
