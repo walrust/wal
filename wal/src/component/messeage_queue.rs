@@ -8,7 +8,7 @@ pub struct MessageQueue<C: Component> {
 }
 
 impl<C: Component> MessageQueue<C> {
-    pub fn new(&mut self, component: C) -> Self {
+    pub fn new(component: C) -> Self {
         MessageQueue {
             pending_messeages: VecDeque::new(),
             component,
