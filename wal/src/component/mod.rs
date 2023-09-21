@@ -1,14 +1,14 @@
-pub mod callback;
 pub mod any_props;
+pub mod callback;
+pub mod messeage_queue;
 
-use std::hash::Hash;
 use crate::virtual_dom::VNode;
 use callback::Callback;
-
+use std::hash::Hash;
 
 pub trait Component {
-   type Message;
-   type Properties: Hash;
+    type Message;
+    type Properties: Hash;
 
     fn new(props: Self::Properties) -> Self;
     fn view(&self) -> VNode;
@@ -25,53 +25,57 @@ pub trait Component {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
+    use wal_macros::html;
+
     use crate::virtual_dom::VNode;
 
-    use super::{Component, callback::Callback};
+    use super::{callback::Callback, Component};
     struct MyChild;
     impl Component for MyChild {
-        type Message=();
-        type Properties=MyChildProps;
-        fn new(props: Self::Properties) -> Self { todo!() }
-        fn view(&self) -> VNode { todo!() }
-        fn update(&mut self, message: Self::Message) -> bool { todo!() }
+        type Message = ();
+        type Properties = MyChildProps;
+        fn new(props: Self::Properties) -> Self {
+            todo!()
+        }
+        fn view(&self) -> VNode {
+            todo!()
+        }
+        fn update(&mut self, message: Self::Message) -> bool {
+            todo!()
+        }
     }
 
     #[derive(Hash)]
     struct MyProps;
     #[derive(Hash)]
     struct MyChildProps {
-        onclick: Callback<i64>,
+        onclick1: Callback<i64>,
+        onclick2: Callback<i64>,
     }
 
     enum MyMessage {
         ChangeMyMother(i64),
         ChangeMyFather(i64),
-    }    
+    }
 
     struct MyComponent;
     impl Component for MyComponent {
-        type Message=MyMessage;
-        type Properties=MyProps;
+        type Message = MyMessage;
+        type Properties = MyProps;
         fn new(_props: Self::Properties) -> Self {
             todo!()
         }
 
         fn view(&self) -> VNode {
-            let callback: Callback<_> = 
-            if true {
-                Self::create_callback(MyMessage::ChangeMyMother)
-            } else {
-                Self::create_callback(MyMessage::ChangeMyFather)
-            };
+            let callback1: Callback<_> = Self::create_callback(MyMessage::ChangeMyMother);
+            let callback2: Callback<_> =
+                Self::create_callback(|_x: i64| MyMessage::ChangeMyFather(_x));
 
-            //html! {
-            //    <MyChild props={ MyChildProps { onclick: callback }} />
-            //}
-            
+            html! {
+               <MyChild props={ MyChildProps { onclick1: callback1, onclick2: callback2}} />
+            }
 
             todo!()
         }
