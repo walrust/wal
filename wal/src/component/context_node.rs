@@ -1,33 +1,31 @@
-// use std::path::Component;
-// use super::{messeage_queue::MessageQueue, callback::Callback};
+use super::{
+    callback::Callback,
+    component::{Component, DynamicComponent},
+    messeage_queue::MessageQueue,
+};
 
-// pub struct ContextNode<'a>{
-//     component: Component<'a>,
-//     message_queue: MessageQueue<???>,
-//     children: Vec<ContextNode>,
-//     parent: Option<ContextNode>
-// }
+pub struct ContextNode<'a> {
+    component: Box<dyn DynamicComponent>, //Component<'a>,
+    message_queue: MessageQueue,
+    children: Vec<Box<dyn DynamicComponent>>,
+}
 
-// impl <'a> ContextNode<'a>{
+impl<'a> ContextNode<'a> {
+    pub fn new(component: Component) -> ContextNode<'a> {
+        ContextNode {
+            component,
+            message_queue: MessageQueue::new(component),
+            children: Vec::new(),
+        }
+    }
 
-//     pub fn new(parent: Option<ContextNode>, component: Component, ) -> ContextNode<'a> {
-//         let mut new_node = ContextNode {
-//             component,
-//             message_queue: MessageQueue::new(component),
-//             children: Vec::new(),
-//             parent
-//         };
-
-//         if let Some(p) = parent {
-//             p.children.push_back(new_node);
-//         };
-//         new_node
-//     }
-
-//     pub fn emit_callback(&mut self, callback: Callback<_>) {
-//         if if let Some(p) = self.parent {
-//             p.message_queue.add_messeage(???)
-//         };
-//     }
-
-// }
+    pub fn create_callback<IN, F, C: Component>(&mut self, wrapper: F) -> Callback<IN>
+    where
+        F: Fn(IN) -> C::Message + 'static,
+    {
+        Callback::new(move |data| {
+            let message = wrapper(data);
+            self.message_queue.add_messeage(message);
+        })
+    }
+}

@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use super::Component;
+use super::component::Component;
 
 pub struct MessageQueue<C: Component> {
     pending_messeages: VecDeque<C::Message>,
