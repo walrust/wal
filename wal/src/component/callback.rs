@@ -1,13 +1,5 @@
-use std::hash::{Hash, Hasher};
-
-/// Once created callback for child shouldnt change, the change isnt registered in runtime
 pub struct Callback<IN> {
     wrapper: Box<dyn Fn(IN)>,
-}
-
-impl<IN> Hash for Callback<IN> {
-    fn hash<H: Hasher>(&self, _state: &mut H) {
-    }
 }
 
 impl<IN> Callback<IN> {

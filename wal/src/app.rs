@@ -1,30 +1,22 @@
-use gloo::utils::document;
-use web_sys::Node;
+use crate::component::{component::Component, context_node::ComponentNode};
 
-use crate::{component::component::Component, virtual_dom::VNode};
-
-pub struct App<Root>
-where
-    Root: Component,
-{
-    root: Root,
-    vdom: VNode,
+pub struct App<C: Component> {
+    component_node: ComponentNode<C>,
 }
 
-impl<Root> App<Root>
-where
-    Root: Component,
-{
-    pub fn new(root: Root) -> App<Root> {
-        let mut vdom = root.view(/* context here */);
-        vdom.patch(None, &document().body().unwrap());
-        App { root, vdom }
+impl<C: Component> App<C> {
+    pub fn new(root_component: C) -> Self {
+        let app = Self {
+            component_node: ComponentNode::new(root_component),
+        };
+        todo!("Create context for root to call view function");
+        // let mut vdom = root.view(/* context here */);
+        // vdom.patch(None, &document().body().unwrap());
+        // App { root, vdom }
+        app
     }
 }
 
-pub fn start<C: Component>(root: C) {
-    App::new(root);
+pub fn start<C: Component>(root_component: C) {
+    let app = App::new(root_component);
 }
-
-#[cfg(test)]
-mod tests {}

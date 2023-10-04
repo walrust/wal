@@ -1,9 +1,8 @@
 use super::VNode;
 
-
 #[derive(PartialEq, Debug)]
 pub struct VList {
-    nodes: Vec<VNode>,
+    pub nodes: Vec<VNode>,
 }
 
 impl VList {
