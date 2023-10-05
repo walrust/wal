@@ -19,4 +19,8 @@ impl<C: Component> App<C> {
 
 pub fn start<C: Component>(root_component: C) {
     let app = App::new(root_component);
+
+    // tworzenie doma, kolejek itp
+
+    // main event loop
 }

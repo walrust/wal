@@ -1,7 +1,4 @@
-use crate::component::{
-    any_props::AnyProps,
-    component::AnyComponent,
-};
+use crate::component::{any_props::AnyProps, component::AnyComponent};
 use std::fmt;
 
 // Example implementation of creting VChild
@@ -13,7 +10,6 @@ use std::fmt;
 //         let props = props.into::<C>();
 //         C::new(props)
 //     });
-
 //     VChild { props, generator: _generator }
 // }
 
