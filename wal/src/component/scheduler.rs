@@ -1,19 +1,21 @@
 use once_cell::sync::Lazy;
 use std::{
     any::Any,
+    collections::BinaryHeap,
     sync::{
         mpsc::{Receiver, Sender},
-        Arc, Mutex,
+        Arc, Condvar, Mutex,
     },
     thread::{self, JoinHandle},
 };
 
-use super::component::AnyComponent;
+use super::{component::AnyComponent, context_node::AnyComponentBehavior};
 
 pub static SCHEDULER_INSTANCE: Lazy<Scheduler> = Lazy::new(|| Scheduler::new());
 
 pub struct Scheduler {
     update_queue: UpdateQueue,
+    rerender_queue: RerenderPriorityQueue,
 }
 
 unsafe impl Sync for Scheduler {}
@@ -22,6 +24,7 @@ impl Scheduler {
     fn new() -> Self {
         Self {
             update_queue: UpdateQueue::new(),
+            rerender_queue: RerenderPriorityQueue::new(),
         }
     }
 
@@ -41,6 +44,18 @@ impl Scheduler {
         })
     }
 
+    fn rerender_queue_loop() -> JoinHandle<()> {
+        thread::spawn(move || loop {
+            let rerender_queue_item = SCHEDULER_INSTANCE.rerender_queue.pop();
+            let behavior = AnyComponentBehavior::new(rerender_queue_item.component.clone());
+            let vnode = rerender_queue_item
+                .component
+                .lock()
+                .unwrap()
+                .view(&behavior);
+        })
+    }
+
     pub fn add_update_message(
         component: Arc<Mutex<Box<dyn AnyComponent>>>,
         message: Box<dyn Any + Send>,
@@ -51,10 +66,17 @@ impl Scheduler {
             .send((component, message))
             .expect("Failed to send message to the update queue");
     }
+
+    pub fn add_rerender_message(component: Arc<Mutex<Box<dyn AnyComponent>>>, depth: u32) {
+        SCHEDULER_INSTANCE
+            .rerender_queue
+            .push(RerenderQueueItem { component, depth });
+    }
 }
 
-pub type UpdateQueueSender = Sender<(Arc<Mutex<Box<dyn AnyComponent>>>, Box<dyn Any + Send>)>;
-type UpdateQueueReceiver = Receiver<(Arc<Mutex<Box<dyn AnyComponent>>>, Box<dyn Any + Send>)>;
+type UpdateQueueItem = (Arc<Mutex<Box<dyn AnyComponent>>>, Box<dyn Any + Send>);
+type UpdateQueueSender = Sender<UpdateQueueItem>;
+type UpdateQueueReceiver = Receiver<UpdateQueueItem>;
 
 pub struct UpdateQueue {
     pub sender: UpdateQueueSender,
@@ -67,3 +89,60 @@ impl UpdateQueue {
         Self { sender, receiver }
     }
 }
+
+struct ThreadSafePriorityQueue<T> {
+    queue: Arc<Mutex<BinaryHeap<T>>>,
+    condvar: Condvar,
+}
+
+impl<T: Ord> ThreadSafePriorityQueue<T> {
+    fn new() -> Self {
+        Self {
+            queue: Arc::new(Mutex::new(BinaryHeap::new())),
+            condvar: Condvar::new(),
+        }
+    }
+
+    fn push(&self, item: T) {
+        let mut queue = self.queue.lock().unwrap();
+        queue.push(item);
+        self.condvar.notify_one();
+    }
+
+    fn pop(&self) -> T {
+        let mut queue = self.queue.lock().unwrap();
+        if let Some(item) = queue.pop() {
+            return item;
+        }
+
+        queue = self.condvar.wait(queue).unwrap();
+        queue.pop().unwrap()
+    }
+}
+
+struct RerenderQueueItem {
+    component: Arc<Mutex<Box<dyn AnyComponent>>>,
+    depth: u32,
+}
+
+impl PartialEq for RerenderQueueItem {
+    fn eq(&self, other: &Self) -> bool {
+        self.depth == other.depth
+    }
+}
+
+impl Eq for RerenderQueueItem {}
+
+impl PartialOrd for RerenderQueueItem {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(other.depth.cmp(&self.depth))
+    }
+}
+
+impl Ord for RerenderQueueItem {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        other.depth.cmp(&self.depth)
+    }
+}
+
+type RerenderPriorityQueue = ThreadSafePriorityQueue<RerenderQueueItem>;

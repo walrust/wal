@@ -14,6 +14,7 @@ use super::{
 
 pub struct AnyComponentNode {
     component: Arc<Mutex<Box<dyn AnyComponent>>>,
+    depth: u32,
     vdom: VNode,
     children: Vec<AnyComponentNode>,
     behavior: AnyComponentBehavior,
@@ -27,11 +28,12 @@ impl AnyComponentNode {
         let vdom = component.lock().unwrap().view(&behavior);
         let mut component_node = Self {
             component,
+            depth: 0,
             vdom,
             children: Vec::new(),
             behavior,
         };
-        Self::generate_children(&mut component_node.children, &component_node.vdom);
+        Self::generate_children(&mut component_node.children, &component_node.vdom, 1);
         component_node
     }
 
@@ -39,16 +41,16 @@ impl AnyComponentNode {
         self.component.lock().unwrap().update(message)
     }
 
-    fn generate_children(children: &mut Vec<AnyComponentNode>, vdom: &VNode) {
+    fn generate_children(children: &mut Vec<AnyComponentNode>, vdom: &VNode, current_depth: u32) {
         match vdom {
             VNode::Element { velement } => {
                 for child_vdom in &velement.children {
-                    Self::generate_children(children, child_vdom);
+                    Self::generate_children(children, child_vdom, current_depth);
                 }
             }
             VNode::List { vlist } => {
                 for child_vdom in &vlist.nodes {
-                    Self::generate_children(children, child_vdom);
+                    Self::generate_children(children, child_vdom, current_depth);
                 }
             }
             VNode::Child { vchild } => {
@@ -58,6 +60,7 @@ impl AnyComponentNode {
                 let child_vdom = child_component.lock().unwrap().view(&child_behavior);
                 let mut child_component_node = AnyComponentNode {
                     component: child_component,
+                    depth: current_depth,
                     vdom: child_vdom,
                     children: Vec::new(),
                     behavior: child_behavior,
@@ -65,6 +68,7 @@ impl AnyComponentNode {
                 Self::generate_children(
                     &mut child_component_node.children,
                     &child_component_node.vdom,
+                    current_depth + 1,
                 );
                 children.push(child_component_node);
             }
@@ -78,7 +82,7 @@ pub struct AnyComponentBehavior {
 }
 
 impl AnyComponentBehavior {
-    fn new(component: Arc<Mutex<Box<dyn AnyComponent>>>) -> Self {
+    pub fn new(component: Arc<Mutex<Box<dyn AnyComponent>>>) -> Self {
         Self { component }
     }
 }
