@@ -1,7 +1,4 @@
-use std::{
-    any::Any,
-    cell::RefCell,
-};
+use std::{any::Any, cell::RefCell, rc::Rc};
 
 use super::{
     component::AnyComponent,
@@ -15,13 +12,13 @@ enum SchedulerMessage {
 }
 
 struct UpdateMessage {
-    component: Box<dyn AnyComponent>,
+    component: Rc<Box<dyn AnyComponent>>,
     message: Box<dyn Any>,
-    rerender_observer: RerenderObserver,
+    rerender_observer: Rc<RefCell<RerenderObserver>>,
 }
 
 struct RerenderMessage {
-    component: Box<dyn AnyComponent>,
+    component: Rc<Box<dyn AnyComponent>>,
     depth: u32,
 }
 
@@ -60,7 +57,7 @@ thread_local! {
 
 #[derive(Default)]
 pub struct Scheduler {
-    pub priority_queue: ThreadSafePriorityQueue<SchedulerMessage>,
+    priority_queue: ThreadSafePriorityQueue<SchedulerMessage>,
 }
 
 impl Scheduler {
@@ -84,9 +81,9 @@ impl Scheduler {
     }
 
     pub fn add_update_message(
-        component: Box<dyn AnyComponent>,
+        component: Rc<Box<dyn AnyComponent>>,
         message: Box<dyn Any>,
-        rerender_observer: RerenderObserver,
+        rerender_observer: Rc<RefCell<RerenderObserver>>,
     ) {
         SCHEDULER_INSTANCE.with(|scheduler| {
             scheduler
@@ -101,8 +98,8 @@ impl Scheduler {
     }
 
     pub fn add_rerender_message(
-        component: Box<dyn AnyComponent>,
-        behavior: AnyComponentBehavior,
+        component: Rc<Box<dyn AnyComponent>>,
+        behavior: Rc<AnyComponentBehavior>,
         depth: u32,
     ) {
         SCHEDULER_INSTANCE.with(|scheduler| {

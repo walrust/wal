@@ -1,7 +1,4 @@
-use std::{
-    marker::PhantomData,
-    sync::{Arc, Mutex},
-};
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use crate::virtual_dom::VNode;
 
@@ -12,15 +9,15 @@ use super::{
 };
 
 pub struct AnyComponentNode {
-    data: AnyComponentNodeData,
-    rerender_observer: RerenderObserver,
+    data: Rc<RefCell<AnyComponentNodeData>>,
+    rerender_observer: Rc<RefCell<RerenderObserver>>,
 }
 
 pub struct AnyComponentNodeData {
-    component: Box<dyn AnyComponent>,
+    component: Rc<Box<dyn AnyComponent>>,
     depth: u32,
     to_rerender: bool,
-    behavior: AnyComponentBehavior,
+    behavior: Rc<AnyComponentBehavior>,
     any_component_node_vdom: AnyComponentNodeVDom,
 }
 
@@ -34,8 +31,8 @@ impl AnyComponentNodeData {
         if !self.to_rerender {
             self.to_rerender = true;
             Scheduler::add_rerender_message(
-                self.component,
-                self.behavior,
+                self.component.clone(),
+                self.behavior.clone(),
                 self.depth,
             );
         }
@@ -50,8 +47,12 @@ impl AnyComponentNode {
     }
 
     fn new_any(component: Box<dyn AnyComponent>, depth: u32) -> Self {
-        let rerender_observer = RerenderObserver::new();
-        let behavior = AnyComponentBehavior::new(component, rerender_observer);
+        let component = Rc::new(component);
+        let rerender_observer = Rc::new(RefCell::new(RerenderObserver::new()));
+        let behavior = Rc::new(AnyComponentBehavior::new(
+            component.clone(),
+            rerender_observer.clone(),
+        ));
         let vdom = component.view(&behavior);
         let mut children = Vec::new();
         Self::generate_children(&mut children, &vdom, depth + 1);
@@ -63,16 +64,13 @@ impl AnyComponentNode {
             behavior,
             any_component_node_vdom,
         };
-        rerender_observer.set_observer(any_component_node_data);
+        let any_component_node_data = Rc::new(RefCell::new(any_component_node_data));
+        rerender_observer.borrow_mut().set_observer(any_component_node_data.clone());
         Self {
             data: any_component_node_data,
             rerender_observer,
         }
     }
-
-    // pub fn update(&mut self, message: Box<dyn Any>) -> bool {
-    //     self.component.lock().unwrap().update(message)
-    // }
 
     fn generate_children(children: &mut Vec<AnyComponentNode>, vdom: &VNode, current_depth: u32) {
         match vdom {
@@ -96,14 +94,14 @@ impl AnyComponentNode {
 }
 
 pub struct AnyComponentBehavior {
-    component: Box<dyn AnyComponent>,
-    rerender_observer: RerenderObserver,
+    component: Rc<Box<dyn AnyComponent>>,
+    rerender_observer: Rc<RefCell<RerenderObserver>>,
 }
 
 impl AnyComponentBehavior {
     pub fn new(
-        component: Box<dyn AnyComponent>,
-        rerender_observer: RerenderObserver,
+        component: Rc<Box<dyn AnyComponent>>,
+        rerender_observer: Rc<RefCell<RerenderObserver>>,
     ) -> Self {
         Self {
             component,
@@ -113,28 +111,25 @@ impl AnyComponentBehavior {
 }
 
 pub struct ComponentBehavior<C: Component> {
-    component: Box<dyn AnyComponent>,
-    rerender_observer: RerenderObserver,
+    component: Rc<Box<dyn AnyComponent>>,
+    rerender_observer: Rc<RefCell<RerenderObserver>>,
     _marker: PhantomData<C>,
 }
 
 impl<C: Component> ComponentBehavior<C> {
-    // pub fn new(component: Arc<Mutex<Box<dyn AnyComponent>>>) -> Self {
-    //     Self {
-    //         component,
-    //         _marker: PhantomData,
-    //     }
-    // }
-
     pub fn create_callback<IN, F>(&mut self, wrapper: F) -> Callback<IN>
     where
         F: Fn(IN) -> C::Message + 'static,
     {
-        let component = self.component;
-        let rerender_observer = self.rerender_observer;
+        let component = self.component.clone();
+        let rerender_observer = self.rerender_observer.clone();
         Callback::new(move |data| {
             let message = wrapper(data);
-            Scheduler::add_update_message(component, Box::new(message), rerender_observer);
+            Scheduler::add_update_message(
+                component.clone(),
+                Box::new(message),
+                rerender_observer.clone(),
+            );
         })
     }
 }
@@ -142,8 +137,8 @@ impl<C: Component> ComponentBehavior<C> {
 impl<C: Component> From<&AnyComponentBehavior> for ComponentBehavior<C> {
     fn from(value: &AnyComponentBehavior) -> Self {
         Self {
-            component: value.component,
-            rerender_observer: value.rerender_observer,
+            component: value.component.clone(),
+            rerender_observer: value.rerender_observer.clone(),
             _marker: PhantomData,
         }
     }
@@ -154,14 +149,13 @@ pub trait Observer {
 }
 
 pub struct RerenderObserver {
-    component_node_data: Arc<Mutex<Option<AnyComponentNodeData>>>,
+    component_node_data: Option<Rc<RefCell<AnyComponentNodeData>>>,
 }
 
 impl Observer for RerenderObserver {
     fn notify(&self) {
-        let any_component_node_data = self.component_node_data.lock().unwrap();
-        if let Some(any_component_node_data) = &*any_component_node_data {
-            any_component_node_data.rerender_notify();
+        if let Some(any_component_node_data) = &self.component_node_data {
+            any_component_node_data.borrow_mut().rerender_notify();
         } else {
             panic!("RerenderObserver is not attached to a component node");
         }
@@ -171,12 +165,11 @@ impl Observer for RerenderObserver {
 impl RerenderObserver {
     fn new() -> Self {
         Self {
-            component_node_data: Arc::new(Mutex::new(None)),
+            component_node_data: None,
         }
     }
 
-    fn set_observer(&self, component_node_data: AnyComponentNodeData) {
-        let mut any_component_node_data = self.component_node_data.lock().unwrap();
-        *any_component_node_data = Some(component_node_data);
+    fn set_observer(&mut self, component_node_data: Rc<RefCell<AnyComponentNodeData>>) {
+        self.component_node_data = Some(component_node_data);
     }
 }
