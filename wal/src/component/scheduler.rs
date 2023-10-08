@@ -8,7 +8,11 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use super::{component::AnyComponent, context_node::AnyComponentBehavior, thread_safe_collections::ThreadSafePriorityQueue};
+use super::{
+    component::AnyComponent,
+    context_node::{AnyComponentBehavior, RerenderObserver, Observer},
+    thread_safe_collections::ThreadSafePriorityQueue,
+};
 
 pub static SCHEDULER_INSTANCE: Lazy<Scheduler> = Lazy::new(|| Scheduler::new());
 
@@ -37,8 +41,13 @@ impl Scheduler {
 
     fn update_queue_loop() -> JoinHandle<()> {
         thread::spawn(move || loop {
-            for (any_component, any_message) in SCHEDULER_INSTANCE.update_queue.receiver.iter() {
+            for (any_component, any_message, rerender_observer) in
+                SCHEDULER_INSTANCE.update_queue.receiver.iter()
+            {
                 let to_rerender = any_component.lock().unwrap().update(any_message);
+                if to_rerender {
+                    rerender_observer.notify();
+                }
             }
         })
     }
@@ -46,34 +55,38 @@ impl Scheduler {
     fn rerender_queue_loop() -> JoinHandle<()> {
         thread::spawn(move || loop {
             let rerender_queue_item = SCHEDULER_INSTANCE.rerender_queue.pop();
-            let behavior = AnyComponentBehavior::new(rerender_queue_item.component.clone());
             let vnode = rerender_queue_item
                 .component
                 .lock()
                 .unwrap()
-                .view(&behavior);
+                .view(&rerender_queue_item.behavior);
         })
     }
 
     pub fn add_update_message(
         component: Arc<Mutex<Box<dyn AnyComponent>>>,
         message: Box<dyn Any + Send>,
+        rerender_observer: Arc<RerenderObserver>,
     ) {
         SCHEDULER_INSTANCE
             .update_queue
             .sender
-            .send((component, message))
+            .send((component, message, rerender_observer))
             .expect("Failed to send message to the update queue");
     }
 
-    pub fn add_rerender_message(component: Arc<Mutex<Box<dyn AnyComponent>>>, depth: u32) {
+    pub fn add_rerender_message(component: Arc<Mutex<Box<dyn AnyComponent>>>, behavior: Arc<AnyComponentBehavior>, depth: u32) {
         SCHEDULER_INSTANCE
             .rerender_queue
-            .push(RerenderQueueItem { component, depth });
+            .push(RerenderQueueItem { component, behavior, depth });
     }
 }
 
-type UpdateQueueItem = (Arc<Mutex<Box<dyn AnyComponent>>>, Box<dyn Any + Send>);
+type UpdateQueueItem = (
+    Arc<Mutex<Box<dyn AnyComponent>>>,
+    Box<dyn Any + Send>,
+    Arc<dyn Observer + Send>,
+);
 type UpdateQueueSender = Sender<UpdateQueueItem>;
 type UpdateQueueReceiver = Receiver<UpdateQueueItem>;
 
@@ -91,6 +104,7 @@ impl UpdateQueue {
 
 struct RerenderQueueItem {
     component: Arc<Mutex<Box<dyn AnyComponent>>>,
+    behavior: Arc<AnyComponentBehavior>,
     depth: u32,
 }
 
