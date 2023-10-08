@@ -1,15 +1,14 @@
 use once_cell::sync::Lazy;
 use std::{
     any::Any,
-    collections::BinaryHeap,
     sync::{
         mpsc::{Receiver, Sender},
-        Arc, Condvar, Mutex,
+        Arc, Mutex,
     },
     thread::{self, JoinHandle},
 };
 
-use super::{component::AnyComponent, context_node::AnyComponentBehavior};
+use super::{component::AnyComponent, context_node::AnyComponentBehavior, thread_safe_collections::ThreadSafePriorityQueue};
 
 pub static SCHEDULER_INSTANCE: Lazy<Scheduler> = Lazy::new(|| Scheduler::new());
 
@@ -87,36 +86,6 @@ impl UpdateQueue {
     fn new() -> Self {
         let (sender, receiver) = std::sync::mpsc::channel();
         Self { sender, receiver }
-    }
-}
-
-struct ThreadSafePriorityQueue<T> {
-    queue: Arc<Mutex<BinaryHeap<T>>>,
-    condvar: Condvar,
-}
-
-impl<T: Ord> ThreadSafePriorityQueue<T> {
-    fn new() -> Self {
-        Self {
-            queue: Arc::new(Mutex::new(BinaryHeap::new())),
-            condvar: Condvar::new(),
-        }
-    }
-
-    fn push(&self, item: T) {
-        let mut queue = self.queue.lock().unwrap();
-        queue.push(item);
-        self.condvar.notify_one();
-    }
-
-    fn pop(&self) -> T {
-        let mut queue = self.queue.lock().unwrap();
-        if let Some(item) = queue.pop() {
-            return item;
-        }
-
-        queue = self.condvar.wait(queue).unwrap();
-        queue.pop().unwrap()
     }
 }
 
