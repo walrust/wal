@@ -3,19 +3,21 @@ use std::{
     sync::{Arc, Condvar, Mutex},
 };
 
-pub struct ThreadSafePriorityQueue<T> {
+pub struct ThreadSafePriorityQueue<T: Ord> {
     queue: Arc<Mutex<BinaryHeap<T>>>,
     condvar: Condvar,
 }
 
-impl<T: Ord> ThreadSafePriorityQueue<T> {
-    pub fn new() -> Self {
+impl<T: Ord> Default for ThreadSafePriorityQueue<T> {
+    fn default() -> Self {
         Self {
             queue: Arc::new(Mutex::new(BinaryHeap::new())),
             condvar: Condvar::new(),
         }
     }
+}
 
+impl<T: Ord> ThreadSafePriorityQueue<T> {
     pub fn push(&self, item: T) {
         let mut queue = self.queue.lock().unwrap();
         queue.push(item);

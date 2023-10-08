@@ -1,131 +1,118 @@
-use once_cell::sync::Lazy;
 use std::{
     any::Any,
-    sync::{
-        mpsc::{Receiver, Sender},
-        Arc, Mutex,
-    },
-    thread::{self, JoinHandle},
+    cell::RefCell,
 };
 
 use super::{
     component::AnyComponent,
-    context_node::{AnyComponentBehavior, RerenderObserver, Observer},
+    context_node::{AnyComponentBehavior, RerenderObserver},
     thread_safe_collections::ThreadSafePriorityQueue,
 };
 
-pub static SCHEDULER_INSTANCE: Lazy<Scheduler> = Lazy::new(|| Scheduler::new());
-
-pub struct Scheduler {
-    update_queue: UpdateQueue,
-    rerender_queue: RerenderPriorityQueue,
+enum SchedulerMessage {
+    Update(UpdateMessage),
+    Rerender(RerenderMessage),
 }
 
-unsafe impl Sync for Scheduler {}
-
-impl Scheduler {
-    fn new() -> Self {
-        Self {
-            update_queue: UpdateQueue::new(),
-            rerender_queue: RerenderPriorityQueue::new(),
-        }
-    }
-
-    pub fn event_loop() {
-        let update_queue_thread = Self::update_queue_loop();
-
-        update_queue_thread
-            .join()
-            .expect("Failed to join the update queue thread");
-    }
-
-    fn update_queue_loop() -> JoinHandle<()> {
-        thread::spawn(move || loop {
-            for (any_component, any_message, rerender_observer) in
-                SCHEDULER_INSTANCE.update_queue.receiver.iter()
-            {
-                let to_rerender = any_component.lock().unwrap().update(any_message);
-                if to_rerender {
-                    rerender_observer.notify();
-                }
-            }
-        })
-    }
-
-    fn rerender_queue_loop() -> JoinHandle<()> {
-        thread::spawn(move || loop {
-            let rerender_queue_item = SCHEDULER_INSTANCE.rerender_queue.pop();
-            let vnode = rerender_queue_item
-                .component
-                .lock()
-                .unwrap()
-                .view(&rerender_queue_item.behavior);
-        })
-    }
-
-    pub fn add_update_message(
-        component: Arc<Mutex<Box<dyn AnyComponent>>>,
-        message: Box<dyn Any + Send>,
-        rerender_observer: Arc<RerenderObserver>,
-    ) {
-        SCHEDULER_INSTANCE
-            .update_queue
-            .sender
-            .send((component, message, rerender_observer))
-            .expect("Failed to send message to the update queue");
-    }
-
-    pub fn add_rerender_message(component: Arc<Mutex<Box<dyn AnyComponent>>>, behavior: Arc<AnyComponentBehavior>, depth: u32) {
-        SCHEDULER_INSTANCE
-            .rerender_queue
-            .push(RerenderQueueItem { component, behavior, depth });
-    }
+struct UpdateMessage {
+    component: Box<dyn AnyComponent>,
+    message: Box<dyn Any>,
+    rerender_observer: RerenderObserver,
 }
 
-type UpdateQueueItem = (
-    Arc<Mutex<Box<dyn AnyComponent>>>,
-    Box<dyn Any + Send>,
-    Arc<dyn Observer + Send>,
-);
-type UpdateQueueSender = Sender<UpdateQueueItem>;
-type UpdateQueueReceiver = Receiver<UpdateQueueItem>;
-
-pub struct UpdateQueue {
-    pub sender: UpdateQueueSender,
-    receiver: UpdateQueueReceiver,
-}
-
-impl UpdateQueue {
-    fn new() -> Self {
-        let (sender, receiver) = std::sync::mpsc::channel();
-        Self { sender, receiver }
-    }
-}
-
-struct RerenderQueueItem {
-    component: Arc<Mutex<Box<dyn AnyComponent>>>,
-    behavior: Arc<AnyComponentBehavior>,
+struct RerenderMessage {
+    component: Box<dyn AnyComponent>,
     depth: u32,
 }
 
-impl PartialEq for RerenderQueueItem {
+impl PartialEq for SchedulerMessage {
     fn eq(&self, other: &Self) -> bool {
-        self.depth == other.depth
+        match (self, other) {
+            (Self::Update(_), Self::Update(_)) => true,
+            (Self::Rerender(_), Self::Rerender(_)) => true,
+            _ => false,
+        }
     }
 }
 
-impl Eq for RerenderQueueItem {}
+impl Eq for SchedulerMessage {}
 
-impl PartialOrd for RerenderQueueItem {
+impl PartialOrd for SchedulerMessage {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(other.depth.cmp(&self.depth))
+        Some(self.cmp(other))
     }
 }
 
-impl Ord for RerenderQueueItem {
+impl Ord for SchedulerMessage {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        other.depth.cmp(&self.depth)
+        match (self, other) {
+            (Self::Update(_), Self::Rerender(_)) => std::cmp::Ordering::Less,
+            (Self::Rerender(_), Self::Update(_)) => std::cmp::Ordering::Greater,
+            (Self::Update(_), Self::Update(_)) => std::cmp::Ordering::Equal,
+            (Self::Rerender(_), Self::Rerender(_)) => std::cmp::Ordering::Equal,
+        }
     }
 }
 
-type RerenderPriorityQueue = ThreadSafePriorityQueue<RerenderQueueItem>;
+thread_local! {
+    pub static SCHEDULER_INSTANCE: RefCell<Scheduler> = Default::default();
+}
+
+#[derive(Default)]
+pub struct Scheduler {
+    pub priority_queue: ThreadSafePriorityQueue<SchedulerMessage>,
+}
+
+impl Scheduler {
+    pub fn event_loop() {
+        loop {
+            SCHEDULER_INSTANCE.with(|scheduler| {
+                let scheduler_message = scheduler.borrow_mut().priority_queue.pop();
+                match scheduler_message {
+                    SchedulerMessage::Update(update_message) => {
+                        // let to_rerender = update_message.component.update(update_message.message);
+                        // if to_rerender {
+                        //     update_message.rerender_observer.notify();
+                        // }
+                    }
+                    SchedulerMessage::Rerender(rerender_message) => {
+                        // let vdom = rerender_message.component.view();
+                    }
+                }
+            });
+        }
+    }
+
+    pub fn add_update_message(
+        component: Box<dyn AnyComponent>,
+        message: Box<dyn Any>,
+        rerender_observer: RerenderObserver,
+    ) {
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            scheduler
+                .borrow_mut()
+                .priority_queue
+                .push(SchedulerMessage::Update(UpdateMessage {
+                    component,
+                    message,
+                    rerender_observer,
+                }))
+        });
+    }
+
+    pub fn add_rerender_message(
+        component: Box<dyn AnyComponent>,
+        behavior: AnyComponentBehavior,
+        depth: u32,
+    ) {
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            scheduler
+                .borrow_mut()
+                .priority_queue
+                .push(SchedulerMessage::Rerender(RerenderMessage {
+                    component,
+                    depth,
+                }))
+        });
+    }
+}

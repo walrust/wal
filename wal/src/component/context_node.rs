@@ -1,5 +1,4 @@
 use std::{
-    any::Any,
     marker::PhantomData,
     sync::{Arc, Mutex},
 };
@@ -18,10 +17,10 @@ pub struct AnyComponentNode {
 }
 
 pub struct AnyComponentNodeData {
-    component: Arc<Mutex<Box<dyn AnyComponent>>>,
+    component: Box<dyn AnyComponent>,
     depth: u32,
     to_rerender: bool,
-    behavior: Arc<AnyComponentBehavior>,
+    behavior: AnyComponentBehavior,
     any_component_node_vdom: AnyComponentNodeVDom,
 }
 
@@ -35,8 +34,8 @@ impl AnyComponentNodeData {
         if !self.to_rerender {
             self.to_rerender = true;
             Scheduler::add_rerender_message(
-                self.component.clone(),
-                self.behavior.clone(),
+                self.component,
+                self.behavior,
                 self.depth,
             );
         }
@@ -51,11 +50,9 @@ impl AnyComponentNode {
     }
 
     fn new_any(component: Box<dyn AnyComponent>, depth: u32) -> Self {
-        let component = Arc::new(Mutex::new(component));
         let rerender_observer = RerenderObserver::new();
-        let rerenderer_observer = Arc::new(rerender_observer);
-        let behavior = AnyComponentBehavior::new(component.clone(), rerenderer_observer.clone());
-        let vdom = component.lock().unwrap().view(&behavior);
+        let behavior = AnyComponentBehavior::new(component, rerender_observer);
+        let vdom = component.view(&behavior);
         let mut children = Vec::new();
         Self::generate_children(&mut children, &vdom, depth + 1);
         let any_component_node_vdom = AnyComponentNodeVDom { vdom, children };
@@ -63,7 +60,7 @@ impl AnyComponentNode {
             component,
             depth,
             to_rerender: false,
-            behavior: Arc::new(behavior),
+            behavior,
             any_component_node_vdom,
         };
         rerender_observer.set_observer(any_component_node_data);
@@ -99,14 +96,14 @@ impl AnyComponentNode {
 }
 
 pub struct AnyComponentBehavior {
-    component: Arc<Mutex<Box<dyn AnyComponent>>>,
-    rerender_observer: Arc<RerenderObserver>,
+    component: Box<dyn AnyComponent>,
+    rerender_observer: RerenderObserver,
 }
 
 impl AnyComponentBehavior {
     pub fn new(
-        component: Arc<Mutex<Box<dyn AnyComponent>>>,
-        rerender_observer: Arc<RerenderObserver>,
+        component: Box<dyn AnyComponent>,
+        rerender_observer: RerenderObserver,
     ) -> Self {
         Self {
             component,
@@ -116,8 +113,8 @@ impl AnyComponentBehavior {
 }
 
 pub struct ComponentBehavior<C: Component> {
-    component: Arc<Mutex<Box<dyn AnyComponent>>>,
-    rerender_observer: Arc<RerenderObserver>,
+    component: Box<dyn AnyComponent>,
+    rerender_observer: RerenderObserver,
     _marker: PhantomData<C>,
 }
 
@@ -133,11 +130,11 @@ impl<C: Component> ComponentBehavior<C> {
     where
         F: Fn(IN) -> C::Message + 'static,
     {
-        let component = self.component.clone();
-        let rerender_observer = self.rerender_observer.clone();
+        let component = self.component;
+        let rerender_observer = self.rerender_observer;
         Callback::new(move |data| {
             let message = wrapper(data);
-            Scheduler::add_update_message(component.clone(), Box::new(message), rerender_observer);
+            Scheduler::add_update_message(component, Box::new(message), rerender_observer);
         })
     }
 }
@@ -145,8 +142,8 @@ impl<C: Component> ComponentBehavior<C> {
 impl<C: Component> From<&AnyComponentBehavior> for ComponentBehavior<C> {
     fn from(value: &AnyComponentBehavior) -> Self {
         Self {
-            component: value.component.clone(),
-            rerender_observer: value.rerender_observer.clone(),
+            component: value.component,
+            rerender_observer: value.rerender_observer,
             _marker: PhantomData,
         }
     }
