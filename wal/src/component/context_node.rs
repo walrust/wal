@@ -14,7 +14,7 @@ pub struct AnyComponentNode {
 }
 
 pub struct AnyComponentNodeData {
-    component: Rc<Box<dyn AnyComponent>>,
+    component: Rc<RefCell<Box<dyn AnyComponent>>>,
     depth: u32,
     to_rerender: bool,
     behavior: Rc<AnyComponentBehavior>,
@@ -47,13 +47,13 @@ impl AnyComponentNode {
     }
 
     fn new_any(component: Box<dyn AnyComponent>, depth: u32) -> Self {
-        let component = Rc::new(component);
+        let component = Rc::new(RefCell::new(component));
         let rerender_observer = Rc::new(RefCell::new(RerenderObserver::new()));
         let behavior = Rc::new(AnyComponentBehavior::new(
             component.clone(),
             rerender_observer.clone(),
         ));
-        let vdom = component.view(&behavior);
+        let vdom = component.borrow().view(&behavior);
         let mut children = Vec::new();
         Self::generate_children(&mut children, &vdom, depth + 1);
         let any_component_node_vdom = AnyComponentNodeVDom { vdom, children };
@@ -94,13 +94,13 @@ impl AnyComponentNode {
 }
 
 pub struct AnyComponentBehavior {
-    component: Rc<Box<dyn AnyComponent>>,
+    component: Rc<RefCell<Box<dyn AnyComponent>>>,
     rerender_observer: Rc<RefCell<RerenderObserver>>,
 }
 
 impl AnyComponentBehavior {
     pub fn new(
-        component: Rc<Box<dyn AnyComponent>>,
+        component: Rc<RefCell<Box<dyn AnyComponent>>>,
         rerender_observer: Rc<RefCell<RerenderObserver>>,
     ) -> Self {
         Self {
@@ -111,7 +111,7 @@ impl AnyComponentBehavior {
 }
 
 pub struct ComponentBehavior<C: Component> {
-    component: Rc<Box<dyn AnyComponent>>,
+    component: Rc<RefCell<Box<dyn AnyComponent>>>,
     rerender_observer: Rc<RefCell<RerenderObserver>>,
     _marker: PhantomData<C>,
 }

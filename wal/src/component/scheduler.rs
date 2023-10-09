@@ -2,7 +2,7 @@ use std::{any::Any, cell::RefCell, rc::Rc};
 
 use super::{
     component::AnyComponent,
-    context_node::{AnyComponentBehavior, RerenderObserver},
+    context_node::{AnyComponentBehavior, Observer, RerenderObserver},
     thread_safe_collections::ThreadSafePriorityQueue,
 };
 
@@ -12,13 +12,14 @@ enum SchedulerMessage {
 }
 
 struct UpdateMessage {
-    component: Rc<Box<dyn AnyComponent>>,
+    component: Rc<RefCell<Box<dyn AnyComponent>>>,
     message: Box<dyn Any>,
     rerender_observer: Rc<RefCell<RerenderObserver>>,
 }
 
 struct RerenderMessage {
-    component: Rc<Box<dyn AnyComponent>>,
+    component: Rc<RefCell<Box<dyn AnyComponent>>>,
+    behavior: Rc<AnyComponentBehavior>,
     depth: u32,
 }
 
@@ -67,13 +68,20 @@ impl Scheduler {
                 let scheduler_message = scheduler.borrow_mut().priority_queue.pop();
                 match scheduler_message {
                     SchedulerMessage::Update(update_message) => {
-                        // let to_rerender = update_message.component.update(update_message.message);
-                        // if to_rerender {
-                        //     update_message.rerender_observer.notify();
-                        // }
+                        let to_rerender = update_message
+                            .component
+                            .borrow_mut()
+                            .update(update_message.message);
+                        if to_rerender {
+                            update_message.rerender_observer.borrow().notify();
+                        }
                     }
                     SchedulerMessage::Rerender(rerender_message) => {
-                        // let vdom = rerender_message.component.view();
+                        let vdom = rerender_message
+                            .component
+                            .borrow()
+                            .view(rerender_message.behavior.as_ref());
+                        // here observer pattern to notify about the new vdom
                     }
                 }
             });
@@ -81,7 +89,7 @@ impl Scheduler {
     }
 
     pub fn add_update_message(
-        component: Rc<Box<dyn AnyComponent>>,
+        component: Rc<RefCell<Box<dyn AnyComponent>>>,
         message: Box<dyn Any>,
         rerender_observer: Rc<RefCell<RerenderObserver>>,
     ) {
@@ -98,7 +106,7 @@ impl Scheduler {
     }
 
     pub fn add_rerender_message(
-        component: Rc<Box<dyn AnyComponent>>,
+        component: Rc<RefCell<Box<dyn AnyComponent>>>,
         behavior: Rc<AnyComponentBehavior>,
         depth: u32,
     ) {
@@ -108,6 +116,7 @@ impl Scheduler {
                 .priority_queue
                 .push(SchedulerMessage::Rerender(RerenderMessage {
                     component,
+                    behavior,
                     depth,
                 }))
         });
