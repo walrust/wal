@@ -10,7 +10,7 @@ use super::{
 
 pub struct AnyComponentNode {
     data: Rc<RefCell<AnyComponentNodeData>>,
-    rerender_observer: Rc<RefCell<RerenderObserver>>,
+    to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
 }
 
 pub struct AnyComponentNodeData {
@@ -18,12 +18,19 @@ pub struct AnyComponentNodeData {
     depth: u32,
     to_rerender: bool,
     behavior: Rc<AnyComponentBehavior>,
-    any_component_node_vdom: AnyComponentNodeVDom,
+    any_component_node_vdom: Rc<RefCell<AnyComponentNodeVDom>>,
+    vdom_observer: Rc<RefCell<VDomObserver>>,
 }
 
 pub struct AnyComponentNodeVDom {
     vdom: VNode,
     children: Vec<AnyComponentNode>,
+}
+
+impl AnyComponentNodeVDom {
+    fn vdom_notify(&mut self, new_vdom: VNode) {
+        todo!("Logic regarding updating the vdom and updating children, probably in AnyComponentNodeVDom we should hold a reference to dom");
+    }
 }
 
 impl AnyComponentNodeData {
@@ -33,10 +40,10 @@ impl AnyComponentNodeData {
             Scheduler::add_rerender_message(
                 self.component.clone(),
                 self.behavior.clone(),
+                self.vdom_observer.clone(),
                 self.depth,
             );
         }
-        // maybe we should get notified with the new VNode?
     }
 }
 
@@ -48,7 +55,7 @@ impl AnyComponentNode {
 
     fn new_any(component: Box<dyn AnyComponent>, depth: u32) -> Self {
         let component = Rc::new(RefCell::new(component));
-        let rerender_observer = Rc::new(RefCell::new(RerenderObserver::new()));
+        let rerender_observer = Rc::new(RefCell::new(ToRerenderObserver::new()));
         let behavior = Rc::new(AnyComponentBehavior::new(
             component.clone(),
             rerender_observer.clone(),
@@ -57,18 +64,26 @@ impl AnyComponentNode {
         let mut children = Vec::new();
         Self::generate_children(&mut children, &vdom, depth + 1);
         let any_component_node_vdom = AnyComponentNodeVDom { vdom, children };
+        let any_component_node_vdom = Rc::new(RefCell::new(any_component_node_vdom));
+        let vdom_observer = Rc::new(RefCell::new(VDomObserver::new()));
         let any_component_node_data = AnyComponentNodeData {
             component,
             depth,
             to_rerender: false,
             behavior,
-            any_component_node_vdom,
+            any_component_node_vdom: any_component_node_vdom.clone(),
+            vdom_observer: vdom_observer.clone(),
         };
+        vdom_observer
+            .borrow_mut()
+            .set_observer(any_component_node_vdom);
         let any_component_node_data = Rc::new(RefCell::new(any_component_node_data));
-        rerender_observer.borrow_mut().set_observer(any_component_node_data.clone());
+        rerender_observer
+            .borrow_mut()
+            .set_observer(any_component_node_data.clone());
         Self {
             data: any_component_node_data,
-            rerender_observer,
+            to_rerender_observer: rerender_observer,
         }
     }
 
@@ -95,13 +110,13 @@ impl AnyComponentNode {
 
 pub struct AnyComponentBehavior {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
-    rerender_observer: Rc<RefCell<RerenderObserver>>,
+    rerender_observer: Rc<RefCell<ToRerenderObserver>>,
 }
 
 impl AnyComponentBehavior {
     pub fn new(
         component: Rc<RefCell<Box<dyn AnyComponent>>>,
-        rerender_observer: Rc<RefCell<RerenderObserver>>,
+        rerender_observer: Rc<RefCell<ToRerenderObserver>>,
     ) -> Self {
         Self {
             component,
@@ -112,7 +127,7 @@ impl AnyComponentBehavior {
 
 pub struct ComponentBehavior<C: Component> {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
-    rerender_observer: Rc<RefCell<RerenderObserver>>,
+    rerender_observer: Rc<RefCell<ToRerenderObserver>>,
     _marker: PhantomData<C>,
 }
 
@@ -144,25 +159,11 @@ impl<C: Component> From<&AnyComponentBehavior> for ComponentBehavior<C> {
     }
 }
 
-pub trait Observer {
-    fn notify(&self);
-}
-
-pub struct RerenderObserver {
+pub struct ToRerenderObserver {
     component_node_data: Option<Rc<RefCell<AnyComponentNodeData>>>,
 }
 
-impl Observer for RerenderObserver {
-    fn notify(&self) {
-        if let Some(any_component_node_data) = &self.component_node_data {
-            any_component_node_data.borrow_mut().rerender_notify();
-        } else {
-            panic!("RerenderObserver is not attached to a component node");
-        }
-    }
-}
-
-impl RerenderObserver {
+impl ToRerenderObserver {
     fn new() -> Self {
         Self {
             component_node_data: None,
@@ -171,5 +172,37 @@ impl RerenderObserver {
 
     fn set_observer(&mut self, component_node_data: Rc<RefCell<AnyComponentNodeData>>) {
         self.component_node_data = Some(component_node_data);
+    }
+
+    pub fn notify(&self) {
+        if let Some(any_component_node_data) = &self.component_node_data {
+            any_component_node_data.borrow_mut().rerender_notify();
+        } else {
+            panic!("RerenderObserver is not attached to a component node");
+        }
+    }
+}
+
+pub struct VDomObserver {
+    component_node_vdom: Option<Rc<RefCell<AnyComponentNodeVDom>>>,
+}
+
+impl VDomObserver {
+    fn new() -> Self {
+        Self {
+            component_node_vdom: None,
+        }
+    }
+
+    fn set_observer(&mut self, component_node_vdom: Rc<RefCell<AnyComponentNodeVDom>>) {
+        self.component_node_vdom = Some(component_node_vdom);
+    }
+
+    pub fn notify(&self, new_vdom: VNode) {
+        if let Some(any_component_node_vdom) = &self.component_node_vdom {
+            any_component_node_vdom.borrow_mut().vdom_notify(new_vdom);
+        } else {
+            panic!("VDomObserver is not attached to a component node");
+        }
     }
 }

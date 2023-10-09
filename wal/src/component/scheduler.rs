@@ -2,7 +2,7 @@ use std::{any::Any, cell::RefCell, rc::Rc};
 
 use super::{
     component::AnyComponent,
-    context_node::{AnyComponentBehavior, Observer, RerenderObserver},
+    context_node::{AnyComponentBehavior, ToRerenderObserver, VDomObserver},
     thread_safe_collections::ThreadSafePriorityQueue,
 };
 
@@ -14,20 +14,42 @@ enum SchedulerMessage {
 struct UpdateMessage {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
     message: Box<dyn Any>,
-    rerender_observer: Rc<RefCell<RerenderObserver>>,
+    to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
 }
 
 struct RerenderMessage {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
     behavior: Rc<AnyComponentBehavior>,
+    vdom_observer: Rc<RefCell<VDomObserver>>,
     depth: u32,
 }
 
 impl PartialEq for SchedulerMessage {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Update(_), Self::Update(_)) => true,
-            (Self::Rerender(_), Self::Rerender(_)) => true,
+            (Self::Update(self_update_message), Self::Update(other_update_message)) => {
+                Rc::ptr_eq(
+                    &self_update_message.component,
+                    &other_update_message.component,
+                ) && &self_update_message.message as *const dyn Any
+                    == &other_update_message.message as *const dyn Any
+                    && Rc::ptr_eq(
+                        &self_update_message.to_rerender_observer,
+                        &other_update_message.to_rerender_observer,
+                    )
+            }
+            (Self::Rerender(self_rerender_message), Self::Rerender(other_rerender_message)) => {
+                Rc::ptr_eq(
+                    &self_rerender_message.component,
+                    &other_rerender_message.component,
+                ) && Rc::ptr_eq(
+                    &self_rerender_message.behavior,
+                    &other_rerender_message.behavior,
+                ) && Rc::ptr_eq(
+                    &self_rerender_message.vdom_observer,
+                    &other_rerender_message.vdom_observer,
+                ) && self_rerender_message.depth == other_rerender_message.depth
+            }
             _ => false,
         }
     }
@@ -44,10 +66,18 @@ impl PartialOrd for SchedulerMessage {
 impl Ord for SchedulerMessage {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         match (self, other) {
-            (Self::Update(_), Self::Rerender(_)) => std::cmp::Ordering::Less,
-            (Self::Rerender(_), Self::Update(_)) => std::cmp::Ordering::Greater,
+            (Self::Update(_), Self::Rerender(_)) => std::cmp::Ordering::Greater,
+            (Self::Rerender(_), Self::Update(_)) => std::cmp::Ordering::Less,
             (Self::Update(_), Self::Update(_)) => std::cmp::Ordering::Equal,
-            (Self::Rerender(_), Self::Rerender(_)) => std::cmp::Ordering::Equal,
+            (Self::Rerender(self_renderer_message), Self::Rerender(other_renderer_message)) => {
+                if self_renderer_message.depth < other_renderer_message.depth {
+                    std::cmp::Ordering::Greater
+                } else if self_renderer_message.depth > other_renderer_message.depth {
+                    std::cmp::Ordering::Less
+                } else {
+                    std::cmp::Ordering::Equal
+                }
+            }
         }
     }
 }
@@ -73,7 +103,7 @@ impl Scheduler {
                             .borrow_mut()
                             .update(update_message.message);
                         if to_rerender {
-                            update_message.rerender_observer.borrow().notify();
+                            update_message.to_rerender_observer.borrow().notify();
                         }
                     }
                     SchedulerMessage::Rerender(rerender_message) => {
@@ -81,7 +111,7 @@ impl Scheduler {
                             .component
                             .borrow()
                             .view(rerender_message.behavior.as_ref());
-                        // here observer pattern to notify about the new vdom
+                        rerender_message.vdom_observer.borrow_mut().notify(vdom);
                     }
                 }
             });
@@ -91,7 +121,7 @@ impl Scheduler {
     pub fn add_update_message(
         component: Rc<RefCell<Box<dyn AnyComponent>>>,
         message: Box<dyn Any>,
-        rerender_observer: Rc<RefCell<RerenderObserver>>,
+        to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
     ) {
         SCHEDULER_INSTANCE.with(|scheduler| {
             scheduler
@@ -100,7 +130,7 @@ impl Scheduler {
                 .push(SchedulerMessage::Update(UpdateMessage {
                     component,
                     message,
-                    rerender_observer,
+                    to_rerender_observer,
                 }))
         });
     }
@@ -108,6 +138,7 @@ impl Scheduler {
     pub fn add_rerender_message(
         component: Rc<RefCell<Box<dyn AnyComponent>>>,
         behavior: Rc<AnyComponentBehavior>,
+        vdom_observer: Rc<RefCell<VDomObserver>>,
         depth: u32,
     ) {
         SCHEDULER_INSTANCE.with(|scheduler| {
@@ -117,6 +148,7 @@ impl Scheduler {
                 .push(SchedulerMessage::Rerender(RerenderMessage {
                     component,
                     behavior,
+                    vdom_observer,
                     depth,
                 }))
         });
