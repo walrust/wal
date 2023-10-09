@@ -27,28 +27,16 @@ struct RerenderMessage {
 impl PartialEq for SchedulerMessage {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Update(self_update_message), Self::Update(other_update_message)) => {
-                Rc::ptr_eq(
-                    &self_update_message.component,
-                    &other_update_message.component,
-                ) && &self_update_message.message as *const dyn Any
-                    == &other_update_message.message as *const dyn Any
-                    && Rc::ptr_eq(
-                        &self_update_message.to_rerender_observer,
-                        &other_update_message.to_rerender_observer,
-                    )
+            (Self::Update(s_msg), Self::Update(o_msg)) => {
+                Rc::ptr_eq(&s_msg.component, &o_msg.component)
+                    && &s_msg.message as *const dyn Any == &o_msg.message as *const dyn Any
+                    && Rc::ptr_eq(&s_msg.to_rerender_observer, &o_msg.to_rerender_observer)
             }
-            (Self::Rerender(self_rerender_message), Self::Rerender(other_rerender_message)) => {
-                Rc::ptr_eq(
-                    &self_rerender_message.component,
-                    &other_rerender_message.component,
-                ) && Rc::ptr_eq(
-                    &self_rerender_message.behavior,
-                    &other_rerender_message.behavior,
-                ) && Rc::ptr_eq(
-                    &self_rerender_message.vdom_observer,
-                    &other_rerender_message.vdom_observer,
-                ) && self_rerender_message.depth == other_rerender_message.depth
+            (Self::Rerender(s_msg), Self::Rerender(o_msg)) => {
+                Rc::ptr_eq(&s_msg.component, &o_msg.component)
+                    && Rc::ptr_eq(&s_msg.behavior, &o_msg.behavior)
+                    && Rc::ptr_eq(&s_msg.vdom_observer, &o_msg.vdom_observer)
+                    && s_msg.depth == o_msg.depth
             }
             _ => false,
         }
@@ -69,14 +57,8 @@ impl Ord for SchedulerMessage {
             (Self::Update(_), Self::Rerender(_)) => std::cmp::Ordering::Greater,
             (Self::Rerender(_), Self::Update(_)) => std::cmp::Ordering::Less,
             (Self::Update(_), Self::Update(_)) => std::cmp::Ordering::Equal,
-            (Self::Rerender(self_renderer_message), Self::Rerender(other_renderer_message)) => {
-                if self_renderer_message.depth < other_renderer_message.depth {
-                    std::cmp::Ordering::Greater
-                } else if self_renderer_message.depth > other_renderer_message.depth {
-                    std::cmp::Ordering::Less
-                } else {
-                    std::cmp::Ordering::Equal
-                }
+            (Self::Rerender(s_msg), Self::Rerender(o_msg)) => {
+                s_msg.depth.cmp(&o_msg.depth).reverse()
             }
         }
     }
@@ -124,14 +106,12 @@ impl Scheduler {
         to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
     ) {
         SCHEDULER_INSTANCE.with(|scheduler| {
-            scheduler
-                .borrow_mut()
-                .priority_queue
-                .push(SchedulerMessage::Update(UpdateMessage {
-                    component,
-                    message,
-                    to_rerender_observer,
-                }))
+            let message = SchedulerMessage::Update(UpdateMessage {
+                component,
+                message,
+                to_rerender_observer,
+            });
+            scheduler.borrow_mut().priority_queue.push(message);
         });
     }
 
@@ -142,15 +122,13 @@ impl Scheduler {
         depth: u32,
     ) {
         SCHEDULER_INSTANCE.with(|scheduler| {
-            scheduler
-                .borrow_mut()
-                .priority_queue
-                .push(SchedulerMessage::Rerender(RerenderMessage {
-                    component,
-                    behavior,
-                    vdom_observer,
-                    depth,
-                }))
+            let message = SchedulerMessage::Rerender(RerenderMessage {
+                component,
+                behavior,
+                vdom_observer,
+                depth,
+            });
+            scheduler.borrow_mut().priority_queue.push(message);
         });
     }
 }

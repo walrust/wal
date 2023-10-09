@@ -4,8 +4,8 @@ use std::hash::Hash;
 
 use super::context_node::{AnyComponentBehavior, ComponentBehavior};
 
-pub trait Component: Sized + Send {
-    type Message: Send + 'static;
+pub trait Component: Sized {
+    type Message: 'static;
     type Properties: Hash + 'static;
 
     fn new(props: Self::Properties) -> Self;
@@ -13,7 +13,7 @@ pub trait Component: Sized + Send {
     fn update(&mut self, message: Self::Message) -> bool;
 }
 
-pub trait AnyComponent : Send {
+pub trait AnyComponent {
     fn new(props: Box<dyn Any>) -> Self
     where
         Self: Sized;

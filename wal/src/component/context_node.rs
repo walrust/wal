@@ -25,6 +25,7 @@ pub struct AnyComponentNodeData {
 pub struct AnyComponentNodeVDom {
     vdom: VNode,
     children: Vec<AnyComponentNode>,
+    // TODO: we should probably add dom reference here
 }
 
 impl AnyComponentNodeVDom {
@@ -49,62 +50,66 @@ impl AnyComponentNodeData {
 
 impl AnyComponentNode {
     pub fn new<C: Component + 'static>(component: C) -> Self {
-        let component = Box::new(component) as Box<dyn AnyComponent>;
-        Self::new_any(component, 0)
+        let component_box = Box::new(component) as Box<dyn AnyComponent>;
+        Self::from_any_component(component_box, 0)
     }
 
-    fn new_any(component: Box<dyn AnyComponent>, depth: u32) -> Self {
-        let component = Rc::new(RefCell::new(component));
-        let rerender_observer = Rc::new(RefCell::new(ToRerenderObserver::new()));
-        let behavior = Rc::new(AnyComponentBehavior::new(
-            component.clone(),
-            rerender_observer.clone(),
+    fn from_any_component(component: Box<dyn AnyComponent>, depth: u32) -> Self {
+        let component_rc = Rc::new(RefCell::new(component));
+        let to_rerender_observer_rc = Rc::new(RefCell::new(ToRerenderObserver::new()));
+        let behavior_rc = Rc::new(AnyComponentBehavior::new(
+            component_rc.clone(),
+            to_rerender_observer_rc.clone(),
         ));
-        let vdom = component.borrow().view(&behavior);
-        let mut children = Vec::new();
-        Self::generate_children(&mut children, &vdom, depth + 1);
+
+        let vdom = component_rc.borrow().view(&behavior_rc);
+        let children = Self::generate_children_from_vdom(&vdom, depth + 1);
+
         let any_component_node_vdom = AnyComponentNodeVDom { vdom, children };
-        let any_component_node_vdom = Rc::new(RefCell::new(any_component_node_vdom));
-        let vdom_observer = Rc::new(RefCell::new(VDomObserver::new()));
+        let any_component_node_vdom_rc = Rc::new(RefCell::new(any_component_node_vdom));
+
+        let vdom_observer_rc = Rc::new(RefCell::new(VDomObserver::new(
+            any_component_node_vdom_rc.clone(),
+        )));
         let any_component_node_data = AnyComponentNodeData {
-            component,
+            component: component_rc,
             depth,
             to_rerender: false,
-            behavior,
-            any_component_node_vdom: any_component_node_vdom.clone(),
-            vdom_observer: vdom_observer.clone(),
+            behavior: behavior_rc,
+            any_component_node_vdom: any_component_node_vdom_rc.clone(),
+            vdom_observer: vdom_observer_rc.clone(),
         };
-        vdom_observer
-            .borrow_mut()
-            .set_observer(any_component_node_vdom);
+
         let any_component_node_data = Rc::new(RefCell::new(any_component_node_data));
-        rerender_observer
+        to_rerender_observer_rc
             .borrow_mut()
             .set_observer(any_component_node_data.clone());
         Self {
             data: any_component_node_data,
-            to_rerender_observer: rerender_observer,
+            to_rerender_observer: to_rerender_observer_rc,
         }
     }
 
-    fn generate_children(children: &mut Vec<AnyComponentNode>, vdom: &VNode, current_depth: u32) {
+    fn generate_children_from_vdom(vdom: &VNode, current_depth: u32) -> Vec<AnyComponentNode> {
+        let mut children = Vec::new();
         match vdom {
             VNode::Element { velement } => {
                 for child_vdom in &velement.children {
-                    Self::generate_children(children, child_vdom, current_depth);
+                    children.extend(Self::generate_children_from_vdom(child_vdom, current_depth));
                 }
             }
             VNode::List { vlist } => {
                 for child_vdom in &vlist.nodes {
-                    Self::generate_children(children, child_vdom, current_depth);
+                    children.extend(Self::generate_children_from_vdom(child_vdom, current_depth));
                 }
             }
             VNode::Child { vchild } => {
                 let child_component = vchild.to_any_component();
-                children.push(Self::new_any(child_component, current_depth));
+                children.push(Self::from_any_component(child_component, current_depth));
             }
             _ => {}
-        }
+        };
+        children
     }
 }
 
@@ -128,7 +133,7 @@ impl AnyComponentBehavior {
 pub struct ComponentBehavior<C: Component> {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
     rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-    _marker: PhantomData<C>,
+    _pd: PhantomData<C>,
 }
 
 impl<C: Component> ComponentBehavior<C> {
@@ -154,7 +159,7 @@ impl<C: Component> From<&AnyComponentBehavior> for ComponentBehavior<C> {
         Self {
             component: value.component.clone(),
             rerender_observer: value.rerender_observer.clone(),
-            _marker: PhantomData,
+            _pd: PhantomData,
         }
     }
 }
@@ -184,25 +189,17 @@ impl ToRerenderObserver {
 }
 
 pub struct VDomObserver {
-    component_node_vdom: Option<Rc<RefCell<AnyComponentNodeVDom>>>,
+    component_node_vdom: Rc<RefCell<AnyComponentNodeVDom>>,
 }
 
 impl VDomObserver {
-    fn new() -> Self {
+    fn new(component_node_vdom: Rc<RefCell<AnyComponentNodeVDom>>) -> Self {
         Self {
-            component_node_vdom: None,
+            component_node_vdom,
         }
-    }
-
-    fn set_observer(&mut self, component_node_vdom: Rc<RefCell<AnyComponentNodeVDom>>) {
-        self.component_node_vdom = Some(component_node_vdom);
     }
 
     pub fn notify(&self, new_vdom: VNode) {
-        if let Some(any_component_node_vdom) = &self.component_node_vdom {
-            any_component_node_vdom.borrow_mut().vdom_notify(new_vdom);
-        } else {
-            panic!("VDomObserver is not attached to a component node");
-        }
+        &self.component_node_vdom.borrow_mut().vdom_notify(new_vdom);
     }
 }
