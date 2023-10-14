@@ -2,7 +2,7 @@ use crate::virtual_dom::VNode;
 use std::any::Any;
 use std::hash::Hash;
 
-use super::context_node::{AnyComponentBehavior, ComponentBehavior};
+use super::component_node::{AnyComponentBehavior, ComponentBehavior};
 
 pub trait Component: Sized {
     type Message: 'static;

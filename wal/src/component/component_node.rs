@@ -1,6 +1,8 @@
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, fmt, marker::PhantomData, mem, rc::Rc};
 
-use crate::virtual_dom::VNode;
+use web_sys::Node;
+
+use crate::virtual_dom::{VNode, VComponent};
 
 use super::{
     callback::Callback,
@@ -24,13 +26,13 @@ pub struct AnyComponentNodeData {
 
 pub struct AnyComponentNodeVDom {
     vdom: VNode,
-    children: Vec<AnyComponentNode>,
-    // TODO: we should probably add dom reference here
+    ancestor: Node,
 }
 
 impl AnyComponentNodeVDom {
-    fn vdom_notify(&mut self, new_vdom: VNode) {
-        todo!("Logic regarding updating the vdom and updating children, probably in AnyComponentNodeVDom we should hold a reference to dom");
+    fn vdom_notify(&mut self, mut new_vdom: VNode) {
+        mem::swap(&mut new_vdom, &mut self.vdom);
+        self.vdom.patch(Some(new_vdom), &self.ancestor);
     }
 }
 
@@ -49,12 +51,12 @@ impl AnyComponentNodeData {
 }
 
 impl AnyComponentNode {
-    pub fn new<C: Component + 'static>(component: C) -> Self {
+    pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Self {
         let component_box = Box::new(component) as Box<dyn AnyComponent>;
-        Self::from_any_component(component_box, 0)
+        Self::from_any_component(component_box, 0, ancestor)
     }
 
-    fn from_any_component(component: Box<dyn AnyComponent>, depth: u32) -> Self {
+    fn from_any_component(component: Box<dyn AnyComponent>, depth: u32, ancestor: Node) -> Self {
         let component_rc = Rc::new(RefCell::new(component));
         let to_rerender_observer_rc = Rc::new(RefCell::new(ToRerenderObserver::new()));
         let behavior_rc = Rc::new(AnyComponentBehavior::new(
@@ -63,9 +65,8 @@ impl AnyComponentNode {
         ));
 
         let vdom = component_rc.borrow().view(&behavior_rc);
-        let children = Self::generate_children_from_vdom(&vdom, depth + 1);
 
-        let any_component_node_vdom = AnyComponentNodeVDom { vdom, children };
+        let any_component_node_vdom = AnyComponentNodeVDom { vdom, ancestor };
         let any_component_node_vdom_rc = Rc::new(RefCell::new(any_component_node_vdom));
 
         let vdom_observer_rc = Rc::new(RefCell::new(VDomObserver::new(
@@ -90,26 +91,25 @@ impl AnyComponentNode {
         }
     }
 
-    fn generate_children_from_vdom(vdom: &VNode, current_depth: u32) -> Vec<AnyComponentNode> {
-        let mut children = Vec::new();
-        match vdom {
-            VNode::Element { velement } => {
-                for child_vdom in &velement.children {
-                    children.extend(Self::generate_children_from_vdom(child_vdom, current_depth));
-                }
-            }
-            VNode::List { vlist } => {
-                for child_vdom in &vlist.nodes {
-                    children.extend(Self::generate_children_from_vdom(child_vdom, current_depth));
-                }
-            }
-            VNode::Child { vchild } => {
-                let child_component = vchild.to_any_component();
-                children.push(Self::from_any_component(child_component, current_depth));
-            }
-            _ => {}
-        };
-        children
+    pub fn vdom(&self) -> &VNode {
+        let x = &self.data.borrow();
+        let d = x.any_component_node_vdom.borrow();
+        &d.vdom
+    }
+
+    pub fn patch(&mut self, last: VComponent, ancestor: &Node) {
+        let any_component_node_data = self.data.borrow();
+        let any_component_node_vdom = any_component_node_data.any_component_node_vdom.borrow_mut();
+        let binding = last.comp.unwrap();
+        let last_any_component_node_data = binding.data.borrow();
+        let last_any_component_node_vdom =  last_any_component_node_data.any_component_node_vdom.borrow();
+        any_component_node_vdom.vdom.patch(Some(any_component_node_data.any_component_node_vdom.borrow_mut().vdom), &ancestor);
+    }
+}
+
+impl fmt::Debug for AnyComponentNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        "AnyComponentNode".fmt(f)
     }
 }
 

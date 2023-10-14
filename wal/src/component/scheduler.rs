@@ -2,7 +2,7 @@ use std::{any::Any, cell::RefCell, rc::Rc};
 
 use super::{
     component::AnyComponent,
-    context_node::{AnyComponentBehavior, ToRerenderObserver, VDomObserver},
+    component_node::{AnyComponentBehavior, ToRerenderObserver, VDomObserver},
     thread_safe_collections::ThreadSafePriorityQueue,
 };
 
