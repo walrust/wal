@@ -1,8 +1,12 @@
-use std::{cell::RefCell, fmt, marker::PhantomData, mem, rc::Rc};
-
+use crate::virtual_dom::VNode;
+use std::{
+    cell::RefCell,
+    fmt,
+    marker::PhantomData,
+    mem,
+    rc::{Rc, Weak},
+};
 use web_sys::Node;
-
-use crate::virtual_dom::{VNode, VComponent};
 
 use super::{
     callback::Callback,
@@ -11,32 +15,51 @@ use super::{
 };
 
 pub struct AnyComponentNode {
-    data: Rc<RefCell<AnyComponentNodeData>>,
-    to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-}
-
-pub struct AnyComponentNodeData {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
     depth: u32,
     to_rerender: bool,
     behavior: Rc<AnyComponentBehavior>,
-    any_component_node_vdom: Rc<RefCell<AnyComponentNodeVDom>>,
-    vdom_observer: Rc<RefCell<VDomObserver>>,
-}
-
-pub struct AnyComponentNodeVDom {
     vdom: VNode,
     ancestor: Node,
+    vdom_observer: Rc<RefCell<VDomObserver>>,
+    to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
 }
 
-impl AnyComponentNodeVDom {
-    fn vdom_notify(&mut self, mut new_vdom: VNode) {
-        mem::swap(&mut new_vdom, &mut self.vdom);
-        self.vdom.patch(Some(new_vdom), &self.ancestor);
+impl AnyComponentNode {
+    pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Self {
+        let component_box = Box::new(component) as Box<dyn AnyComponent>;
+        let component_rc = Rc::new(RefCell::new(component_box));
+        let to_rerender_observer_rc = Rc::new(RefCell::new(ToRerenderObserver::new()));
+        let behavior_rc = Rc::new(AnyComponentBehavior::new(
+            component_rc.clone(),
+            to_rerender_observer_rc.clone(),
+        ));
+        let vdom = component_rc.borrow().view(&behavior_rc);
+        let vdom_observer_rc = Rc::new(RefCell::new(VDomObserver::new()));
+
+        let node = Self {
+            component: component_rc,
+            depth: 0,
+            to_rerender: false,
+            behavior: behavior_rc,
+            vdom,
+            ancestor,
+            vdom_observer: vdom_observer_rc,
+            to_rerender_observer: to_rerender_observer_rc,
+        };
+
+        let node_rc = Rc::new(RefCell::new(node));
+
+        to_rerender_observer_rc
+            .borrow_mut()
+            .set_observer(node_rc.clone());
+        vdom_observer_rc.borrow_mut().set_observer(node_rc.clone());
+
+        Rc::try_unwrap(node_rc)
+            .expect("Failed to unwrap the Rc")
+            .into_inner()
     }
-}
 
-impl AnyComponentNodeData {
     fn rerender_notify(&mut self) {
         if !self.to_rerender {
             self.to_rerender = true;
@@ -48,62 +71,10 @@ impl AnyComponentNodeData {
             );
         }
     }
-}
 
-impl AnyComponentNode {
-    pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Self {
-        let component_box = Box::new(component) as Box<dyn AnyComponent>;
-        Self::from_any_component(component_box, 0, ancestor)
-    }
-
-    fn from_any_component(component: Box<dyn AnyComponent>, depth: u32, ancestor: Node) -> Self {
-        let component_rc = Rc::new(RefCell::new(component));
-        let to_rerender_observer_rc = Rc::new(RefCell::new(ToRerenderObserver::new()));
-        let behavior_rc = Rc::new(AnyComponentBehavior::new(
-            component_rc.clone(),
-            to_rerender_observer_rc.clone(),
-        ));
-
-        let vdom = component_rc.borrow().view(&behavior_rc);
-
-        let any_component_node_vdom = AnyComponentNodeVDom { vdom, ancestor };
-        let any_component_node_vdom_rc = Rc::new(RefCell::new(any_component_node_vdom));
-
-        let vdom_observer_rc = Rc::new(RefCell::new(VDomObserver::new(
-            any_component_node_vdom_rc.clone(),
-        )));
-        let any_component_node_data = AnyComponentNodeData {
-            component: component_rc,
-            depth,
-            to_rerender: false,
-            behavior: behavior_rc,
-            any_component_node_vdom: any_component_node_vdom_rc.clone(),
-            vdom_observer: vdom_observer_rc.clone(),
-        };
-
-        let any_component_node_data = Rc::new(RefCell::new(any_component_node_data));
-        to_rerender_observer_rc
-            .borrow_mut()
-            .set_observer(any_component_node_data.clone());
-        Self {
-            data: any_component_node_data,
-            to_rerender_observer: to_rerender_observer_rc,
-        }
-    }
-
-    pub fn vdom(&self) -> &VNode {
-        let x = &self.data.borrow();
-        let d = x.any_component_node_vdom.borrow();
-        &d.vdom
-    }
-
-    pub fn patch(&mut self, last: VComponent, ancestor: &Node) {
-        let any_component_node_data = self.data.borrow();
-        let any_component_node_vdom = any_component_node_data.any_component_node_vdom.borrow_mut();
-        let binding = last.comp.unwrap();
-        let last_any_component_node_data = binding.data.borrow();
-        let last_any_component_node_vdom =  last_any_component_node_data.any_component_node_vdom.borrow();
-        any_component_node_vdom.vdom.patch(Some(any_component_node_data.any_component_node_vdom.borrow_mut().vdom), &ancestor);
+    fn vdom_notify(&mut self, mut new_vdom: VNode) {
+        mem::swap(&mut new_vdom, &mut self.vdom);
+        self.vdom.patch(Some(new_vdom), &self.ancestor);
     }
 }
 
@@ -164,8 +135,37 @@ impl<C: Component> From<&AnyComponentBehavior> for ComponentBehavior<C> {
     }
 }
 
+pub struct VDomObserver {
+    component_node: Option<Weak<RefCell<AnyComponentNode>>>,
+}
+
+impl VDomObserver {
+    fn new() -> Self {
+        Self {
+            component_node: None,
+        }
+    }
+
+    fn set_observer(&mut self, component_node: Rc<RefCell<AnyComponentNode>>) {
+        self.component_node = Some(Rc::downgrade(&component_node));
+    }
+
+    pub fn notify(&self, new_vdom: VNode) {
+        if let Some(weak_ref) = &self.component_node {
+            if let Some(component_node_ref) = weak_ref.upgrade() {
+                let mut component_node = component_node_ref.borrow_mut();
+                component_node.vdom_notify(new_vdom);
+            } else {
+                panic!("VDomObserver's reference to AnyComponentNode has expired");
+            }
+        } else {
+            panic!("VDomObserver is not attached to a AnyComponentNode");
+        }
+    }
+}
+
 pub struct ToRerenderObserver {
-    component_node_data: Option<Rc<RefCell<AnyComponentNodeData>>>,
+    component_node_data: Option<Weak<RefCell<AnyComponentNode>>>,
 }
 
 impl ToRerenderObserver {
@@ -175,31 +175,19 @@ impl ToRerenderObserver {
         }
     }
 
-    fn set_observer(&mut self, component_node_data: Rc<RefCell<AnyComponentNodeData>>) {
-        self.component_node_data = Some(component_node_data);
+    fn set_observer(&mut self, component_node_data: Rc<RefCell<AnyComponentNode>>) {
+        self.component_node_data = Some(Rc::downgrade(&component_node_data));
     }
 
     pub fn notify(&self) {
-        if let Some(any_component_node_data) = &self.component_node_data {
-            any_component_node_data.borrow_mut().rerender_notify();
+        if let Some(weak_ref) = &self.component_node_data {
+            if let Some(any_component_node_data) = weak_ref.upgrade() {
+                any_component_node_data.borrow_mut().rerender_notify();
+            } else {
+                panic!("RerenderObserver's reference to AnyComponentNode has expired");
+            }
         } else {
-            panic!("RerenderObserver is not attached to a component node");
+            panic!("RerenderObserver is not attached to AnyComponentNode");
         }
-    }
-}
-
-pub struct VDomObserver {
-    component_node_vdom: Rc<RefCell<AnyComponentNodeVDom>>,
-}
-
-impl VDomObserver {
-    fn new(component_node_vdom: Rc<RefCell<AnyComponentNodeVDom>>) -> Self {
-        Self {
-            component_node_vdom,
-        }
-    }
-
-    pub fn notify(&self, new_vdom: VNode) {
-        &self.component_node_vdom.borrow_mut().vdom_notify(new_vdom);
     }
 }
