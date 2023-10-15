@@ -19,7 +19,7 @@ pub struct AnyComponentNode {
     depth: u32,
     to_rerender: bool,
     behavior: Rc<AnyComponentBehavior>,
-    vdom: VNode,
+    pub vdom: VNode,
     ancestor: Node,
     vdom_observer: Rc<RefCell<VDomObserver>>,
     to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
@@ -50,10 +50,16 @@ impl AnyComponentNode {
 
         let node_rc = Rc::new(RefCell::new(node));
 
-        to_rerender_observer_rc
+        node_rc
+            .borrow()
+            .to_rerender_observer
             .borrow_mut()
             .set_observer(node_rc.clone());
-        vdom_observer_rc.borrow_mut().set_observer(node_rc.clone());
+        node_rc
+            .borrow()
+            .vdom_observer
+            .borrow_mut()
+            .set_observer(node_rc.clone());
 
         Rc::try_unwrap(node_rc)
             .expect("Failed to unwrap the Rc")
@@ -75,6 +81,10 @@ impl AnyComponentNode {
     fn vdom_notify(&mut self, mut new_vdom: VNode) {
         mem::swap(&mut new_vdom, &mut self.vdom);
         self.vdom.patch(Some(new_vdom), &self.ancestor);
+    }
+
+    pub fn patch(&mut self, last_component_node: Box<AnyComponentNode>, ancestor: &Node) {
+        self.vdom.patch(Some(last_component_node.vdom), ancestor);
     }
 }
 

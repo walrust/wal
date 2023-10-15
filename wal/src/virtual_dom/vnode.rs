@@ -24,7 +24,7 @@ impl VNode {
         match self {
             VNode::Element { velement } => velement.dom.as_ref().map(|x| x as &Node),
             VNode::Text { vtext } => vtext.dom.as_ref().map(|x| x as &Node),
-            VNode::Component { vcomp } => vcomp.comp.as_ref().unwrap().vdom().get_dom(),
+            VNode::Component { vcomp } => vcomp.comp.as_ref().unwrap().vdom.get_dom(),
             VNode::List { .. } => todo!(),
         }
     }

@@ -74,7 +74,7 @@ impl VComponent {
             Some(old_vcomp) => {
                 log!("\t\tHashes differ");
                 let mut any_component_node = (self.generator)(self.props.take(), ancestor);
-                any_component_node.patch(old_vcomp, ancestor);
+                any_component_node.patch(old_vcomp.comp.unwrap(), ancestor);
                 //let old_vdom = old_vcomp.comp.unwrap().vdom();
                 //any_component_node.patch(old_vcomp, ancestor);
                 //self.comp = Some(any_component_node);
