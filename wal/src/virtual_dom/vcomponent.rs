@@ -47,17 +47,17 @@ impl VComponent {
         let mut old_virt: Option<VComponent> = None;
 
         match last {
-        Some(VNode::Component { vcomp }) => {
-            log!("\tComparing two components");
-            old_virt = Some(vcomp);
-        },
-        Some(VNode::Element { .. }) | Some(VNode::Text { .. }) => {
-            log!("\tNew component over element/text");
-        },
-        None => {
-            log!("\tCreating the comp for the first time");
-        },
-        Some(VNode::List { .. }) => todo!(),
+            Some(VNode::Component { vcomp }) => {
+                log!("\tComparing two components");
+                old_virt = Some(vcomp);
+            }
+            Some(VNode::Element { .. }) | Some(VNode::Text { .. }) => {
+                log!("\tNew component over element/text");
+            }
+            None => {
+                log!("\tCreating the comp for the first time");
+            }
+            Some(VNode::List { .. }) => todo!(),
         }
 
         self.render(old_virt, ancestor);
@@ -75,9 +75,7 @@ impl VComponent {
                 log!("\t\tHashes differ");
                 let mut any_component_node = (self.generator)(self.props.take(), ancestor);
                 any_component_node.patch(old_vcomp.comp.unwrap(), ancestor);
-                //let old_vdom = old_vcomp.comp.unwrap().vdom();
-                //any_component_node.patch(old_vcomp, ancestor);
-                //self.comp = Some(any_component_node);
+                self.comp = Some(any_component_node);
             }
             None => {
                 log!("\t\tThere was no component before");

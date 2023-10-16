@@ -4,6 +4,7 @@ use crate::{
 };
 
 pub fn start<C: Component + 'static>(root_component: C) {
-    AnyComponentNode::new(root_component, Dom::get_root_element());
+    let ancestor = Dom::get_root_element();
+    AnyComponentNode::new_root(root_component, ancestor);
     Scheduler::event_loop();
 }

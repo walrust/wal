@@ -26,6 +26,12 @@ pub struct AnyComponentNode {
 }
 
 impl AnyComponentNode {
+    pub fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Self {
+        let mut root = Self::new(component, ancestor);
+        root.vdom.patch(None, &root.ancestor);
+        root
+    }
+
     pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Self {
         let component_box = Box::new(component) as Box<dyn AnyComponent>;
         let component_rc = Rc::new(RefCell::new(component_box));
