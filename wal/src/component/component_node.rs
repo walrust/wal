@@ -89,8 +89,9 @@ impl AnyComponentNode {
         self.vdom.patch(Some(new_vdom), &self.ancestor);
     }
 
-    pub fn patch(&mut self, last_component_node: Box<AnyComponentNode>, ancestor: &Node) {
-        self.vdom.patch(Some(last_component_node.vdom), ancestor);
+    pub fn patch(&mut self, last_component_node: Option<Box<AnyComponentNode>>, ancestor: &Node) {
+        self.vdom
+            .patch(last_component_node.map(|node| node.vdom), ancestor);
     }
 }
 

@@ -74,12 +74,14 @@ impl VComponent {
             Some(old_vcomp) => {
                 log!("\t\tHashes differ");
                 let mut any_component_node = (self.generator)(self.props.take(), ancestor);
-                any_component_node.patch(old_vcomp.comp.unwrap(), ancestor);
+                any_component_node.patch(old_vcomp.comp, ancestor);
                 self.comp = Some(any_component_node);
             }
             None => {
                 log!("\t\tThere was no component before");
-                self.comp = Some((self.generator)(self.props.take(), ancestor));
+                let mut any_component_node = (self.generator)(self.props.take(), ancestor);
+                any_component_node.patch(None, ancestor);
+                self.comp = Some(any_component_node);
             }
         }
     }

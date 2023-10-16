@@ -1,9 +1,8 @@
-use std::{any::Any, cell::RefCell, rc::Rc};
+use std::{any::Any, cell::RefCell, collections::BinaryHeap, rc::Rc};
 
 use super::{
     component::AnyComponent,
     component_node::{AnyComponentBehavior, ToRerenderObserver, VDomObserver},
-    thread_safe_collections::ThreadSafePriorityQueue,
 };
 
 enum SchedulerMessage {
@@ -70,14 +69,13 @@ thread_local! {
 
 #[derive(Default)]
 pub struct Scheduler {
-    priority_queue: ThreadSafePriorityQueue<SchedulerMessage>,
+    messages: BinaryHeap<SchedulerMessage>,
 }
 
 impl Scheduler {
-    pub fn event_loop() {
-        loop {
-            SCHEDULER_INSTANCE.with(|scheduler| {
-                let scheduler_message = scheduler.borrow_mut().priority_queue.pop();
+    fn handle_messages() {
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            while let Some(scheduler_message) = scheduler.borrow_mut().messages.pop() {
                 match scheduler_message {
                     SchedulerMessage::Update(update_message) => {
                         let to_rerender = update_message
@@ -96,8 +94,8 @@ impl Scheduler {
                         rerender_message.vdom_observer.borrow_mut().notify(vdom);
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     pub fn add_update_message(
@@ -111,8 +109,10 @@ impl Scheduler {
                 message,
                 to_rerender_observer,
             });
-            scheduler.borrow_mut().priority_queue.push(message);
+            scheduler.borrow_mut().messages.push(message);
         });
+
+        Scheduler::handle_messages();
     }
 
     pub fn add_rerender_message(
@@ -128,7 +128,9 @@ impl Scheduler {
                 vdom_observer,
                 depth,
             });
-            scheduler.borrow_mut().priority_queue.push(message);
+            scheduler.borrow_mut().messages.push(message);
         });
+
+        Scheduler::handle_messages();
     }
 }
