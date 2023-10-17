@@ -70,8 +70,7 @@ impl Component for ChildComponent {
         let cb = props.1.clone();
         Interval::new(5000, move || {
             cb.emit(());
-        })
-        .forget();
+        }).forget();
 
         Self(props.0, props.1)
     }
