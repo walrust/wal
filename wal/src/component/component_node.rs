@@ -1,12 +1,6 @@
 use crate::virtual_dom::VNode;
 use gloo::console::log;
-use std::{
-    cell::RefCell,
-    fmt,
-    marker::PhantomData,
-    mem,
-    rc::{Rc, Weak},
-};
+use std::{cell::RefCell, fmt, marker::PhantomData, mem, rc::Rc};
 use web_sys::Node;
 
 use super::{
@@ -78,7 +72,6 @@ impl AnyComponentNode {
         let mut to_rerender = self.to_rerender.borrow_mut();
         if !*to_rerender {
             *to_rerender = true;
-            log!("before add rerender message");
             Scheduler::add_rerender_message(
                 self.component.clone(),
                 self.behavior.clone(),
@@ -86,16 +79,12 @@ impl AnyComponentNode {
                 self.to_rerender.clone(),
                 self.depth,
             );
-            log!("after add rerender message and before handle messages");
         }
     }
 
     fn vdom_notify(&mut self, mut new_vdom: VNode) {
-        log!("vdom notify1");
         mem::swap(&mut new_vdom, &mut self.vdom);
-        log!("vdom notify2");
         self.vdom.patch(Some(&new_vdom), &self.ancestor);
-        log!("vdom notify3");
     }
 
     pub fn patch(
@@ -195,20 +184,11 @@ impl VDomObserver {
     }
 
     pub fn notify(&self, new_vdom: VNode) {
-        log!("rerender notify1");
         if let Some(any_componend_node) = &self.component_node {
-            log!("rerender notify2");
-            let any_component_node = any_componend_node.try_borrow_mut();
-            if any_component_node.is_err() {
-                log!("rerender notify kurwa jest borrowed");
-                panic!("aaaaaaaaaaaaaaaaa");
-            }
-            let mut any_component_node = any_component_node.unwrap();
-            log!("rerender notify2.5");
+            let mut any_component_node = any_componend_node.borrow_mut();
             any_component_node.vdom_notify(new_vdom);
-            log!("rerender notify3");
         } else {
-            log!("rerender notify4");
+            log!("VDomObserver is not attached to a AnyComponentNode");
             panic!("VDomObserver is not attached to a AnyComponentNode");
         }
     }
@@ -230,15 +210,11 @@ impl ToRerenderObserver {
     }
 
     pub fn notify(&self) {
-        log!("Notifying1");
         if let Some(any_component_node) = &self.any_component_node {
-            log!("Notifying2");
             any_component_node.borrow_mut().rerender_notify();
-            log!("Notifying4");
         } else {
-            log!("Notifying6");
+            log!("RerenderObserver is not attached to AnyComponentNode");
             panic!("RerenderObserver is not attached to AnyComponentNode");
         }
-        log!("Notifying7");
     }
 }

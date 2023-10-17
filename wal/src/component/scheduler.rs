@@ -1,6 +1,5 @@
 use std::{any::Any, cell::RefCell, collections::BinaryHeap, rc::Rc};
 
-use gloo::console::log;
 use wasm_bindgen_futures::spawn_local;
 
 use super::{
@@ -21,15 +20,10 @@ struct UpdateMessage {
 
 impl UpdateMessage {
     fn handle(self) {
-        log!("UpdateMessage handle1");
         let to_rerender = self.component.borrow_mut().update(self.message);
-        log!("UpdateMessage handle2");
         if to_rerender {
-            log!("UpdateMessage handle3");
             self.to_rerender_observer.borrow().notify();
-            log!("UpdateMessage handle4");
         }
-        log!("UpdateMessage handle5");
     }
 }
 
@@ -43,13 +37,9 @@ struct RerenderMessage {
 
 impl RerenderMessage {
     fn handle(self) {
-        log!("RerenderMessage handle1");
         let vdom = self.component.borrow().view(self.behavior.as_ref());
-        log!("RerenderMessage handle2");
         let vdom_observer = self.vdom_observer.borrow();
-        log!("RerenderMessage handle3");
         vdom_observer.notify(vdom);
-        log!("RerenderMessage handle4");
         *self.to_rerender.borrow_mut() = false;
     }
 }
@@ -113,20 +103,14 @@ impl Scheduler {
     }
 
     pub fn handle_messages() {
-        log!("Handling messages1");
         let scheduler_messages: Vec<SchedulerMessage> = SCHEDULER_INSTANCE.with(|scheduler| {
-            log!("Handling messages2");
             let mut scheduler = scheduler.borrow_mut();
-            log!("Handling messages3");
             let messages = scheduler.messages.drain().collect();
-            log!("Handling messages4");
             scheduler.is_handle_messages_scheduled = false;
-            log!("Handling messages5");
             messages
         });
-        log!("Hangdling massage6");
+
         for scheduler_message in scheduler_messages {
-            log!("handling messages for");
             match scheduler_message {
                 SchedulerMessage::Update(update_message) => {
                     update_message.handle();
@@ -136,11 +120,6 @@ impl Scheduler {
                 }
             }
         }
-    }
-
-    fn add_message(&mut self, message: SchedulerMessage) {
-        self.messages.push(message);
-        self.schedule_handle_messages();
     }
 
     fn schedule_handle_messages(&mut self) {
@@ -157,19 +136,12 @@ impl Scheduler {
         message: Box<dyn Any>,
         to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
     ) {
-        log!("Adding update message1");
-        SCHEDULER_INSTANCE.with(|scheduler| {
-            log!("Adding update message2");
-            let message = SchedulerMessage::Update(UpdateMessage {
-                component,
-                message,
-                to_rerender_observer,
-            });
-            log!("Adding update message3");
-            scheduler.borrow_mut().add_message(message);
-            log!("Adding update message4");
+        let message = SchedulerMessage::Update(UpdateMessage {
+            component,
+            message,
+            to_rerender_observer,
         });
-        log!("Adding update message5");
+        Self::add_message(message);
     }
 
     pub fn add_rerender_message(
@@ -179,21 +151,21 @@ impl Scheduler {
         to_rerender: Rc<RefCell<bool>>,
         depth: u32,
     ) {
-        log!("add rerender message1");
-        SCHEDULER_INSTANCE.with(|scheduler| {
-            log!("add rerender message2");
-            let message = SchedulerMessage::Rerender(RerenderMessage {
-                component,
-                behavior,
-                vdom_observer,
-                to_rerender,
-                depth,
-            });
-            log!("add rerender message3");
-            scheduler.borrow_mut().add_message(message);
-            log!("add rerender message4");
+        let message = SchedulerMessage::Rerender(RerenderMessage {
+            component,
+            behavior,
+            vdom_observer,
+            to_rerender,
+            depth,
         });
+        Self::add_message(message);
+    }
 
-        log!("add rerender message5");
+    fn add_message(message: SchedulerMessage) {
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            let mut scheduler = scheduler.borrow_mut();
+            scheduler.messages.push(message);
+            scheduler.schedule_handle_messages();
+        });
     }
 }
