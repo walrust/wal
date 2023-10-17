@@ -17,10 +17,10 @@ impl VText {
         }
     }
 
-    pub fn patch(&mut self, mut last: Option<&VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
         log!("Patching TextNode");
         let mut old_virt: Option<&VText> = None;
-        
+
         match last {
             None => {
                 log!("\tCreating the node for the first time");

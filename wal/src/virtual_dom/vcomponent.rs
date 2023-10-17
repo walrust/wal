@@ -4,7 +4,7 @@ use web_sys::Node;
 use crate::component::{component::Component, component_node::AnyComponentNode};
 use std::{
     any::Any,
-    cell::{Ref, RefCell},
+    cell::RefCell,
     collections::hash_map::DefaultHasher,
     fmt,
     hash::{Hash, Hasher},
@@ -69,7 +69,7 @@ impl VComponent {
 impl VComponent {
     fn render(&mut self, last: Option<&VComponent>, ancestor: &Node) {
         match last {
-            Some(mut old_vcomp) if old_vcomp.hash == self.hash => {
+            Some(old_vcomp) if old_vcomp.hash == self.hash => {
                 log!("\t\tHashes are the same");
                 self.comp = old_vcomp.comp.clone();
             }
