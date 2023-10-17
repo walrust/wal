@@ -4,9 +4,11 @@ use web_sys::Node;
 use crate::component::{component::Component, component_node::AnyComponentNode};
 use std::{
     any::Any,
+    cell::{Ref, RefCell},
     collections::hash_map::DefaultHasher,
     fmt,
     hash::{Hash, Hasher},
+    rc::Rc,
 };
 
 use super::VNode;
@@ -14,14 +16,14 @@ use super::VNode;
 pub(crate) type PropertiesHash = u64;
 pub(crate) type AnyProps = Option<Box<dyn Any>>;
 pub(crate) type ComponentNodeGenerator =
-    Box<dyn Fn(AnyProps, &Node) -> Box<AnyComponentNode> + 'static>;
+    Box<dyn Fn(AnyProps, &Node) -> Rc<RefCell<AnyComponentNode>> + 'static>;
 pub struct VComponent {
     props: AnyProps,
     hash: PropertiesHash,
     generator: ComponentNodeGenerator,
 
     // Sth stinks here
-    pub comp: Option<Box<AnyComponentNode>>,
+    pub comp: Option<Rc<RefCell<AnyComponentNode>>>,
 }
 
 impl VComponent {
@@ -42,9 +44,9 @@ impl VComponent {
         }
     }
 
-    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
         log!("Patching component");
-        let mut old_virt: Option<VComponent> = None;
+        let mut old_virt: Option<&VComponent> = None;
 
         match last {
             Some(VNode::Component { vcomp }) => {
@@ -65,23 +67,29 @@ impl VComponent {
 }
 
 impl VComponent {
-    fn render(&mut self, last: Option<VComponent>, ancestor: &Node) {
+    fn render(&mut self, last: Option<&VComponent>, ancestor: &Node) {
         match last {
             Some(mut old_vcomp) if old_vcomp.hash == self.hash => {
                 log!("\t\tHashes are the same");
-                self.comp = old_vcomp.comp.take();
+                self.comp = old_vcomp.comp.clone();
             }
             Some(old_vcomp) => {
                 log!("\t\tHashes differ");
-                let mut any_component_node = (self.generator)(self.props.take(), ancestor);
-                any_component_node.patch(old_vcomp.comp, ancestor);
-                self.comp = Some(any_component_node);
+                let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
+                {
+                    let mut any_component_node = any_component_node_rc.borrow_mut();
+                    any_component_node.patch(old_vcomp.comp.clone(), ancestor);
+                }
+                self.comp = Some(any_component_node_rc);
             }
             None => {
                 log!("\t\tThere was no component before");
-                let mut any_component_node = (self.generator)(self.props.take(), ancestor);
-                any_component_node.patch(None, ancestor);
-                self.comp = Some(any_component_node);
+                let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
+                {
+                    let mut any_component_node = any_component_node_rc.borrow_mut();
+                    any_component_node.patch(None, ancestor);
+                }
+                self.comp = Some(any_component_node_rc);
             }
         }
     }
@@ -89,14 +97,13 @@ impl VComponent {
     fn generator<C: Component + 'static>(
         props: AnyProps,
         ancestor: &Node,
-    ) -> Box<AnyComponentNode> {
+    ) -> Rc<RefCell<AnyComponentNode>> {
         let props = props
             .unwrap()
             .downcast::<C::Properties>()
             .expect("Trying to unpack others component props");
 
-        let any_node = AnyComponentNode::new(C::new(*props), ancestor.clone());
-        Box::new(any_node)
+        AnyComponentNode::new(C::new(*props), ancestor.clone())
     }
 }
 

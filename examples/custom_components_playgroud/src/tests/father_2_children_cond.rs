@@ -1,5 +1,6 @@
+use gloo::timers::callback::Interval;
 use wal::{
-    component::{component::Component, component_node::ComponentBehavior},
+    component::{callback::Callback, component::Component, component_node::ComponentBehavior},
     virtual_dom::{VComponent, VElement, VNode},
 };
 
@@ -20,16 +21,25 @@ impl Component for FatherComponent {
     }
 
     fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+        let callback = _behavior.create_callback(|()| FatherMessages::Add);
+
         VElement {
             tag_name: "div".to_string(),
             attr: [("father".to_string(), "true".to_string())].into(),
             children: {
                 if self.0 % 2 == 0 {
-                    vec![VComponent::new::<ChildComponent>(ChildProperties(self.0)).into()]
+                    vec![
+                        VComponent::new::<ChildComponent>(ChildProperties(self.0, callback)).into(),
+                    ]
                 } else {
                     vec![
-                        VComponent::new::<ChildComponent>(ChildProperties(self.0)).into(),
-                        VComponent::new::<ChildComponent>(ChildProperties(self.0 * -1)).into(),
+                        VComponent::new::<ChildComponent>(ChildProperties(
+                            self.0,
+                            callback.clone(),
+                        ))
+                        .into(),
+                        VComponent::new::<ChildComponent>(ChildProperties(self.0 * -1, callback))
+                            .into(),
                     ]
                 }
             },
@@ -49,15 +59,21 @@ impl Component for FatherComponent {
 enum ChildMessages {}
 
 #[derive(Hash)]
-struct ChildProperties(i32);
+struct ChildProperties(i32, Callback<()>);
 
-struct ChildComponent(i32);
+struct ChildComponent(i32, Callback<()>);
 impl Component for ChildComponent {
     type Message = ChildMessages;
     type Properties = ChildProperties;
 
     fn new(props: Self::Properties) -> Self {
-        Self(props.0)
+        let cb = props.1.clone();
+        Interval::new(5000, move || {
+            cb.emit(());
+        })
+        .forget();
+
+        Self(props.0, props.1)
     }
 
     fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {

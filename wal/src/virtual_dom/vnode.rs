@@ -1,6 +1,6 @@
 use web_sys::Node;
 
-use super::{VElement, VList, VText, VComponent};
+use super::{VComponent, VElement, VList, VText};
 
 #[derive(PartialEq, Debug)]
 pub enum VNode {
@@ -11,7 +11,7 @@ pub enum VNode {
 }
 
 impl VNode {
-    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
         match self {
             VNode::Element { velement } => velement.patch(last, ancestor),
             VNode::Text { vtext } => vtext.patch(last, ancestor),
@@ -20,11 +20,11 @@ impl VNode {
         };
     }
 
-    pub fn get_dom(&self) -> Option<&Node> {
+    pub fn get_dom(&self) -> Option<Node> {
         match self {
-            VNode::Element { velement } => velement.dom.as_ref().map(|x| x as &Node),
-            VNode::Text { vtext } => vtext.dom.as_ref().map(|x| x as &Node),
-            VNode::Component { vcomp } => vcomp.comp.as_ref().unwrap().vdom.get_dom(),
+            VNode::Element { velement } => velement.dom.as_ref().map(|x| x as &Node).cloned(),
+            VNode::Text { vtext } => vtext.dom.as_ref().map(|x| x as &Node).cloned(),
+            VNode::Component { vcomp } => vcomp.comp.as_ref().unwrap().borrow().vdom.get_dom(),
             VNode::List { .. } => todo!(),
         }
     }
@@ -32,25 +32,19 @@ impl VNode {
 
 impl From<VElement> for VNode {
     fn from(velement: VElement) -> Self {
-        Self::Element {
-            velement,
-        }
+        Self::Element { velement }
     }
 }
 
 impl From<VComponent> for VNode {
     fn from(vcomp: VComponent) -> Self {
-        Self::Component { 
-            vcomp
-        }
+        Self::Component { vcomp }
     }
 }
 
 impl From<VText> for VNode {
     fn from(vtext: VText) -> Self {
-        Self::Text {
-            vtext,
-        }
+        Self::Text { vtext }
     }
 }
 

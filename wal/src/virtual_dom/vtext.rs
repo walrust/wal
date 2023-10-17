@@ -17,16 +17,17 @@ impl VText {
         }
     }
 
-    pub fn patch(&mut self, mut last: Option<VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, mut last: Option<&VNode>, ancestor: &Node) {
         log!("Patching TextNode");
         let mut old_virt: Option<&VText> = None;
+        
         match last {
             None => {
                 log!("\tCreating the node for the first time");
                 self.dom = None;
             }
-            Some(VNode::Text { ref mut vtext }) => {
-                self.dom = vtext.dom.take();
+            Some(VNode::Text { ref vtext }) => {
+                self.dom = vtext.dom.clone();
                 old_virt = Some(vtext);
             }
             Some(VNode::Element { .. }) | Some(VNode::Component { .. }) => {

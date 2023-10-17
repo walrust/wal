@@ -1,5 +1,7 @@
 use std::{any::Any, cell::RefCell, collections::BinaryHeap, rc::Rc};
 
+use gloo::console::log;
+
 use super::{
     component::AnyComponent,
     component_node::{AnyComponentBehavior, ToRerenderObserver, VDomObserver},
@@ -73,29 +75,46 @@ pub struct Scheduler {
 }
 
 impl Scheduler {
-    fn handle_messages() {
-        SCHEDULER_INSTANCE.with(|scheduler| {
-            while let Some(scheduler_message) = scheduler.borrow_mut().messages.pop() {
-                match scheduler_message {
-                    SchedulerMessage::Update(update_message) => {
-                        let to_rerender = update_message
-                            .component
-                            .borrow_mut()
-                            .update(update_message.message);
-                        if to_rerender {
-                            update_message.to_rerender_observer.borrow().notify();
-                        }
+    pub fn handle_messages() {
+        log!("Handling messages-1");
+        let scheduler_messages: Vec<SchedulerMessage> = SCHEDULER_INSTANCE.with(|scheduler| {
+            log!("Handling messages-2");
+            let messages = scheduler.borrow_mut().messages.drain().collect();
+            log!("Handling messages-3");
+            messages
+        });
+        log!("Hangdling massage0");
+        for scheduler_message in scheduler_messages {
+            log!("handling messages for");
+            match scheduler_message {
+                SchedulerMessage::Update(update_message) => {
+                    log!("Handling update message1");
+                    let to_rerender = update_message
+                        .component
+                        .borrow_mut()
+                        .update(update_message.message);
+                    log!("Handling update message2");
+                    if to_rerender {
+                        log!("Handling update message3");
+                        update_message.to_rerender_observer.borrow().notify();
+                        log!("Handling update message4");
                     }
-                    SchedulerMessage::Rerender(rerender_message) => {
-                        let vdom = rerender_message
-                            .component
-                            .borrow()
-                            .view(rerender_message.behavior.as_ref());
-                        rerender_message.vdom_observer.borrow_mut().notify(vdom);
-                    }
+                    log!("Handling update message5");
+                }
+                SchedulerMessage::Rerender(rerender_message) => {
+                    log!("handle rerender message1");
+                    let vdom = rerender_message
+                        .component
+                        .borrow()
+                        .view(rerender_message.behavior.as_ref());
+                    log!("handle rerender message2");
+                    let vdom_observer = rerender_message.vdom_observer.borrow();
+                    log!("handle rerender message2.5");
+                    vdom_observer.notify(vdom);
+                    log!("handle rerender message3");
                 }
             }
-        });
+        }
     }
 
     pub fn add_update_message(
@@ -103,15 +122,19 @@ impl Scheduler {
         message: Box<dyn Any>,
         to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
     ) {
+        log!("Adding update message1");
         SCHEDULER_INSTANCE.with(|scheduler| {
+            log!("Adding update message2");
             let message = SchedulerMessage::Update(UpdateMessage {
                 component,
                 message,
                 to_rerender_observer,
             });
+            log!("Adding update message3");
             scheduler.borrow_mut().messages.push(message);
+            log!("Adding update message4");
         });
-
+        log!("Adding update message5");
         Scheduler::handle_messages();
     }
 
@@ -121,16 +144,23 @@ impl Scheduler {
         vdom_observer: Rc<RefCell<VDomObserver>>,
         depth: u32,
     ) {
+        log!("add rerender message1");
         SCHEDULER_INSTANCE.with(|scheduler| {
+            log!("add rerender message2");
             let message = SchedulerMessage::Rerender(RerenderMessage {
                 component,
                 behavior,
                 vdom_observer,
                 depth,
             });
-            scheduler.borrow_mut().messages.push(message);
+            log!("add rerender message3");
+            let mut scheduler = scheduler.borrow_mut();
+            log!("add rerender message3.5");
+            scheduler.messages.push(message);
+            log!("add rerender message4");
         });
 
+        log!("add rerender message5");
         Scheduler::handle_messages();
     }
 }
