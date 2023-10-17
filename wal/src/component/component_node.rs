@@ -18,7 +18,7 @@ use super::{
 pub struct AnyComponentNode {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
     depth: u32,
-    to_rerender: bool,
+    to_rerender: Rc<RefCell<bool>>,
     behavior: Rc<AnyComponentBehavior>,
     pub vdom: VNode,
     ancestor: Node,
@@ -50,7 +50,7 @@ impl AnyComponentNode {
         let node = Self {
             component: component_rc,
             depth: 0,
-            to_rerender: false,
+            to_rerender: Rc::new(RefCell::new(false)),
             behavior: behavior_rc,
             vdom,
             ancestor,
@@ -75,13 +75,15 @@ impl AnyComponentNode {
     }
 
     fn rerender_notify(&mut self) {
-        if !self.to_rerender {
-            self.to_rerender = true;
+        let mut to_rerender = self.to_rerender.borrow_mut();
+        if !*to_rerender {
+            *to_rerender = true;
             log!("before add rerender message");
             Scheduler::add_rerender_message(
                 self.component.clone(),
                 self.behavior.clone(),
                 self.vdom_observer.clone(),
+                self.to_rerender.clone(),
                 self.depth,
             );
             log!("after add rerender message and before handle messages");
@@ -196,7 +198,12 @@ impl VDomObserver {
         log!("rerender notify1");
         if let Some(any_componend_node) = &self.component_node {
             log!("rerender notify2");
-            let mut any_component_node = any_componend_node.borrow_mut();
+            let any_component_node = any_componend_node.try_borrow_mut();
+            if any_component_node.is_err() {
+                log!("rerender notify kurwa jest borrowed");
+                panic!("aaaaaaaaaaaaaaaaa");
+            }
+            let mut any_component_node = any_component_node.unwrap();
             log!("rerender notify2.5");
             any_component_node.vdom_notify(new_vdom);
             log!("rerender notify3");
