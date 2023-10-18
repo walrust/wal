@@ -10,7 +10,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 wasm-bindgen = "0.2.87"
-wal-vdom = { path = "../../wal-vdom" }
+wal = { path = "../../wal" }
 serde = { version = "1.0.183", features = ["derive"] }
 serde_json = "1.0.104"
 serde-wasm-bindgen = "0.5.0"

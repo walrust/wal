@@ -1,6 +1,6 @@
 [workspace]
 members = [
+    "wal",
     "wal-macros",
-    "wal-vdom",
     "examples/*",
 ]

@@ -1,10 +1,8 @@
-use serde::Serialize;
-
 use super::VNode;
 
-#[derive(Serialize, PartialEq, Debug)]
+#[derive(PartialEq, Debug)]
 pub struct VList {
-    nodes: Vec<VNode>,
+    pub nodes: Vec<VNode>,
 }
 
 impl VList {
