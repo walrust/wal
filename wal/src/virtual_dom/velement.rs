@@ -1,4 +1,5 @@
 use gloo::console::log;
+use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 use web_sys::{Element, Node};
 
@@ -40,10 +41,7 @@ impl VElement {
             }
             Some(VNode::Element { velement }) => {
                 log!("\tCopying existing node");
-                self.dom = match velement.dom.clone() {
-                    Some(v) => Some(v),
-                    None => None,
-                };
+                self.dom = velement.dom.clone();
                 old_virt = Some(velement);
             }
             Some(VNode::Text { .. }) | Some(VNode::Component { .. }) => {
@@ -99,42 +97,23 @@ impl VElement {
         }
     }
 
-    fn handle_children(&mut self, old_virt: Option<&VElement>) {
+    fn handle_children(&mut self, old_element: Option<&VElement>) {
         let target = self.dom.as_mut().unwrap();
+        let old_children = old_element.map_or(Vec::new(), |e| e.children.iter().collect());
 
-        let mut children: Vec<Option<&mut VNode>> =
-            self.children.iter_mut().map(|x| Some(x)).collect();
-        let mut old_children: Vec<Option<&VNode>> = match old_virt {
-            Some(el) => el.children.iter().map(Some).collect(),
-            None => Vec::new(),
-        };
-
-        // More elegant and rust-style like approach
-        let len_diff = children.len() as i64 - old_children.len() as i64;
-
-        if len_diff < 0 {
-            let appendix = (0..len_diff.abs()).map(|_| None);
-            children.append(&mut appendix.collect());
-        } else if len_diff > 0 {
-            let appendix = (0..len_diff.abs()).map(|_| None);
-            old_children.append(&mut appendix.collect());
-        }
-
-        for pair in children.into_iter().zip(old_children) {
-            match pair {
-                (None, Some(node)) => {
+        for either_child_or_both in self.children.iter_mut().zip_longest(old_children) {
+            match either_child_or_both {
+                EitherOrBoth::Both(child, old_child) => {
+                    child.patch(Some(old_child), target);
+                }
+                EitherOrBoth::Left(child) => {
+                    child.patch(None, target);
+                }
+                EitherOrBoth::Right(old_child) => {
                     // child doesnt exist anymore
-                    if let Some(node) = node.get_dom() {
+                    if let Some(node) = old_child.get_dom() {
                         Dom::remove_child(&target, &node);
                     }
-                }
-                (Some(node), old) => {
-                    //patch child
-                    node.patch(old, target);
-                }
-                (None, None) => {
-                    log!("Impossible redundant loop");
-                    panic!("Impossible redundant loop");
                 }
             }
         }

@@ -9,6 +9,7 @@ edition = "2021"
 wal-macros = { path = "../wal-macros" }
 gloo = { version = "0.10.0", features = ["utils"] }
 wasm-bindgen-futures = "0.4"
+itertools = "0.11"
 
 [dependencies.web-sys]
 version = "0.3.64"

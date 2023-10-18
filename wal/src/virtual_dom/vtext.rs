@@ -26,7 +26,7 @@ impl VText {
                 log!("\tCreating the node for the first time");
                 self.dom = None;
             }
-            Some(VNode::Text { ref vtext }) => {
+            Some(VNode::Text { vtext }) => {
                 self.dom = vtext.dom.clone();
                 old_virt = Some(vtext);
             }
@@ -50,7 +50,7 @@ impl VText {
             Some(last) if self.text != last.text => {
                 self.dom
                     .as_ref()
-                    .expect("Dom isnt craeted even tho it should have been")
+                    .expect("Dom is not created even though it should have been")
                     .set_node_value(Some(self.text.as_str()));
             }
             // Same thing => do nothing

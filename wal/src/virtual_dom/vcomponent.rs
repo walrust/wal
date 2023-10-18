@@ -31,17 +31,32 @@ impl VComponent {
     where
         C: Component + 'static,
     {
-        let mut hasher = DefaultHasher::new();
-        props.hash(&mut hasher);
-        let hash = hasher.finish();
-        let props = Box::new(props);
+        let hash = Self::calculate_hash(&props);
         let generator = Box::new(Self::generator::<C>);
         VComponent {
-            props: Some(props),
+            props: Some(Box::new(props)),
             generator,
             hash,
             comp: None,
         }
+    }
+
+    fn calculate_hash<T: Hash>(props: &T) -> PropertiesHash {
+        let mut hasher = DefaultHasher::new();
+        props.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    fn generator<C: Component + 'static>(
+        props: AnyProps,
+        ancestor: &Node,
+    ) -> Rc<RefCell<AnyComponentNode>> {
+        let props = props
+            .unwrap()
+            .downcast::<C::Properties>()
+            .expect("Trying to unpack others component props");
+
+        AnyComponentNode::new(C::new(*props), ancestor.clone())
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
@@ -64,9 +79,7 @@ impl VComponent {
 
         self.render(old_virt, ancestor);
     }
-}
 
-impl VComponent {
     fn render(&mut self, last: Option<&VComponent>, ancestor: &Node) {
         match last {
             Some(old_vcomp) if old_vcomp.hash == self.hash => {
@@ -92,18 +105,6 @@ impl VComponent {
                 self.comp = Some(any_component_node_rc);
             }
         }
-    }
-
-    fn generator<C: Component + 'static>(
-        props: AnyProps,
-        ancestor: &Node,
-    ) -> Rc<RefCell<AnyComponentNode>> {
-        let props = props
-            .unwrap()
-            .downcast::<C::Properties>()
-            .expect("Trying to unpack others component props");
-
-        AnyComponentNode::new(C::new(*props), ancestor.clone())
     }
 }
 

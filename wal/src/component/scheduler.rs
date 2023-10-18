@@ -12,6 +12,15 @@ enum SchedulerMessage {
     Rerender(RerenderMessage),
 }
 
+impl SchedulerMessage {
+    fn handle(self) {
+        match self {
+            SchedulerMessage::Update(msg) => msg.handle(),
+            SchedulerMessage::Rerender(msg) => msg.handle(),
+        }
+    }
+}
+
 struct UpdateMessage {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
     message: Box<dyn Any>,
@@ -38,8 +47,7 @@ struct RerenderMessage {
 impl RerenderMessage {
     fn handle(self) {
         let vdom = self.component.borrow().view(self.behavior.as_ref());
-        let vdom_observer = self.vdom_observer.borrow();
-        vdom_observer.notify(vdom);
+        self.vdom_observer.borrow().notify(vdom);
         *self.to_rerender.borrow_mut() = false;
     }
 }
@@ -88,7 +96,6 @@ thread_local! {
     pub static SCHEDULER_INSTANCE: RefCell<Scheduler> = RefCell::new(Scheduler::new());
 }
 
-#[derive(Default)]
 pub struct Scheduler {
     messages: BinaryHeap<SchedulerMessage>,
     is_handle_messages_scheduled: bool,
@@ -102,7 +109,16 @@ impl Scheduler {
         }
     }
 
-    pub fn handle_messages() {
+    fn schedule_handle_messages(&mut self) {
+        if !self.is_handle_messages_scheduled {
+            self.is_handle_messages_scheduled = true;
+            spawn_local(async {
+                Scheduler::handle_messages();
+            });
+        }
+    }
+
+    fn handle_messages() {
         let scheduler_messages: Vec<SchedulerMessage> = SCHEDULER_INSTANCE.with(|scheduler| {
             let mut scheduler = scheduler.borrow_mut();
             let messages = scheduler.messages.drain().collect();
@@ -111,23 +127,7 @@ impl Scheduler {
         });
 
         for scheduler_message in scheduler_messages {
-            match scheduler_message {
-                SchedulerMessage::Update(update_message) => {
-                    update_message.handle();
-                }
-                SchedulerMessage::Rerender(rerender_message) => {
-                    rerender_message.handle();
-                }
-            }
-        }
-    }
-
-    fn schedule_handle_messages(&mut self) {
-        if !self.is_handle_messages_scheduled {
-            self.is_handle_messages_scheduled = true;
-            spawn_local(async {
-                Scheduler::handle_messages();
-            });
+            scheduler_message.handle();
         }
     }
 

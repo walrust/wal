@@ -30,6 +30,10 @@ impl AnyComponentNode {
         root_rc
     }
 
+    fn new_root_patch(&mut self) {
+        self.vdom.patch(None, &self.ancestor);
+    }
+
     pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
         let component_box = Box::new(component) as Box<dyn AnyComponent>;
         let component_rc = Rc::new(RefCell::new(component_box));
@@ -100,10 +104,6 @@ impl AnyComponentNode {
         } else {
             self.vdom.patch(None, ancestor)
         }
-    }
-
-    fn new_root_patch(&mut self) {
-        self.vdom.patch(None, &self.ancestor);
     }
 
     pub fn get_dom(&self) -> Option<Node> {
