@@ -15,24 +15,16 @@ fn main() {
 
     assert_eq!(
         html,
-        VNode::List {
-            vlist: VList::new(vec![
-                VNode::Element {
-                    velement: new_velement_str("div", HashMap::new(), Vec::new()),
-                },
-                VNode::Element {
-                    velement: new_velement_str(
-                        "div",
-                        HashMap::new(),
-                        vec![VNode::Element {
-                            velement: new_velement_str("span", HashMap::new(), Vec::new()),
-                        }],
-                    ),
-                },
-                VNode::Element {
-                    velement: new_velement_str("div", HashMap::new(), Vec::new()),
-                },
-            ]),
-        }
+        VNode::List(VList::new(vec![
+            VNode::Element(new_velement_str("div", HashMap::new(), Vec::new())),
+            VNode::Element(new_velement_str(
+                "div",
+                HashMap::new(),
+                vec![VNode::Element {
+                    velement: new_velement_str("span", HashMap::new(), Vec::new()),
+                }],
+            )),
+            VNode::Element(new_velement_str("div", HashMap::new(), Vec::new())),
+        ]))
     )
 }

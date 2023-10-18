@@ -7,7 +7,7 @@ fn empty_iter() -> impl std::iter::Iterator<Item = i32> {
 fn empty_vec() -> std::vec::Vec<i32> {
     std::vec::Vec::new()
 }
-
+// TODO: Add asserts
 fn main() {
     html! { for empty_iter() };
     html! { for empty_vec() };

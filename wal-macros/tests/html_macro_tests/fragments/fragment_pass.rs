@@ -14,12 +14,7 @@ fn main() {
 
 fn empty() {
     let html = html! { <></> };
-    assert_eq!(
-        html,
-        VNode::List {
-            vlist: VList::new_empty()
-        }
-    );
+    assert_eq!(html, VNode::List(VList::new_empty()));
 }
 
 fn with_single_element() {
@@ -30,11 +25,11 @@ fn with_single_element() {
     };
     assert_eq!(
         html,
-        VNode::List {
-            vlist: VList::new(vec![VNode::Element {
-                velement: new_velement_str("div", HashMap::new(), Vec::new()),
-            }]),
-        }
+        VNode::List(VList::new(vec![VNode::Element(new_velement_str(
+            "div",
+            HashMap::new(),
+            Vec::new()
+        ))]),)
     );
 }
 
@@ -47,16 +42,10 @@ fn with_multiple_elements() {
     };
     assert_eq!(
         html,
-        VNode::List {
-            vlist: VList::new(vec![
-                VNode::Element {
-                    velement: new_velement_str("div", HashMap::new(), Vec::new()),
-                },
-                VNode::Element {
-                    velement: new_velement_str("div", HashMap::new(), Vec::new()),
-                },
-            ]),
-        }
+        VNode::List(VList::new(vec![
+            VNode::Element(new_velement_str("div", HashMap::new(), Vec::new())),
+            VNode::Element(new_velement_str("div", HashMap::new(), Vec::new()),),
+        ]))
     );
 }
 
@@ -68,24 +57,15 @@ fn inside_element() {
     };
     assert_eq!(
         html,
-        VNode::Element {
-            velement: new_velement_str(
-                "div",
-                HashMap::new(),
-                vec![VNode::List {
-                    vlist: VList::new_empty()
-                }],
-            ),
-        }
+        VNode::Element(new_velement_str(
+            "div",
+            HashMap::new(),
+            vec![VNode::List(VList::new_empty())],
+        ))
     );
 }
 
 fn with_key_attribute() {
     let html = html! { <key="value"></> };
-    assert_eq!(
-        html,
-        VNode::List {
-            vlist: VList::new_empty(),
-        }
-    );
+    assert_eq!(html, VNode::List(VList::new_empty()));
 }

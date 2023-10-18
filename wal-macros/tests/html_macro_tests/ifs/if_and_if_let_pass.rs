@@ -9,10 +9,5 @@ fn main() {
         else if let Some(val) = Some("hello4") { val }
         else { "hello5" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello4")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello4")));
 }

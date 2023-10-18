@@ -36,13 +36,11 @@ fn element_with_float() {
 }
 
 fn get_div_with<T: ToString>(t: T) -> VNode {
-    VNode::Element {
-        velement: VElement::new(
-            "div".to_string(),
-            HashMap::new(),
-            vec![VNode::Text {
-                vtext: VText::new(t.to_string()),
-            }],
-        ),
-    }
+    VNode::Element(VElement::new(
+        "div".to_string(),
+        HashMap::new(),
+        vec![VNode::Text {
+            vtext: VText::new(t.to_string()),
+        }],
+    ))
 }

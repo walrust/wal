@@ -16,30 +16,20 @@ fn main() {
     };
     assert_eq!(
         html,
-        VNode::Element {
-            velement: new_velement_str(
-                "div",
-                HashMap::new(),
-                vec![
-                    VNode::Element {
-                        velement: new_velement_str(
-                            "div",
-                            HashMap::new(),
-                            vec![
-                                VNode::Element {
-                                    velement: new_velement_str("input", HashMap::new(), Vec::new()),
-                                },
-                                VNode::Element {
-                                    velement: new_velement_str("div", HashMap::new(), Vec::new()),
-                                },
-                            ],
-                        ),
-                    },
-                    VNode::Element {
-                        velement: new_velement_str("div", HashMap::new(), Vec::new()),
-                    },
-                ],
-            ),
-        }
+        VNode::Element(new_velement_str(
+            "div",
+            HashMap::new(),
+            vec![
+                VNode::Element(new_velement_str(
+                    "div",
+                    HashMap::new(),
+                    vec![
+                        VNode::Element(new_velement_str("input", HashMap::new(), Vec::new())),
+                        VNode::Element(new_velement_str("div", HashMap::new(), Vec::new())),
+                    ],
+                )),
+                VNode::Element(new_velement_str("div", HashMap::new(), Vec::new())),
+            ],
+        ))
     )
 }

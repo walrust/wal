@@ -10,18 +10,18 @@ fn main() {
     };
     assert_eq!(
         html,
-        VNode::List {
-            vlist: VList::new(vec![
-                VNode::Element {
-                    velement: VElement::new("div".to_string(), HashMap::new(), Vec::new()),
-                },
-                VNode::Element {
-                    velement: VElement::new("span".to_string(), HashMap::new(), Vec::new()),
-                },
-                VNode::Element {
-                    velement: VElement::new("input".to_string(), HashMap::new(), Vec::new()),
-                },
-            ]),
-        }
+        VNode::List(VList::new(vec![
+            VNode::Element(VElement::new("div".to_string(), HashMap::new(), Vec::new())),
+            VNode::Element(VElement::new(
+                "span".to_string(),
+                HashMap::new(),
+                Vec::new()
+            )),
+            VNode::Element(VElement::new(
+                "input".to_string(),
+                HashMap::new(),
+                Vec::new()
+            )),
+        ]))
     )
 }
