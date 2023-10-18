@@ -64,17 +64,17 @@ impl VComponent {
         let mut old_virt: Option<&VComponent> = None;
 
         match last {
-            Some(VNode::Component { vcomp }) => {
+            Some(VNode::Component(vcomp)) => {
                 log!("\tComparing two components");
                 old_virt = Some(vcomp);
             }
-            Some(VNode::Element { .. }) | Some(VNode::Text { .. }) => {
+            Some(VNode::Element(_)) | Some(VNode::Text(_)) => {
                 log!("\tNew component over element/text");
             }
             None => {
                 log!("\tCreating the comp for the first time");
             }
-            Some(VNode::List { .. }) => todo!(),
+            Some(VNode::List(_)) => todo!(),
         }
 
         self.render(old_virt, ancestor);

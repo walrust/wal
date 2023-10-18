@@ -26,15 +26,15 @@ impl VText {
                 log!("\tCreating the node for the first time");
                 self.dom = None;
             }
-            Some(VNode::Text { vtext }) => {
+            Some(VNode::Text(vtext)) => {
                 self.dom = vtext.dom.clone();
                 old_virt = Some(vtext);
             }
-            Some(VNode::Element { .. }) | Some(VNode::Component { .. }) => {
+            Some(VNode::Element(_)) | Some(VNode::Component(_)) => {
                 log!("\tCreating the node for the first time and swapping with existing text/comp node");
                 self.dom = None;
             }
-            Some(VNode::List { .. }) => todo!(),
+            Some(VNode::List(_)) => todo!(),
         }
 
         self.render(old_virt, ancestor);

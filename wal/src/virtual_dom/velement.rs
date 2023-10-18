@@ -39,16 +39,16 @@ impl VElement {
                 log!("\tCreating the node for the first time");
                 self.dom = None;
             }
-            Some(VNode::Element { velement }) => {
+            Some(VNode::Element(velement)) => {
                 log!("\tCopying existing node");
                 self.dom = velement.dom.clone();
                 old_virt = Some(velement);
             }
-            Some(VNode::Text { .. }) | Some(VNode::Component { .. }) => {
+            Some(VNode::Text(_)) | Some(VNode::Component(_)) => {
                 log!("\tCreating the node for the first time and swapping with existing text/comp node");
                 self.dom = None;
             }
-            Some(VNode::List { .. }) => todo!(),
+            Some(VNode::List(_)) => todo!(),
         }
 
         self.render(old_virt, ancestor);
