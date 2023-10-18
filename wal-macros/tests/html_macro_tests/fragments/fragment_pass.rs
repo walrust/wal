@@ -1,6 +1,6 @@
 use std::collections::HashMap;
+use wal::virtual_dom::{VElement, VList, VNode};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VElement, VList, VNode};
 
 include!("../utils/new_element_str.rs");
 

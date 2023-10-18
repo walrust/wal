@@ -1,6 +1,6 @@
 use std::collections::HashMap;
+use wal::virtual_dom::{VElement, VList, VNode, VText};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VElement, VList, VNode, VText};
 
 fn main() {
     if_true();
@@ -148,9 +148,7 @@ fn if_in_element() {
         VNode::Element(VElement::new(
             String::from("div"),
             HashMap::new(),
-            vec![VNode::Text {
-                vtext: VText::new("hello")
-            }],
+            vec![VNode::Text(VText::new("hello"))],
         ))
     );
 }

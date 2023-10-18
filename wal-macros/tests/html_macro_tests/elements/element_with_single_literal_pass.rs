@@ -1,6 +1,6 @@
 use std::collections::HashMap;
+use wal::virtual_dom::{VElement, VNode, VText};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VElement, VNode, VText};
 
 fn main() {
     element_with_empty_string();
@@ -39,8 +39,6 @@ fn get_div_with<T: ToString>(t: T) -> VNode {
     VNode::Element(VElement::new(
         "div".to_string(),
         HashMap::new(),
-        vec![VNode::Text {
-            vtext: VText::new(t.to_string()),
-        }],
+        vec![VNode::Text(VText::new(t.to_string()))],
     ))
 }

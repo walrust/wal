@@ -1,5 +1,5 @@
+use wal::virtual_dom::{VList, VNode, VText};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VList, VNode, VText};
 
 fn main() {
     if_let_true();

@@ -25,9 +25,9 @@ impl ToTokens for HtmlLiteral {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let literal = &self.0;
         tokens.extend(
-            quote_spanned! { literal.span() => ::wal_vdom::virtual_dom::VNode::Text {
-                vtext: ::wal_vdom::virtual_dom::VText::new(#literal)
-            }},
+            quote_spanned! { literal.span() => ::wal::virtual_dom::VNode::Text(
+                ::wal::virtual_dom::VText::new(#literal)
+            )},
         );
     }
 }

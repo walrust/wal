@@ -57,7 +57,7 @@ impl ToTokens for HtmlFragment {
         let spanned = quote!(#start_spanned #end_spanned);
 
         tokens.extend(quote_spanned! {spanned.span() =>
-            ::wal_vdom::virtual_dom::VNode::from_iter::<::std::vec::Vec<::wal_vdom::virtual_dom::VNode>>(vec![#(#children),*])
+            ::wal::virtual_dom::VNode::from_iter::<::std::vec::Vec<::wal::virtual_dom::VNode>>(vec![#(#children),*])
         });
     }
 }

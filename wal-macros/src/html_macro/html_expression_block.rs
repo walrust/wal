@@ -24,7 +24,7 @@ impl ToTokens for HtmlExpressionBlock {
         let expr_block = &self.0;
         tokens.extend(quote_spanned! { expr_block.span() =>
             #[allow(unused_braces)]
-            ::wal_vdom::virtual_dom::VNode::from(#expr_block)
+            ::wal::virtual_dom::VNode::from(#expr_block)
         });
     }
 }

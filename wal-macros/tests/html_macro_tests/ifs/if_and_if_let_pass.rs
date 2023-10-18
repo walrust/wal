@@ -1,5 +1,5 @@
+use wal::virtual_dom::{VNode, VText};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VNode, VText};
 
 fn main() {
     let html = html! {

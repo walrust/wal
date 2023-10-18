@@ -1,6 +1,6 @@
 use std::collections::HashMap;
+use wal::virtual_dom::{VElement, VNode};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VElement, VNode};
 
 fn main() {
     format!("Hello world!");
