@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use wal::virtual_dom::{VElement, VList, VNode};
 use wal_macros::html;
 
-include!("../utils/new_element_str.rs");
+include!("../utils/new_velement_str.rs");
 
 fn main() {
     single_attribute();
