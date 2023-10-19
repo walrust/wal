@@ -87,7 +87,7 @@ impl ToTokens for HtmlTree {
             Self::If(html_if) => html_if.to_tokens(tokens),
             Self::For(html_for) => html_for.to_tokens(tokens),
             Self::Fragment(html_fragment) => html_fragment.to_tokens(tokens),
-            Self::Component(_) => todo!(), // TODO: implement totokens for component
+            Self::Component(html_component) => html_component.to_tokens(tokens),
             Self::Element(html_element) => html_element.to_tokens(tokens),
             Self::Literal(html_literal) => html_literal.to_tokens(tokens),
             Self::ExpressionBlock(html_expr_block) => html_expr_block.to_tokens(tokens),

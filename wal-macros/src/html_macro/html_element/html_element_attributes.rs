@@ -56,6 +56,7 @@ impl HtmlElementAttributes {
     }
 }
 
+// TODO: instead of ident.span maybe use whole html attribute here
 impl From<&HtmlElementAttributes> for Vec<proc_macro2::TokenStream> {
     fn from(element_attributes: &HtmlElementAttributes) -> Vec<proc_macro2::TokenStream> {
         let mut attributes: Vec<proc_macro2::TokenStream> = element_attributes

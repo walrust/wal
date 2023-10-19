@@ -1,4 +1,4 @@
-use quote::ToTokens;
+use quote::{quote, ToTokens};
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
@@ -41,6 +41,12 @@ impl Parse for HtmlAttribute {
 impl HtmlAttribute {
     pub fn peek(input: ParseStream) -> bool {
         input.peek(proc_macro2::Ident::peek_any)
+    }
+
+    pub fn to_spanned(&self) -> impl ToTokens {
+        let ident = &self.ident;
+        let value = &self.value;
+        quote! { #ident #value}
     }
 }
 

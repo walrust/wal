@@ -3,7 +3,7 @@ use syn::parse::Parse;
 use crate::html_macro::html_attribute::HtmlAttribute;
 
 pub struct HtmlComponentAttributes {
-    props: Option<HtmlAttribute>,
+    pub props: Option<HtmlAttribute>,
     key: Option<HtmlAttribute>,
 }
 
