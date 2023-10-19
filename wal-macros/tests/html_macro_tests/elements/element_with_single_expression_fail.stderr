@@ -41,6 +41,7 @@ error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
    = help: the following other types implement trait `From<T>`:
              <VNode as From<T>>
+             <VNode as From<VComponent>>
              <VNode as From<VElement>>
              <VNode as From<VList>>
              <VNode as From<VText>>
@@ -60,6 +61,7 @@ error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
    = help: the following other types implement trait `From<T>`:
              <VNode as From<T>>
+             <VNode as From<VComponent>>
              <VNode as From<VElement>>
              <VNode as From<VList>>
              <VNode as From<VText>>
@@ -79,6 +81,7 @@ error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
    = help: the following other types implement trait `From<T>`:
              <VNode as From<T>>
+             <VNode as From<VComponent>>
              <VNode as From<VElement>>
              <VNode as From<VList>>
              <VNode as From<VText>>
