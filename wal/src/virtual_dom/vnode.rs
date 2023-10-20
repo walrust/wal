@@ -1,7 +1,5 @@
 use web_sys::Node;
 
-use crate::utils::WasmUtils;
-
 use super::{VComponent, VElement, VList, VText};
 
 #[derive(PartialEq, Debug)]
@@ -26,7 +24,7 @@ impl VNode {
         match self {
             VNode::Element(velement) => velement.dom.as_ref().cloned().map(Into::into),
             VNode::Text(vtext) => vtext.dom.as_ref().cloned().map(Into::into),
-            VNode::Component(vcomp) => vcomp.comp.as_ref().wasm_unwrap().borrow().vdom.get_dom(),
+            VNode::Component(vcomp) => vcomp.comp.as_ref().unwrap().borrow().vdom.get_dom(),
             VNode::List(_) => todo!(),
         }
     }

@@ -1,7 +1,5 @@
-use core::fmt;
-
 use gloo::{
-    console::{error, log, warn},
+    console::{log, warn},
     dialogs::alert,
 };
 
@@ -12,7 +10,7 @@ pub fn debug_log(text: impl ToString) {
 }
 #[cfg(not(debug_assertions))]
 #[inline]
-pub fn debug_log(text: impl ToString) {}
+pub fn debug_log(_text: impl ToString) {}
 
 #[cfg(debug_assertions)]
 #[inline]
@@ -21,7 +19,7 @@ pub fn debug_alert(text: &str) {
 }
 #[cfg(not(debug_assertions))]
 #[inline]
-pub fn debug_alert(text: impl ToString) {}
+pub fn debug_alert(_text: impl ToString) {}
 
 #[cfg(debug_assertions)]
 #[inline]
@@ -30,58 +28,4 @@ pub fn debug_warn(text: &str) {
 }
 #[cfg(not(debug_assertions))]
 #[inline]
-pub fn debug_alert(text: impl ToString) {}
-
-
-pub trait WasmUtils<T> {
-    fn wasm_expect(self, msg: &str) -> T;
-    fn wasm_unwrap(self) -> T;
-}
-
-impl<T> WasmUtils<T> for Option<T> {
-    #[inline]
-    fn wasm_expect(self, msg: &str) -> T {
-        match self {
-            Some(val) => val,
-            None => {
-                error!(msg);
-                panic!()
-            }
-        }
-    }
-
-    #[inline]
-    fn wasm_unwrap(self) -> T {
-        match self {
-            Some(val) => val,
-            None => {
-                error!("called `Option::unwrap()` on a `None` value");
-                panic!()
-            }
-        }
-    }
-}
-
-impl<T, E: fmt::Debug> WasmUtils<T> for Result<T, E> {
-    #[inline]
-    fn wasm_expect(self, msg: &str) -> T {
-        match self {
-            Ok(t) => t,
-            Err(e) => {
-                error!(format!("{}: {:?}", msg, e));
-                panic!()
-            }
-        }
-    }
-
-    #[inline]
-    fn wasm_unwrap(self) -> T {
-        match self {
-            Ok(t) => t,
-            Err(e) => {
-                error!(format!("called `Result::unwrap()` on an `Err` value: {:?}", &e));
-                panic!()
-            },
-        }
-    }
-}
+pub fn debug_warn(_text: impl ToString) {}

@@ -1,6 +1,6 @@
 use web_sys::Node;
 
-use crate::{component::{component::Component, component_node::AnyComponentNode}, utils::{WasmUtils, debug_log}};
+use crate::{component::{component::Component, component_node::AnyComponentNode}, utils:: debug_log};
 use std::{
     any::Any,
     cell::RefCell,
@@ -51,7 +51,7 @@ impl VComponent {
         ancestor: &Node,
     ) -> Rc<RefCell<AnyComponentNode>> {
         let props = props
-            .wasm_unwrap()
+            .unwrap()
             .downcast::<C::Properties>()
             .expect("Trying to unpack others component props");
 
