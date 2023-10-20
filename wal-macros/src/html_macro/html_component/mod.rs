@@ -38,17 +38,17 @@ impl ToTokens for HtmlComponent {
         let props = self.attributes.props.as_ref().map_or_else(
             || quote_spanned!(self.ty.span() => <#props_type as ::std::default::Default>::default()),
             |props| match &props.value {
-                HtmlComponentAttributeValue::Literal(lit) => quote_spanned!(props.to_spanned().span() => #lit),
+                HtmlComponentAttributeValue::Literal(lit) => quote_spanned!(props.span() => #lit),
                 HtmlComponentAttributeValue::StructExpression(expr_struct) => {
-                    quote_spanned!(props.to_spanned().span() => #expr_struct)
+                    quote_spanned!(props.span() => #expr_struct)
                 }
                 HtmlComponentAttributeValue::ExpressionBlock(expr_block) => {
-                    quote_spanned!(props.to_spanned().span() => #[allow(unused_braces)] #expr_block)
+                    quote_spanned!(props.span() => #[allow(unused_braces)] #expr_block)
                 }
             },
         );
 
-        tokens.extend(quote_spanned! { self.to_spanned().span() =>
+        tokens.extend(quote_spanned! { self.span() =>
             ::wal::virtual_dom::VNode::Component(
                 ::wal::virtual_dom::VComponent::new::<#ty>(#props)
             )
@@ -57,6 +57,10 @@ impl ToTokens for HtmlComponent {
 }
 
 impl HtmlComponent {
+    fn span(&self) -> proc_macro2::Span {
+        self.to_spanned().span()
+    }
+
     fn to_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;

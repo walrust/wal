@@ -2,6 +2,7 @@ use quote::{quote, ToTokens};
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
+    spanned::Spanned,
 };
 
 use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
@@ -84,7 +85,11 @@ impl HtmlComponentAttribute {
         input.peek(proc_macro2::Ident::peek_any)
     }
 
-    pub fn to_spanned(&self) -> impl ToTokens {
+    pub fn span(&self) -> proc_macro2::Span {
+        self.to_spanned().span()
+    }
+
+    fn to_spanned(&self) -> impl ToTokens {
         let ident = &self.ident;
         let value = &self.value;
         quote! { #ident #value }
