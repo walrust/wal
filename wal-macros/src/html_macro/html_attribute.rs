@@ -4,6 +4,8 @@ use syn::{
     parse::{Parse, ParseStream},
 };
 
+use super::html_component::html_component_attributes::HtmlComponentAttributeValue;
+
 pub struct HtmlAttribute {
     pub ident: proc_macro2::Ident,
     pub value: HtmlAttributeValue,
@@ -55,6 +57,20 @@ impl ToTokens for HtmlAttributeValue {
         match self {
             HtmlAttributeValue::Literal(lit) => lit.to_tokens(tokens),
             HtmlAttributeValue::ExpressionBlock(expr_block) => expr_block.to_tokens(tokens),
+        }
+    }
+}
+
+impl From<HtmlComponentAttributeValue> for HtmlAttributeValue {
+    fn from(value: HtmlComponentAttributeValue) -> Self {
+        match value {
+            HtmlComponentAttributeValue::Literal(lit) => HtmlAttributeValue::Literal(lit),
+            HtmlComponentAttributeValue::ExpressionBlock(expr_block) => {
+                HtmlAttributeValue::ExpressionBlock(expr_block)
+            }
+            _ => panic!(
+                "Unsupported conversion from HtmlComponentAttributeValue to HtmlAttributeValue - should never happen"
+            ),
         }
     }
 }

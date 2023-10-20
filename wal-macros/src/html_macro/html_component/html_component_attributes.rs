@@ -15,6 +15,7 @@ impl Parse for HtmlComponentAttributes {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let mut props = None;
         let mut key = None;
+
         while HtmlComponentAttribute::peek(input) {
             let attribute = input.parse::<HtmlComponentAttribute>()?;
             if attribute.ident == "props" {
@@ -34,11 +35,7 @@ impl Parse for HtmlComponentAttributes {
                 }
                 key = Some(HtmlAttribute {
                     ident: attribute.ident,
-                    value: match attribute.value {
-                        HtmlComponentAttributeValue::Literal(lit) => HtmlAttributeValue::Literal(lit),
-                        HtmlComponentAttributeValue::ExpressionBlock(expr_block) => HtmlAttributeValue::ExpressionBlock(expr_block),
-                        _ => panic!("Should never happen because we are parsing key attribute value as HtmlAttributeValue which supports only Literal and ExpressionBlock and then we are mapping it to HtmlComponentAttributeValue"),
-                    }
+                    value: attribute.value.into(),
                 });
             } else {
                 return Err(syn::Error::new(
@@ -67,12 +64,7 @@ impl Parse for HtmlComponentAttribute {
         let value = if ident == "props" {
             input.parse::<HtmlComponentAttributeValue>()?
         } else if ident == "key" {
-            match input.parse::<HtmlAttributeValue>()? {
-                HtmlAttributeValue::Literal(lit) => HtmlComponentAttributeValue::Literal(lit),
-                HtmlAttributeValue::ExpressionBlock(expr_block) => {
-                    HtmlComponentAttributeValue::ExpressionBlock(expr_block)
-                }
-            }
+            input.parse::<HtmlAttributeValue>()?.into()
         } else {
             return Err(syn::Error::new(
                 ident.span(),
@@ -110,7 +102,7 @@ impl Parse for HtmlComponentAttributeValue {
         let attribute_value = if input.peek(syn::Lit) {
             HtmlComponentAttributeValue::Literal(input.parse()?)
         } else if input.fork().parse::<syn::ExprStruct>().is_ok() {
-            HtmlComponentAttributeValue::StructExpression(input.parse::<syn::ExprStruct>()?)
+            HtmlComponentAttributeValue::StructExpression(input.parse()?)
         } else if let Ok(expr_block) = input.parse::<syn::ExprBlock>() {
             if expr_block.block.stmts.is_empty() {
                 return Err(syn::Error::new_spanned(
@@ -137,6 +129,17 @@ impl ToTokens for HtmlComponentAttributeValue {
             }
             HtmlComponentAttributeValue::ExpressionBlock(expr_block) => {
                 expr_block.to_tokens(tokens)
+            }
+        }
+    }
+}
+
+impl From<HtmlAttributeValue> for HtmlComponentAttributeValue {
+    fn from(value: HtmlAttributeValue) -> Self {
+        match value {
+            HtmlAttributeValue::Literal(lit) => HtmlComponentAttributeValue::Literal(lit),
+            HtmlAttributeValue::ExpressionBlock(expr_block) => {
+                HtmlComponentAttributeValue::ExpressionBlock(expr_block)
             }
         }
     }

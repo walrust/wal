@@ -3,7 +3,7 @@ use syn::{parse::Parse, spanned::Spanned};
 
 use self::html_component_attributes::{HtmlComponentAttributeValue, HtmlComponentAttributes};
 
-mod html_component_attributes;
+pub mod html_component_attributes;
 
 pub struct HtmlComponent {
     lt: syn::token::Lt,
@@ -34,21 +34,20 @@ impl ToTokens for HtmlComponent {
         let ty = &self.ty;
         let props_type =
             quote_spanned!(self.ty.span() => <#ty as ::wal::component::Component>::Properties);
-        let props = if let Some(props) = &self.attributes.props {
-            match &props.value {
-                HtmlComponentAttributeValue::Literal(lit) => {
-                    quote_spanned!(props.to_spanned().span() => #lit)
-                }
+
+        let props = self.attributes.props.as_ref().map_or_else(
+            || quote_spanned!(self.ty.span() => <#props_type as ::std::default::Default>::default()),
+            |props| match &props.value {
+                HtmlComponentAttributeValue::Literal(lit) => quote_spanned!(props.to_spanned().span() => #lit),
                 HtmlComponentAttributeValue::StructExpression(expr_struct) => {
                     quote_spanned!(props.to_spanned().span() => #expr_struct)
                 }
                 HtmlComponentAttributeValue::ExpressionBlock(expr_block) => {
                     quote_spanned!(props.to_spanned().span() => #[allow(unused_braces)] #expr_block)
                 }
-            }
-        } else {
-            quote_spanned!(self.ty.span() =>  <#props_type as ::std::default::Default>::default())
-        };
+            },
+        );
+
         tokens.extend(quote_spanned! { self.to_spanned().span() =>
             ::wal::virtual_dom::VNode::Component(
                 ::wal::virtual_dom::VComponent::new::<#ty>(#props)

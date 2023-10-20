@@ -15,7 +15,6 @@ fn main() {
     custom_component_props_tuple_struct();
     custom_component_props_struct();
 
-    // TODO: change this two functions so that struct expressions don't need to be braced
     custom_component_props_tuple_struct_with_struct_expression();
     custom_component_props_struct_with_struct_expression();
 
@@ -25,7 +24,6 @@ fn main() {
     custom_component_props_tuple_struct_with_key();
     custom_component_props_struct_with_key();
 
-    // TODO: change this two functions so that struct expressions don't need to be braced
     custom_component_props_tuple_struct_with_struct_expression_with_key();
     custom_component_props_struct_with_struct_expression_with_key();
 }
