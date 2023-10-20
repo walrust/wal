@@ -1,7 +1,7 @@
 use gloo::console::log;
 use web_sys::Node;
 
-use crate::component::{component::Component, component_node::AnyComponentNode};
+use crate::{component::{component::Component, component_node::AnyComponentNode}, utils::WasmUtils};
 use std::{
     any::Any,
     cell::RefCell,
@@ -52,7 +52,7 @@ impl VComponent {
         ancestor: &Node,
     ) -> Rc<RefCell<AnyComponentNode>> {
         let props = props
-            .unwrap()
+            .wasm_unwrap()
             .downcast::<C::Properties>()
             .expect("Trying to unpack others component props");
 

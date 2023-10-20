@@ -3,7 +3,7 @@ use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 use web_sys::{Element, Node};
 
-use crate::virtual_dom::Dom;
+use crate::{virtual_dom::Dom, utils::WasmUtils};
 
 use super::VNode;
 
@@ -98,7 +98,7 @@ impl VElement {
     }
 
     fn handle_children(&mut self, old_element: Option<&VElement>) {
-        let target = self.dom.as_mut().unwrap();
+        let target = self.dom.as_mut().wasm_unwrap();
         let old_children = old_element.map_or(Vec::new(), |e| e.children.iter().collect());
 
         for either_child_or_both in self.children.iter_mut().zip_longest(old_children) {

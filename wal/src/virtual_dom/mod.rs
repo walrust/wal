@@ -8,6 +8,8 @@ use gloo::console::log;
 use gloo::utils::{body, document};
 use web_sys::{Element, Node, Text};
 
+use crate::utils::WasmUtils;
+
 pub use self::vcomponent::VComponent;
 pub use self::velement::VElement;
 pub use self::vlist::VList;
@@ -28,7 +30,7 @@ impl Dom {
                         Self::ROOT_ELEMENT_ID
                     );
                     log!(message);
-                    let root = document().create_element("div").unwrap();
+                    let root = document().create_element("div").wasm_unwrap();
                     Dom::set_attribute(&root, "id", Self::ROOT_ELEMENT_ID);
                     Dom::append_child(&body(), &root);
                     root
