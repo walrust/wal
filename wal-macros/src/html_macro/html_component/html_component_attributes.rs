@@ -4,7 +4,7 @@ use crate::html_macro::html_attribute::HtmlAttribute;
 
 pub struct HtmlComponentAttributes {
     pub props: Option<HtmlAttribute>,
-    key: Option<HtmlAttribute>,
+    _key: Option<HtmlAttribute>,
 }
 
 impl Parse for HtmlComponentAttributes {
@@ -39,6 +39,6 @@ impl Parse for HtmlComponentAttributes {
                 ));
             }
         }
-        Ok(HtmlComponentAttributes { props, key })
+        Ok(HtmlComponentAttributes { props, _key: key })
     }
 }

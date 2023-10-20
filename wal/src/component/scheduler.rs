@@ -3,8 +3,8 @@ use std::{any::Any, cell::RefCell, collections::BinaryHeap, rc::Rc};
 use wasm_bindgen_futures::spawn_local;
 
 use super::{
-    component::AnyComponent,
     component_node::{AnyComponentBehavior, ToRerenderObserver, VDomObserver},
+    AnyComponent,
 };
 
 enum SchedulerMessage {

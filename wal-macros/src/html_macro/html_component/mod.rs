@@ -46,7 +46,7 @@ impl ToTokens for HtmlComponent {
                 }
             }
         } else {
-            quote_spanned!(self.ty.span() => #props_type::default())
+            quote_spanned!(self.ty.span() =>  <#props_type as ::std::default::Default>::default())
         };
         tokens.extend(quote_spanned! { self.to_spanned().span() =>
             ::wal::virtual_dom::VNode::Component(

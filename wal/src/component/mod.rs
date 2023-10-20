@@ -2,11 +2,11 @@ use crate::virtual_dom::VNode;
 use std::any::Any;
 use std::hash::Hash;
 
+use self::component_node::{AnyComponentBehavior, ComponentBehavior};
+
 pub mod callback;
 pub mod component_node;
 pub mod scheduler;
-
-use super::component_node::{AnyComponentBehavior, ComponentBehavior};
 
 pub trait Component: Sized {
     type Message: 'static;

@@ -1,7 +1,7 @@
 use gloo::console::log;
 use web_sys::Node;
 
-use crate::component::{component::Component, component_node::AnyComponentNode};
+use crate::component::{component_node::AnyComponentNode, Component};
 use std::{
     any::Any,
     cell::RefCell,
@@ -14,9 +14,10 @@ use std::{
 use super::VNode;
 
 pub(crate) type PropertiesHash = u64;
-pub(crate) type AnyProps = Option<Box<dyn Any>>;
+pub(crate) type AnyProps = Option<Box<dyn Any>>; // TODO: remove Option since props are always present - the only reason i see for Option rn is to run take() function and pass Properties to new function for component not &Properties
 pub(crate) type ComponentNodeGenerator =
     Box<dyn Fn(AnyProps, &Node) -> Rc<RefCell<AnyComponentNode>> + 'static>;
+
 pub struct VComponent {
     props: AnyProps,
     hash: PropertiesHash,
@@ -119,7 +120,14 @@ impl fmt::Debug for VComponent {
 }
 
 impl PartialEq for VComponent {
-    fn eq(&self, _other: &Self) -> bool {
-        todo!()
+    fn eq(&self, other: &Self) -> bool {
+        self.hash == other.hash
+            && match (&self.props, &other.props) {
+                (Some(self_props), Some(other_props)) => {
+                    self_props.type_id() == other_props.type_id()
+                }
+                (None, None) => true,
+                _ => false,
+            }
     }
 }
