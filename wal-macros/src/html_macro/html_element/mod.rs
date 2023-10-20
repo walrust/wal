@@ -94,15 +94,15 @@ impl ToTokens for HtmlElement {
         let children = &self.children;
 
         tokens.extend(quote_spanned! { self.name.span() =>
-            ::wal_vdom::virtual_dom::VNode::Element {
-                velement: ::wal_vdom::virtual_dom::VElement::new(
+            ::wal::virtual_dom::VNode::Element(
+                ::wal::virtual_dom::VElement::new(
                     ::std::string::String::from(#name),
                     ::std::collections::HashMap::from([
                         #(#attributes,)*
                     ]),
                     ::std::vec![#(#children,)*],
                 ),
-            }
+            )
         });
     }
 }

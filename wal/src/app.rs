@@ -1,6 +1,6 @@
 extern crate console_error_panic_hook;
 use crate::{
-    component::{component::Component, component_node::AnyComponentNode},
+    component::{component_node::AnyComponentNode, Component},
     virtual_dom::Dom,
 };
 

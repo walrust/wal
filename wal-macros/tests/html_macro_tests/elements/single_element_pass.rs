@@ -1,6 +1,6 @@
-use wal_macros::html;
-use wal_vdom::virtual_dom::{VElement, VNode};
 use std::collections::HashMap;
+use wal::virtual_dom::{VElement, VNode};
+use wal_macros::html;
 
 fn main() {
     format!("Hello world!");
@@ -43,7 +43,5 @@ fn main() {
 }
 
 fn get_velement(tag: &str) -> VNode {
-    VNode::Element {
-        velement: VElement::new(tag.to_string(), HashMap::new(), Vec::new()),
-    }
+    VNode::Element(VElement::new(tag.to_string(), HashMap::new(), Vec::new()))
 }

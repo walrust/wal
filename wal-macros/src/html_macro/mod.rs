@@ -1,4 +1,5 @@
 mod html_attribute;
+mod html_component;
 mod html_element;
 mod html_expression_block;
 mod html_for;

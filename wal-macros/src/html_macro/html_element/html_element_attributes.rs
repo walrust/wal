@@ -1,12 +1,46 @@
 use std::collections::HashMap;
 
 use quote::quote_spanned;
+use syn::parse::Parse;
 
 use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
 
 pub struct HtmlElementAttributes {
     attributes: HashMap<proc_macro2::Ident, HtmlAttributeValue>,
     key: Option<HtmlAttribute>,
+}
+
+impl Parse for HtmlElementAttributes {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let mut attributes = HashMap::<proc_macro2::Ident, HtmlAttributeValue>::new();
+        let mut key = None;
+
+        while HtmlAttribute::peek(input) {
+            let attribute = input.parse::<HtmlAttribute>()?;
+            if attribute.ident == "key" {
+                if key.is_some() {
+                    return Err(syn::Error::new(
+                        attribute.ident.span(),
+                        format!("Duplicate attribute `{}`", attribute.ident),
+                    ));
+                }
+                key = Some(attribute);
+            } else {
+                let ident = attribute.ident.clone();
+                if attributes
+                    .insert(attribute.ident, attribute.value)
+                    .is_some()
+                {
+                    return Err(syn::Error::new(
+                        ident.span(),
+                        format!("Duplicate attribute `{}`", ident),
+                    ));
+                }
+            }
+        }
+
+        Ok(HtmlElementAttributes { attributes, key })
+    }
 }
 
 impl HtmlElementAttributes {

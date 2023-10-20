@@ -2,11 +2,7 @@ use crate::{virtual_dom::VNode, utils::debug_log};
 use std::{cell::RefCell, fmt, marker::PhantomData, mem, rc::Rc};
 use web_sys::Node;
 
-use super::{
-    callback::Callback,
-    component::{AnyComponent, Component},
-    scheduler::Scheduler,
-};
+use super::{callback::Callback, scheduler::Scheduler, AnyComponent, Component};
 
 pub struct AnyComponentNode {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
