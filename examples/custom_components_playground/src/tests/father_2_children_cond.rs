@@ -81,7 +81,7 @@ impl Component for ChildComponent {
 
 impl Drop for ChildComponent {
     fn drop(&mut self) {
-        debug_warn("TO DELETE, ChildComponent is dropped");
+        debug::warn("TO DELETE, ChildComponent is dropped");
     }
 }
 

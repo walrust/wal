@@ -25,13 +25,13 @@ pub mod debug {
 pub mod debug {
     #[cfg(not(debug_assertions))]
     #[inline]
-    pub fn debug_log(_text: impl ToString) {}
+    pub fn log(_text: impl ToString) {}
 
     #[cfg(not(debug_assertions))]
     #[inline]
-    pub fn debug_alert(_text: impl ToString) {}
+    pub fn alert(_text: impl ToString) {}
 
     #[cfg(not(debug_assertions))]
     #[inline]
-    pub fn debug_warn(_text: impl ToString) {}
+    pub fn warn(_text: impl ToString) {}
 }
