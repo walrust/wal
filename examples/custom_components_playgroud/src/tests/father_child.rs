@@ -1,5 +1,5 @@
 use wal::{
-    component::{component::Component, component_node::ComponentBehavior},
+    component::{component_node::ComponentBehavior, Component},
     virtual_dom::{VComponent, VElement, VNode},
 };
 

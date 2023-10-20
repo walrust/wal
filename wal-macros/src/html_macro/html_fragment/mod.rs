@@ -52,12 +52,20 @@ impl ToTokens for HtmlFragment {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let children = &self.children;
 
+        tokens.extend(quote_spanned! {self.span() =>
+            ::wal::virtual_dom::VNode::from_iter::<::std::vec::Vec<::wal::virtual_dom::VNode>>(vec![#(#children),*])
+        });
+    }
+}
+
+impl HtmlFragment {
+    fn span(&self) -> proc_macro2::Span {
+        self.to_spanned().span()
+    }
+
+    fn to_spanned(&self) -> impl ToTokens {
         let start_spanned = self.start_tag.to_spanned();
         let end_spanned = self.end_tag.to_spanned();
-        let spanned = quote!(#start_spanned #end_spanned);
-
-        tokens.extend(quote_spanned! {spanned.span() =>
-            ::wal_vdom::virtual_dom::VNode::from_iter::<::std::vec::Vec<::wal_vdom::virtual_dom::VNode>>(vec![#(#children),*])
-        });
+        quote!(#start_spanned #end_spanned)
     }
 }

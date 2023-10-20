@@ -5,15 +5,16 @@ use syn::{
 };
 
 use super::{
-    html_element::HtmlElement, html_expression_block::HtmlExpressionBlock, html_for::HtmlFor,
-    html_fragment::HtmlFragment, html_if::HtmlIfExpression, html_literal::HtmlLiteral,
+    html_component::HtmlComponent, html_element::HtmlElement,
+    html_expression_block::HtmlExpressionBlock, html_for::HtmlFor, html_fragment::HtmlFragment,
+    html_if::HtmlIfExpression, html_literal::HtmlLiteral,
 };
 
 pub enum HtmlTree {
     If(HtmlIfExpression),
     For(HtmlFor<syn::ExprBlock>),
     Fragment(HtmlFragment),
-    _Component, // TODO: Implement component
+    Component(HtmlComponent),
     Element(HtmlElement),
     Literal(HtmlLiteral),
     ExpressionBlock(HtmlExpressionBlock),
@@ -47,7 +48,7 @@ impl HtmlTree {
         let html_tree = if forked_input.peek(syn::token::Gt) {
             Self::Fragment(input.parse()?)
         } else if forked_input.peek(syn::token::PathSep) {
-            Self::_Component // TODO: Implement parsing for component
+            Self::Component(input.parse()?)
         } else if forked_input.peek(proc_macro2::Ident::peek_any) {
             Self::parse_where_after_lt_is_ident(input, forked_input)?
         } else {
@@ -71,7 +72,7 @@ impl HtmlTree {
             .map_or(false, |c| c.is_ascii_uppercase())
             || forked_input.peek(syn::token::PathSep)
         {
-            Self::_Component // TODO: Implement parsing for component
+            Self::Component(input.parse()?)
         } else {
             Self::Element(input.parse()?)
         };
@@ -86,7 +87,7 @@ impl ToTokens for HtmlTree {
             Self::If(html_if) => html_if.to_tokens(tokens),
             Self::For(html_for) => html_for.to_tokens(tokens),
             Self::Fragment(html_fragment) => html_fragment.to_tokens(tokens),
-            Self::_Component => unimplemented!(), // TODO: implement totokens for component
+            Self::Component(html_component) => html_component.to_tokens(tokens),
             Self::Element(html_element) => html_element.to_tokens(tokens),
             Self::Literal(html_literal) => html_literal.to_tokens(tokens),
             Self::ExpressionBlock(html_expr_block) => html_expr_block.to_tokens(tokens),

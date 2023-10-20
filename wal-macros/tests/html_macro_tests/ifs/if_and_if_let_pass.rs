@@ -1,5 +1,5 @@
+use wal::virtual_dom::{VNode, VText};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VNode, VText};
 
 fn main() {
     let html = html! {
@@ -9,10 +9,5 @@ fn main() {
         else if let Some(val) = Some("hello4") { val }
         else { "hello5" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello4")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello4")));
 }

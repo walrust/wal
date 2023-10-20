@@ -32,12 +32,21 @@ impl HtmlFor<syn::Expr> {
     }
 }
 
-impl<Expr: ExprInFor + ToTokens> ToTokens for HtmlFor<Expr> {
+impl ToTokens for HtmlFor<syn::Expr> {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let expr = &self.0;
+        tokens.extend(quote_spanned!(expr.span() =>
+            ::wal::virtual_dom::VNode::from_iter(#expr)
+        ));
+    }
+}
+
+impl ToTokens for HtmlFor<syn::ExprBlock> {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let expr = &self.0;
         tokens.extend(quote_spanned!(expr.span() =>
             #[allow(unused_braces)]
-            ::wal_vdom::virtual_dom::VNode::from_iter(#expr)
+            ::wal::virtual_dom::VNode::from_iter(#expr)
         ));
     }
 }
