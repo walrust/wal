@@ -1,5 +1,6 @@
-use gloo::console::log;
 use web_sys::{Node, Text};
+
+use crate::utils::debug_log;
 
 use super::{Dom, VNode};
 
@@ -18,12 +19,12 @@ impl VText {
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
-        log!("Patching TextNode");
+        debug_log("Patching TextNode");
         let mut old_virt: Option<&VText> = None;
 
         match last {
             None => {
-                log!("\tCreating the node for the first time");
+                debug_log("\tCreating the node for the first time");
                 self.dom = None;
             }
             Some(VNode::Text(vtext)) => {
@@ -31,7 +32,7 @@ impl VText {
                 old_virt = Some(vtext);
             }
             Some(VNode::Element(_)) | Some(VNode::Component(_)) => {
-                log!("\tCreating the node for the first time and swapping with existing text/comp node");
+                debug_log("\tCreating the node for the first time and swapping with existing text/comp node");
                 self.dom = None;
             }
             Some(VNode::List(_)) => todo!(),

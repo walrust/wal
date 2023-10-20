@@ -4,11 +4,10 @@ pub mod vlist;
 pub mod vnode;
 pub mod vtext;
 
-use gloo::console::log;
 use gloo::utils::{body, document};
 use web_sys::{Element, Node, Text};
 
-use crate::utils::WasmUtils;
+use crate::utils::{WasmUtils, debug_log};
 
 pub use self::vcomponent::VComponent;
 pub use self::velement::VElement;
@@ -29,7 +28,7 @@ impl Dom {
                         "There was no '{}' element, adding default one",
                         Self::ROOT_ELEMENT_ID
                     );
-                    log!(message);
+                    debug_log(message);
                     let root = document().create_element("div").wasm_unwrap();
                     Dom::set_attribute(&root, "id", Self::ROOT_ELEMENT_ID);
                     Dom::append_child(&body(), &root);

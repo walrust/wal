@@ -1,9 +1,8 @@
-use gloo::console::log;
 use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 use web_sys::{Element, Node};
 
-use crate::{virtual_dom::Dom, utils::WasmUtils};
+use crate::{virtual_dom::Dom, utils::{WasmUtils, debug_log}};
 
 use super::VNode;
 
@@ -31,21 +30,21 @@ impl VElement {
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
-        log!("Patching element");
+        debug_log("Patching element");
         let mut old_virt: Option<&VElement> = None;
 
         match last {
             None => {
-                log!("\tCreating the node for the first time");
+                debug_log("\tCreating the node for the first time");
                 self.dom = None;
             }
             Some(VNode::Element(velement)) => {
-                log!("\tCopying existing node");
+                debug_log("\tCopying existing node");
                 self.dom = velement.dom.clone();
                 old_virt = Some(velement);
             }
             Some(VNode::Text(_)) | Some(VNode::Component(_)) => {
-                log!("\tCreating the node for the first time and swapping with existing text/comp node");
+                debug_log("\tCreating the node for the first time and swapping with existing text/comp node");
                 self.dom = None;
             }
             Some(VNode::List(_)) => todo!(),
@@ -62,7 +61,7 @@ impl VElement {
     fn render(&mut self, last: Option<&VElement>, ancestor: &Node) {
         match last {
             Some(last) if last.tag_name == self.tag_name => {
-                log!("\t\tComparing attrs");
+                debug_log("\t\tComparing attrs");
                 let target = self
                     .dom
                     .as_mut()
@@ -80,7 +79,7 @@ impl VElement {
             _ => {
                 // inverted check, if last == None || last = Some(x) that x.tag_name !=
                 // self.tag_name => Swap whole element
-                log!("\t\tRendering new node");
+                debug_log("\t\tRendering new node");
                 let el = Dom::create_element(&self.tag_name);
 
                 // add attributes

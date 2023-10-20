@@ -1,7 +1,6 @@
-use gloo::console::log;
 use web_sys::Node;
 
-use crate::{component::{component::Component, component_node::AnyComponentNode}, utils::WasmUtils};
+use crate::{component::{component::Component, component_node::AnyComponentNode}, utils::{WasmUtils, debug_log}};
 use std::{
     any::Any,
     cell::RefCell,
@@ -60,19 +59,19 @@ impl VComponent {
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
-        log!("Patching component");
+        debug_log("Patching component");
         let mut old_virt: Option<&VComponent> = None;
 
         match last {
             Some(VNode::Component(vcomp)) => {
-                log!("\tComparing two components");
+                debug_log("\tComparing two components");
                 old_virt = Some(vcomp);
             }
             Some(VNode::Element(_)) | Some(VNode::Text(_)) => {
-                log!("\tNew component over element/text");
+                debug_log("\tNew component over element/text");
             }
             None => {
-                log!("\tCreating the comp for the first time");
+                debug_log("\tCreating the comp for the first time");
             }
             Some(VNode::List(_)) => todo!(),
         }
@@ -83,11 +82,11 @@ impl VComponent {
     fn render(&mut self, last: Option<&VComponent>, ancestor: &Node) {
         match last {
             Some(old_vcomp) if old_vcomp.hash == self.hash => {
-                log!("\t\tHashes are the same");
+                debug_log("\t\tHashes are the same");
                 self.comp = old_vcomp.comp.clone();
             }
             Some(old_vcomp) => {
-                log!("\t\tHashes differ");
+                debug_log("\t\tHashes differ");
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();
@@ -96,7 +95,7 @@ impl VComponent {
                 self.comp = Some(any_component_node_rc);
             }
             None => {
-                log!("\t\tThere was no component before");
+                debug_log("\t\tThere was no component before");
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();
