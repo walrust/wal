@@ -31,4 +31,5 @@ fn html_macro_tests() {
     t.compile_fail("tests/html_macro_tests/custom_components/custom_component_without_props_without_default_fail.rs");
     t.compile_fail("tests/html_macro_tests/custom_components/custom_component_without_props_without_hash_fail.rs");
     t.pass("tests/html_macro_tests/custom_components/custom_component_with_props_pass.rs");
+    t.compile_fail("tests/html_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs")
 }
