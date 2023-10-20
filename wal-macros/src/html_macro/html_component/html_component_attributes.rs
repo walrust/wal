@@ -5,7 +5,10 @@ use syn::{
     spanned::Spanned,
 };
 
-use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
+use crate::html_macro::{
+    html_attribute::{HtmlAttribute, HtmlAttributeValue},
+    KEY_STR, PROPS_STR,
+};
 
 pub struct HtmlComponentAttributes {
     pub props: Option<HtmlComponentAttribute>,
@@ -19,7 +22,7 @@ impl Parse for HtmlComponentAttributes {
 
         while HtmlComponentAttribute::peek(input) {
             let attribute = input.parse::<HtmlComponentAttribute>()?;
-            if attribute.ident == "props" {
+            if attribute.ident == PROPS_STR {
                 if props.is_some() {
                     return Err(syn::Error::new(
                         attribute.ident.span(),
@@ -27,7 +30,7 @@ impl Parse for HtmlComponentAttributes {
                     ));
                 }
                 props = Some(attribute);
-            } else if attribute.ident == "key" {
+            } else if attribute.ident == KEY_STR {
                 if key.is_some() {
                     return Err(syn::Error::new(
                         attribute.ident.span(),
@@ -42,8 +45,10 @@ impl Parse for HtmlComponentAttributes {
                 return Err(syn::Error::new(
                     attribute.ident.span(),
                     format!(
-                        "Unsupported attribute `{}`. Custom components supports only `props` and `key` attributes",
-                        attribute.ident
+                        "Unsupported attribute `{}`. Custom components supports only `{}` and `{}` attributes",
+                        attribute.ident,
+                        PROPS_STR,
+                        KEY_STR
                     ),
                 ));
             }
@@ -62,16 +67,18 @@ impl Parse for HtmlComponentAttribute {
         let ident = proc_macro2::Ident::parse_any(&input)?;
         input.parse::<syn::token::Eq>()?;
 
-        let value = if ident == "props" {
+        let value = if ident == PROPS_STR {
             input.parse::<HtmlComponentAttributeValue>()?
-        } else if ident == "key" {
+        } else if ident == KEY_STR {
             input.parse::<HtmlAttributeValue>()?.into()
         } else {
             return Err(syn::Error::new(
                 ident.span(),
                 format!(
-                    "Unsupported attribute `{}`. Custom components supports only `props` and `key` attributes",
-                    ident
+                    "Unsupported attribute `{}`. Custom components supports only `{}` and `{}` attributes",
+                    ident,
+                    PROPS_STR,
+                    KEY_STR
                 ),
             ));
         };

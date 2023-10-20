@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use quote::quote_spanned;
 use syn::parse::Parse;
 
-use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
+use crate::html_macro::{
+    html_attribute::{HtmlAttribute, HtmlAttributeValue},
+    KEY_STR,
+};
 
 pub struct HtmlElementAttributes {
     attributes: HashMap<proc_macro2::Ident, HtmlAttributeValue>,
@@ -17,7 +20,7 @@ impl Parse for HtmlElementAttributes {
 
         while HtmlAttribute::peek(input) {
             let attribute = input.parse::<HtmlAttribute>()?;
-            if attribute.ident == "key" {
+            if attribute.ident == KEY_STR {
                 if key.is_some() {
                     return Err(syn::Error::new(
                         attribute.ident.span(),
@@ -40,19 +43,6 @@ impl Parse for HtmlElementAttributes {
         }
 
         Ok(HtmlElementAttributes { attributes, key })
-    }
-}
-
-impl HtmlElementAttributes {
-    pub fn new(mut attributes: HashMap<proc_macro2::Ident, HtmlAttributeValue>) -> Self {
-        let key = attributes
-            .remove_entry(&proc_macro2::Ident::new(
-                "key",
-                proc_macro2::Span::call_site(),
-            ))
-            .map(|(k, v)| HtmlAttribute { ident: k, value: v });
-
-        HtmlElementAttributes { attributes, key }
     }
 }
 
