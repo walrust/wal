@@ -1,7 +1,7 @@
 use itertools::{Itertools, EitherOrBoth};
 use web_sys::Node;
 
-use crate::utils::debug_log;
+use crate::utils::debug;
 
 use super::VNode;
 
@@ -20,27 +20,27 @@ impl VList {
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
-        debug_log("Patching list");
+        debug::log("Patching list");
         let mut old_virt: Option<&VList> = None;
 
         match last {
             None => {
-                debug_log("\tCreating list for the first time");
+                debug::log("\tCreating list for the first time");
             },
             Some(VNode::List(vlist)) => {
-                debug_log("\tComparing two lists");
+                debug::log("\tComparing two lists");
                 old_virt = Some(vlist);
             },
             Some(VNode::Text(v)) => {
-                debug_log("\tCreating list for the first time and swapping with existing text");
+                debug::log("\tCreating list for the first time and swapping with existing text");
                 v.erase();
             },
             Some(VNode::Element(v)) => {
-                debug_log("\tCreating list for the first time and swapping with existing element");
+                debug::log("\tCreating list for the first time and swapping with existing element");
                 v.erase();
             },
             Some(VNode::Component(v)) => {
-                debug_log("\tCreating list for the first time and swapping with existing comp");
+                debug::log("\tCreating list for the first time and swapping with existing comp");
                 v.erase();
             },
         }

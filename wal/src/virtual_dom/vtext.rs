@@ -1,6 +1,6 @@
 use web_sys::{Node, Text};
 
-use crate::utils::debug_log;
+use crate::utils::debug;
 
 use super::{Dom, VNode};
 
@@ -19,12 +19,12 @@ impl VText {
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
-        debug_log("Patching TextNode");
+        debug::log("Patching TextNode");
         let mut old_virt: Option<&VText> = None;
 
         match last {
             None => {
-                debug_log("\tCreating text for the first time");
+                debug::log("\tCreating text for the first time");
                 self.dom = None;
             }
             Some(VNode::Text(vtext)) => {
@@ -32,17 +32,17 @@ impl VText {
                 old_virt = Some(vtext);
             }
             Some(VNode::Element(v)) => {
-                debug_log("\tCreating text for the first time and swapping with existing element");
+                debug::log("\tCreating text for the first time and swapping with existing element");
                 self.dom = None;
                 v.erase();
             },
             Some(VNode::Component(v)) => {
-                debug_log("\tCreating text for the first time and swapping with existing comp node");
+                debug::log("\tCreating text for the first time and swapping with existing comp node");
                 self.dom = None;
                 v.erase();
             }
             Some(VNode::List(v)) => {
-                debug_log("\tCreating text for the first time and swapping with list");
+                debug::log("\tCreating text for the first time and swapping with list");
                 self.dom = None;
                 v.erase();
             },

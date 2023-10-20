@@ -1,31 +1,37 @@
-use gloo::{
-    console::{log, warn},
-    dialogs::alert,
-};
 
 #[cfg(debug_assertions)]
-#[inline]
-pub fn debug_log(text: impl ToString) {
-    log!(text.to_string())
-}
-#[cfg(not(debug_assertions))]
-#[inline]
-pub fn debug_log(_text: impl ToString) {}
+pub mod debug {
+    use gloo::{
+        console::{log, warn}, dialogs,
+    };
 
-#[cfg(debug_assertions)]
-#[inline]
-pub fn debug_alert(text: impl ToString) {
-    alert(text.to_string().as_str())
-}
-#[cfg(not(debug_assertions))]
-#[inline]
-pub fn debug_alert(_text: impl ToString) {}
+    #[inline]
+    pub fn log(text: impl ToString) {
+        log!(text.to_string())
+    }
 
-#[cfg(debug_assertions)]
-#[inline]
-pub fn debug_warn(text: impl ToString) {
-    warn!(text.to_string().as_str())
+    #[inline]
+    pub fn alert(text: impl ToString) {
+        dialogs::alert(text.to_string().as_str())
+    }
+
+    #[inline]
+    pub fn warn(text: impl ToString) {
+        warn!(text.to_string().as_str())
+    }
 }
+
 #[cfg(not(debug_assertions))]
-#[inline]
-pub fn debug_warn(_text: impl ToString) {}
+pub mod debug {
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn debug_log(_text: impl ToString) {}
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn debug_alert(_text: impl ToString) {}
+
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn debug_warn(_text: impl ToString) {}
+}

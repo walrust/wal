@@ -7,7 +7,7 @@ pub mod vtext;
 use gloo::utils::{body, document};
 use web_sys::{Element, Node, Text};
 
-use crate::utils::debug_log;
+use crate::utils::debug;
 
 pub use self::vcomponent::VComponent;
 pub use self::velement::VElement;
@@ -28,7 +28,7 @@ impl Dom {
                         "There was no '{}' element, adding default one",
                         Self::ROOT_ELEMENT_ID
                     );
-                    debug_log(message);
+                    debug::log(message);
                     let root = document().create_element("div").unwrap();
                     Dom::set_attribute(&root, "id", Self::ROOT_ELEMENT_ID);
                     Dom::append_child(&body(), &root);

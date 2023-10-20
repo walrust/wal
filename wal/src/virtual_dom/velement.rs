@@ -2,7 +2,7 @@ use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 use web_sys::{Element, Node};
 
-use crate::{virtual_dom::Dom, utils::debug_log};
+use crate::{virtual_dom::Dom, utils::debug};
 
 use super::VNode;
 
@@ -30,31 +30,31 @@ impl VElement {
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
-        debug_log("Patching element");
+        debug::log("Patching element");
         let mut old_virt: Option<&VElement> = None;
 
         match last {
             None => {
-                debug_log("\tCreating element for the first time");
+                debug::log("\tCreating element for the first time");
                 self.dom = None;
             }
             Some(VNode::Element(velement)) => {
-                debug_log("\tComparing two elements");
+                debug::log("\tComparing two elements");
                 self.dom = velement.dom.clone();
                 old_virt = Some(velement);
             }
             Some(VNode::Text(v)) => {
-                debug_log("\tCreating element for the first time and swapping with existing text");
+                debug::log("\tCreating element for the first time and swapping with existing text");
                 self.dom = None;
                 v.erase();
             },
             Some(VNode::Component(v)) => {
-                debug_log("\tCreating element for the first time and swapping with existing comp node");
+                debug::log("\tCreating element for the first time and swapping with existing comp node");
                 self.dom = None;
                 v.erase();
             }
             Some(VNode::List(v)) => {
-                debug_log("\tCreating element for the first time and swapping with list");
+                debug::log("\tCreating element for the first time and swapping with list");
                 self.dom = None;
                 v.erase();
             },
@@ -77,7 +77,7 @@ impl VElement {
     fn render(&mut self, last: Option<&VElement>, ancestor: &Node) {
         match last {
             Some(last) if last.tag_name == self.tag_name => {
-                debug_log("\t\tComparing attrs");
+                debug::log("\t\tComparing attrs");
                 let target = self
                     .dom
                     .as_mut()
@@ -95,7 +95,7 @@ impl VElement {
             _ => {
                 // inverted check, if last == None || last = Some(x) that x.tag_name !=
                 // self.tag_name => Swap whole element
-                debug_log("\t\tRendering new node");
+                debug::log("\t\tRendering new node");
                 let el = Dom::create_element(&self.tag_name);
 
                 // add attributes

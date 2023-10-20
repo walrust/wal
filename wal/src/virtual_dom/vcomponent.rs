@@ -1,6 +1,6 @@
 use web_sys::Node;
 
-use crate::{component::{Component, component_node::AnyComponentNode}, utils:: debug_log};
+use crate::{component::{Component, component_node::AnyComponentNode}, utils::debug};
 
 use std::{
     any::Any,
@@ -61,27 +61,27 @@ impl VComponent {
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
-        debug_log("Patching component");
+        debug::log("Patching component");
         let mut old_virt: Option<&VComponent> = None;
 
         match last {
             Some(VNode::Component(vcomp)) => {
-                debug_log("\tComparing two components");
+                debug::log("\tComparing two components");
                 old_virt = Some(vcomp);
             }
             Some(VNode::Element(v)) => {
-                debug_log("\tNew component over element");
+                debug::log("\tNew component over element");
                 v.erase();
             }, 
             Some(VNode::Text(v)) => {
-                debug_log("\tNew component over text");
+                debug::log("\tNew component over text");
                 v.erase();
             }
             None => {
-                debug_log("\tCreating the comp for the first time");
+                debug::log("\tCreating the comp for the first time");
             }
             Some(VNode::List(v)) => {
-                debug_log("\tNew component over list");
+                debug::log("\tNew component over list");
                 v.erase();
             }
         }
@@ -91,7 +91,7 @@ impl VComponent {
 
     pub fn erase(&self) {
         if let Some(node) = self.comp.as_ref() {
-            debug_log("Erasing vcomponent, feels kinda fucking sus");
+            debug::log("Erasing vcomponent, feels kinda fucking sus");
             node.borrow_mut().vdom.erase();
         }
     }
@@ -99,11 +99,11 @@ impl VComponent {
     fn render(&mut self, last: Option<&VComponent>, ancestor: &Node) {
         match last {
             Some(old_vcomp) if old_vcomp.hash == self.hash => {
-                debug_log("\t\tHashes are equal");
+                debug::log("\t\tHashes are equal");
                 self.comp = old_vcomp.comp.clone();
             }
             Some(old_vcomp) => {
-                debug_log("\t\tHashes differ");
+                debug::log("\t\tHashes differ");
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();
@@ -112,7 +112,7 @@ impl VComponent {
                 self.comp = Some(any_component_node_rc);
             }
             None => {
-                debug_log("\t\tThere was no component before");
+                debug::log("\t\tThere was no component before");
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();

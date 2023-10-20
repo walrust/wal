@@ -1,6 +1,6 @@
 use std::{rc::Rc, cell::RefCell};
 
-use crate::{virtual_dom::VNode, utils::debug_log};
+use crate::{virtual_dom::VNode, utils::debug};
 
 use super::component_node::AnyComponentNode;
 
@@ -26,7 +26,7 @@ impl VDomObserver {
             let mut any_component_node = any_componend_node.borrow_mut();
             any_component_node.vdom_notify(new_vdom);
         } else {
-            debug_log("VDomObserver is not attached to a AnyComponentNode");
+            debug::log("VDomObserver is not attached to a AnyComponentNode");
             panic!("VDomObserver is not attached to a AnyComponentNode");
         }
     }
@@ -51,7 +51,7 @@ impl ToRerenderObserver {
         if let Some(any_component_node) = &self.any_component_node {
             any_component_node.borrow_mut().rerender_notify();
         } else {
-            debug_log("RerenderObserver is not attached to AnyComponentNode");
+            debug::log("RerenderObserver is not attached to AnyComponentNode");
             panic!("RerenderObserver is not attached to AnyComponentNode");
         }
     }
