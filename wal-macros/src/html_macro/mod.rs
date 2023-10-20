@@ -9,3 +9,6 @@ mod html_if;
 mod html_literal;
 pub mod html_root;
 mod html_tree;
+
+const KEY_STR: &str = "key";
+const PROPS_STR: &str = "props";
