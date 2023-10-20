@@ -14,8 +14,8 @@ pub fn debug_log(_text: impl ToString) {}
 
 #[cfg(debug_assertions)]
 #[inline]
-pub fn debug_alert(text: &str) {
-    alert(text)
+pub fn debug_alert(text: impl ToString) {
+    alert(text.to_string().as_str())
 }
 #[cfg(not(debug_assertions))]
 #[inline]
@@ -23,8 +23,8 @@ pub fn debug_alert(_text: impl ToString) {}
 
 #[cfg(debug_assertions)]
 #[inline]
-pub fn debug_warn(text: &str) {
-    warn!(text)
+pub fn debug_warn(text: impl ToString) {
+    warn!(text.to_string().as_str())
 }
 #[cfg(not(debug_assertions))]
 #[inline]
