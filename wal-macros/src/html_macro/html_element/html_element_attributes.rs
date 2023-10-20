@@ -46,19 +46,6 @@ impl Parse for HtmlElementAttributes {
     }
 }
 
-impl HtmlElementAttributes {
-    pub fn new(mut attributes: HashMap<proc_macro2::Ident, HtmlAttributeValue>) -> Self {
-        let key = attributes
-            .remove_entry(&proc_macro2::Ident::new(
-                KEY_STR,
-                proc_macro2::Span::call_site(),
-            ))
-            .map(|(k, v)| HtmlAttribute { ident: k, value: v });
-
-        HtmlElementAttributes { attributes, key }
-    }
-}
-
 impl From<&HtmlElementAttributes> for Vec<proc_macro2::TokenStream> {
     fn from(element_attributes: &HtmlElementAttributes) -> Vec<proc_macro2::TokenStream> {
         let mut attributes: Vec<proc_macro2::TokenStream> = element_attributes
