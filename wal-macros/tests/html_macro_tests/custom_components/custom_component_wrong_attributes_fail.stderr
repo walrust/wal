@@ -52,13 +52,13 @@ error: expected `=`
 18 |     html! { <CustomComponentPropsI32 props /> };
    |                                            ^
 
-error: Expected a literal or an expression block
+error: Expected a literal, a struct literal expression or an expression block
   --> tests/html_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:19:46
    |
 19 |     html! { <CustomComponentPropsI32 props = /> };
    |                                              ^
 
-error: Expected a literal or an expression block
+error: Expected a literal, a struct literal expression or an expression block
   --> tests/html_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:20:46
    |
 20 |     html! { <CustomComponentPropsI32 props = key = "key" /> };

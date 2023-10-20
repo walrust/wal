@@ -1,9 +1,7 @@
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{parse::Parse, spanned::Spanned};
 
-use self::html_component_attributes::HtmlComponentAttributes;
-
-use super::html_attribute::HtmlAttributeValue;
+use self::html_component_attributes::{HtmlComponentAttributeValue, HtmlComponentAttributes};
 
 mod html_component_attributes;
 
@@ -38,10 +36,13 @@ impl ToTokens for HtmlComponent {
             quote_spanned!(self.ty.span() => <#ty as ::wal::component::Component>::Properties);
         let props = if let Some(props) = &self.attributes.props {
             match &props.value {
-                HtmlAttributeValue::Literal(lit) => {
+                HtmlComponentAttributeValue::Literal(lit) => {
                     quote_spanned!(props.to_spanned().span() => #lit)
                 }
-                HtmlAttributeValue::ExpressionBlock(expr_block) => {
+                HtmlComponentAttributeValue::StructExpression(expr_struct) => {
+                    quote_spanned!(props.to_spanned().span() => #expr_struct)
+                }
+                HtmlComponentAttributeValue::ExpressionBlock(expr_block) => {
                     quote_spanned!(props.to_spanned().span() => #[allow(unused_braces)] #expr_block)
                 }
             }
@@ -60,6 +61,6 @@ impl HtmlComponent {
     fn to_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
-        quote!( #lt #gt )
+        quote! { #lt #gt }
     }
 }
