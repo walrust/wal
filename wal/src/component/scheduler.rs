@@ -3,7 +3,7 @@ use std::{any::Any, cell::RefCell, collections::BinaryHeap, rc::Rc};
 use wasm_bindgen_futures::spawn_local;
 
 use super::{
-    component_node::{ToRerenderObserver, VDomObserver},
+    observer::{ToRerenderObserver, VDomObserver},
     AnyComponent, behavior::AnyComponentBehavior,
 };
 
@@ -30,6 +30,7 @@ struct UpdateMessage {
 impl UpdateMessage {
     fn handle(self) {
         let to_rerender = self.component.borrow_mut().update(self.message);
+
         if to_rerender {
             self.to_rerender_observer.borrow().notify();
         }
@@ -46,9 +47,9 @@ struct RerenderMessage {
 
 impl RerenderMessage {
     fn handle(self) {
-        let vdom = self.component.borrow().view(self.behavior.as_ref());
+        let vdom = self.component.borrow().view(&self.behavior);
         self.vdom_observer.borrow().notify(vdom);
-        *self.to_rerender.borrow_mut() = false;
+        *std::cell::RefCell::<_>::borrow_mut(&self.to_rerender) = false;
     }
 }
 

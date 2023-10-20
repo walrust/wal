@@ -1,5 +1,5 @@
 use wal::{
-    component::{Component, behavior::ComponentBehavior},
+    component::{Component, behavior::Behavior},
     virtual_dom::{VComponent, VElement, VNode},
 };
 
@@ -19,7 +19,7 @@ impl Component for FatherComponent {
         Self(props.0)
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         VElement {
             tag_name: "div".to_string(),
             attr: [("father".to_string(), "true".to_string())].into(),
@@ -51,7 +51,7 @@ impl Component for ChildComponent {
         Self(props.0)
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         VElement {
             tag_name: "div".to_string(),
             attr: [("counter-child".to_string(), self.0.to_string())].into(),

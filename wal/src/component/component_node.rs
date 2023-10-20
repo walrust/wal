@@ -1,8 +1,8 @@
-use crate::{virtual_dom::VNode, utils::debug_log};
-use std::{cell::RefCell, fmt, marker::PhantomData, mem, rc::Rc};
+use crate::virtual_dom::VNode;
+use std::{cell::RefCell, fmt, mem, rc::Rc};
 use web_sys::Node;
 
-use super::{callback::Callback, scheduler::Scheduler, AnyComponent, Component, behavior::AnyComponentBehavior};
+use super::{scheduler::Scheduler, AnyComponent, Component, behavior::AnyComponentBehavior, observer::{VDomObserver, ToRerenderObserver}};
 
 pub struct AnyComponentNode {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
@@ -67,7 +67,7 @@ impl AnyComponentNode {
         node_rc
     }
 
-    fn rerender_notify(&mut self) {
+    pub(crate) fn rerender_notify(&mut self) {
         let mut to_rerender = self.to_rerender.borrow_mut();
         if !*to_rerender {
             *to_rerender = true;
@@ -81,7 +81,7 @@ impl AnyComponentNode {
         }
     }
 
-    fn vdom_notify(&mut self, mut new_vdom: VNode) {
+    pub(crate) fn vdom_notify(&mut self, mut new_vdom: VNode) {
         mem::swap(&mut new_vdom, &mut self.vdom);
         self.vdom.patch(Some(&new_vdom), &self.ancestor);
     }
@@ -112,53 +112,3 @@ impl fmt::Debug for AnyComponentNode {
     }
 }
 
-pub struct VDomObserver {
-    component_node: Option<Rc<RefCell<AnyComponentNode>>>,
-}
-
-impl VDomObserver {
-    fn new() -> Self {
-        Self {
-            component_node: None,
-        }
-    }
-
-    fn set_observer(&mut self, component_node: Rc<RefCell<AnyComponentNode>>) {
-        self.component_node = Some(component_node);
-    }
-
-    pub fn notify(&self, new_vdom: VNode) {
-        if let Some(any_componend_node) = &self.component_node {
-            let mut any_component_node = any_componend_node.borrow_mut();
-            any_component_node.vdom_notify(new_vdom);
-        } else {
-            debug_log("VDomObserver is not attached to a AnyComponentNode");
-            panic!("VDomObserver is not attached to a AnyComponentNode");
-        }
-    }
-}
-
-pub struct ToRerenderObserver {
-    any_component_node: Option<Rc<RefCell<AnyComponentNode>>>,
-}
-
-impl ToRerenderObserver {
-    fn new() -> Self {
-        Self {
-            any_component_node: None,
-        }
-    }
-
-    fn set_observer(&mut self, any_component_node: Rc<RefCell<AnyComponentNode>>) {
-        self.any_component_node = Some(any_component_node);
-    }
-
-    pub fn notify(&self) {
-        if let Some(any_component_node) = &self.any_component_node {
-            any_component_node.borrow_mut().rerender_notify();
-        } else {
-            debug_log("RerenderObserver is not attached to AnyComponentNode");
-            panic!("RerenderObserver is not attached to AnyComponentNode");
-        }
-    }
-}

@@ -1,6 +1,6 @@
 use gloo::timers::callback::Interval;
 use wal::{
-    component::{callback::Callback, Component, behavior::ComponentBehavior},
+    component::{callback::Callback, Component, behavior::Behavior},
     virtual_dom::{VElement, VNode},
 };
 use wal_macros::html;
@@ -21,7 +21,7 @@ impl Component for FatherComponent {
         Self(props.0)
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         let callback = _behavior.create_callback(|()| FatherMessages::Add);
 
         html! {
@@ -64,7 +64,7 @@ impl Component for ChildComponent {
         Self(props.0, props.1)
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         VElement {
             tag_name: "div".to_string(),
             attr: [("counter-child".to_string(), self.0.to_string())].into(),

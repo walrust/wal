@@ -1,5 +1,5 @@
 use wal::{
-    component::{Component, behavior::ComponentBehavior},
+    component::{Component, behavior::Behavior},
     virtual_dom::{VElement, VNode},
 };
 
@@ -23,7 +23,7 @@ impl Component for RootComponent {
         Self(props.starting_count)
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         VElement {
             tag_name: "div".to_string(),
             attr: [("counter".to_string(), self.0.to_string())].into(),

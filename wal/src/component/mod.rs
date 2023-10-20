@@ -1,21 +1,22 @@
 use crate::virtual_dom::VNode;
-use std::any::Any;
+use std::{any::Any, rc::Rc};
 use std::hash::Hash;
 
-use self::behavior::{ComponentBehavior, AnyComponentBehavior};
+use self::behavior::{AnyComponentBehavior, Behavior};
 
 
 pub mod behavior;
 pub mod callback;
 pub mod component_node;
 pub mod scheduler;
+pub mod observer;
 
 pub trait Component: Sized {
     type Message: 'static;
     type Properties: Hash + 'static;
 
     fn new(props: Self::Properties) -> Self;
-    fn view(&self, behavior: &mut ComponentBehavior<Self>) -> VNode;
+    fn view(&self, behavior: &mut impl Behavior<Self>) -> VNode;
     fn update(&mut self, message: Self::Message) -> bool;
 }
 
@@ -23,7 +24,7 @@ pub trait AnyComponent {
     fn new(props: Box<dyn Any>) -> Self
     where
         Self: Sized;
-    fn view(&self, behavior: &AnyComponentBehavior) -> VNode;
+    fn view(&self, behavior: &Rc<AnyComponentBehavior>) -> VNode;
     fn update(&mut self, message: Box<dyn Any>) -> bool;
 }
 
@@ -35,9 +36,8 @@ impl<C: Component> AnyComponent for C {
         C::new(props)
     }
 
-    fn view(&self, any_component_behavior: &AnyComponentBehavior) -> VNode {
-        let mut component_behavior = ComponentBehavior::from(any_component_behavior);
-
+    fn view(&self, any_component_behavior: &Rc<AnyComponentBehavior>) -> VNode {
+        let mut component_behavior = any_component_behavior.clone();
         self.view(&mut component_behavior)
     }
 
