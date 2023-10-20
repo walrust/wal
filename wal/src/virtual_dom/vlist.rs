@@ -1,3 +1,8 @@
+use itertools::{Itertools, EitherOrBoth};
+use web_sys::Node;
+
+use crate::utils::debug_log;
+
 use super::VNode;
 
 #[derive(PartialEq, Debug)]
@@ -12,5 +17,57 @@ impl VList {
 
     pub fn new_empty() -> VList {
         VList { nodes: Vec::new() }
+    }
+
+    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
+        debug_log("Patching list");
+        let mut old_virt: Option<&VList> = None;
+
+        match last {
+            None => {
+                debug_log("\tCreating list for the first time");
+            },
+            Some(VNode::List(vlist)) => {
+                debug_log("\tComparing two lists");
+                old_virt = Some(vlist);
+            },
+            Some(VNode::Text(v)) => {
+                debug_log("\tCreating list for the first time and swapping with existing text");
+                v.erase();
+            },
+            Some(VNode::Element(v)) => {
+                debug_log("\tCreating list for the first time and swapping with existing element");
+                v.erase();
+            },
+            Some(VNode::Component(v)) => {
+                debug_log("\tCreating list for the first time and swapping with existing comp");
+                v.erase();
+            },
+        }
+
+        self.render(old_virt, ancestor);
+    }
+
+    pub fn erase(&self) {
+        for node in self.nodes.iter() {
+            node.erase();
+        }
+    }
+}
+
+impl VList {
+    fn render(&mut self, last: Option<&VList>, ancestor: &Node) {
+        for e in self.nodes.iter_mut().zip_longest(
+                last.map_or_else(
+                    || vec![], 
+                    |x| x.nodes.iter().collect())) {
+            match e {
+                EitherOrBoth::Both(cur, old) => 
+                    cur.patch(Some(old), ancestor),
+                EitherOrBoth::Left(cur) => 
+                    cur.patch(None, ancestor),
+                EitherOrBoth::Right(old) => old.erase(),
+            }
+        }
     }
 }

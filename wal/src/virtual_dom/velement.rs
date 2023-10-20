@@ -35,23 +35,39 @@ impl VElement {
 
         match last {
             None => {
-                debug_log("\tCreating the node for the first time");
+                debug_log("\tCreating element for the first time");
                 self.dom = None;
             }
             Some(VNode::Element(velement)) => {
-                debug_log("\tCopying existing node");
+                debug_log("\tComparing two elements");
                 self.dom = velement.dom.clone();
                 old_virt = Some(velement);
             }
-            Some(VNode::Text(_)) | Some(VNode::Component(_)) => {
-                debug_log("\tCreating the node for the first time and swapping with existing text/comp node");
+            Some(VNode::Text(v)) => {
+                debug_log("\tCreating element for the first time and swapping with existing text");
                 self.dom = None;
+                v.erase();
+            },
+            Some(VNode::Component(v)) => {
+                debug_log("\tCreating element for the first time and swapping with existing comp node");
+                self.dom = None;
+                v.erase();
             }
-            Some(VNode::List(_)) => todo!(),
+            Some(VNode::List(v)) => {
+                debug_log("\tCreating element for the first time and swapping with list");
+                self.dom = None;
+                v.erase();
+            },
         }
 
         self.render(old_virt, ancestor);
         self.handle_children(old_virt);
+    }
+
+    pub fn erase(&self) {
+        if let Some(el) = &self.dom {
+            Dom::remove_node(el);
+        }
     }
 }
 
@@ -103,16 +119,14 @@ impl VElement {
         for either_child_or_both in self.children.iter_mut().zip_longest(old_children) {
             match either_child_or_both {
                 EitherOrBoth::Both(child, old_child) => {
-                    child.patch(Some(old_child), target);
+                    child.patch(Some(&old_child), target);
                 }
                 EitherOrBoth::Left(child) => {
                     child.patch(None, target);
                 }
                 EitherOrBoth::Right(old_child) => {
                     // child doesnt exist anymore
-                    if let Some(node) = old_child.get_dom() {
-                        Dom::remove_child(&target, &node);
-                    }
+                    old_child.erase();
                 }
             }
         }

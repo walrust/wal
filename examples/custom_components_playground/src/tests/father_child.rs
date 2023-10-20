@@ -3,6 +3,7 @@ use wal::{
     virtual_dom::{VComponent, VElement, VNode},
 };
 
+#[allow(dead_code)]
 enum FatherMessages {
     Add,
 }

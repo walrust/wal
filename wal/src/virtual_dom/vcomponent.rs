@@ -69,22 +69,37 @@ impl VComponent {
                 debug_log("\tComparing two components");
                 old_virt = Some(vcomp);
             }
-            Some(VNode::Element(_)) | Some(VNode::Text(_)) => {
-                debug_log("\tNew component over element/text");
+            Some(VNode::Element(v)) => {
+                debug_log("\tNew component over element");
+                v.erase();
+            }, 
+            Some(VNode::Text(v)) => {
+                debug_log("\tNew component over text");
+                v.erase();
             }
             None => {
                 debug_log("\tCreating the comp for the first time");
             }
-            Some(VNode::List(_)) => todo!(),
+            Some(VNode::List(v)) => {
+                debug_log("\tNew component over list");
+                v.erase();
+            }
         }
 
         self.render(old_virt, ancestor);
     }
 
+    pub fn erase(&self) {
+        if let Some(node) = self.comp.as_ref() {
+            debug_log("Erasing vcomponent, feels kinda fucking sus");
+            node.borrow_mut().vdom.erase();
+        }
+    }
+
     fn render(&mut self, last: Option<&VComponent>, ancestor: &Node) {
         match last {
             Some(old_vcomp) if old_vcomp.hash == self.hash => {
-                debug_log("\t\tHashes are the same");
+                debug_log("\t\tHashes are equal");
                 self.comp = old_vcomp.comp.clone();
             }
             Some(old_vcomp) => {

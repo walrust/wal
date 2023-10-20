@@ -37,6 +37,7 @@ impl AnyComponentNode {
             component_rc.clone(),
             to_rerender_observer_rc.clone(),
         ));
+        // TODO: consider using RC::get_mut function instead of this fucking nonsense
         let vdom = component_rc.borrow().view(&behavior_rc);
         let vdom_observer_rc = Rc::new(RefCell::new(VDomObserver::new()));
 
@@ -93,7 +94,7 @@ impl AnyComponentNode {
     ) {
         if let Some(last_component_node) = last_component_node {
             let last_component_node = last_component_node.clone();
-            let last_component_node_vdom = &last_component_node.borrow().vdom;
+            let last_component_node_vdom = &last_component_node.borrow_mut().vdom;
 
             self.vdom.patch(Some(last_component_node_vdom), ancestor);
         } else {
@@ -101,9 +102,9 @@ impl AnyComponentNode {
         }
     }
 
-    pub fn get_dom(&self) -> Option<Node> {
-        self.vdom.get_dom()
-    }
+    // pub fn get_dom(&self) -> Option<Node> {
+    //     self.vdom.get_dom()
+    // }
 }
 
 impl fmt::Debug for AnyComponentNode {

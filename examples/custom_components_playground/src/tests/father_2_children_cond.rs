@@ -1,9 +1,15 @@
-use gloo::timers::callback::Interval;
+use std::{cell::RefCell, rc::Rc};
+
+use gloo::timers::callback::{Interval, Timeout};
 use wal::{
     component::{callback::Callback, Component, behavior::Behavior},
-    virtual_dom::{VElement, VNode},
+    virtual_dom::{VElement, VNode}, utils::debug_log,
 };
 use wal_macros::html;
+
+thread_local! {
+    pub static COUNTER: Rc<RefCell<i32>> = Rc::new(RefCell::new(0));
+}
 
 enum FatherMessages {
     Add,
@@ -56,7 +62,12 @@ impl Component for ChildComponent {
 
     fn new(props: Self::Properties) -> Self {
         let cb = props.1.clone();
-        Interval::new(5000, move || {
+        Timeout::new(5000, move || {
+            COUNTER.with(|x| {
+                let xd = x.clone();
+                debug_log(format!("{:?}", xd.borrow()));
+                *x.borrow_mut() += 1;
+            });
             cb.emit(());
         })
         .forget();
@@ -79,6 +90,7 @@ impl Component for ChildComponent {
     }
 }
 
+#[allow(dead_code)]
 pub fn start() {
     let comp = FatherComponent(0);
     wal::app::start(comp);

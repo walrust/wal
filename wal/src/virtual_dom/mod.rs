@@ -47,6 +47,11 @@ impl Dom {
         document().create_text_node(data)
     }
 
+    pub fn remove_node(node: &Node) {
+        let ancestor = node.parent_node().expect("Node does not have a parent");
+        Dom::remove_child(&ancestor, &node);
+    }
+
     pub fn append_child(ancestor: &Node, child: &Node) -> Node {
         ancestor
             .append_child(child)

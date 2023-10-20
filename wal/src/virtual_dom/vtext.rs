@@ -24,21 +24,37 @@ impl VText {
 
         match last {
             None => {
-                debug_log("\tCreating the node for the first time");
+                debug_log("\tCreating text for the first time");
                 self.dom = None;
             }
             Some(VNode::Text(vtext)) => {
                 self.dom = vtext.dom.clone();
                 old_virt = Some(vtext);
             }
-            Some(VNode::Element(_)) | Some(VNode::Component(_)) => {
-                debug_log("\tCreating the node for the first time and swapping with existing text/comp node");
+            Some(VNode::Element(v)) => {
+                debug_log("\tCreating text for the first time and swapping with existing element");
                 self.dom = None;
+                v.erase();
+            },
+            Some(VNode::Component(v)) => {
+                debug_log("\tCreating text for the first time and swapping with existing comp node");
+                self.dom = None;
+                v.erase();
             }
-            Some(VNode::List(_)) => todo!(),
+            Some(VNode::List(v)) => {
+                debug_log("\tCreating text for the first time and swapping with list");
+                self.dom = None;
+                v.erase();
+            },
         }
 
         self.render(old_virt, ancestor);
+    }
+
+    pub fn erase(&self) {
+        if let Some(text) = &self.dom {
+            Dom::remove_node(text);
+        }
     }
 }
 
