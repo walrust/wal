@@ -12,6 +12,7 @@ impl Parse for HtmlComponentAttributes {
         let mut props = None;
         let mut key = None;
         while HtmlAttribute::peek(input) {
+            // TODO: maybe parse HtmlComponentAttribute which will allow to parse struct expression without braces
             let attribute = input.parse::<HtmlAttribute>()?;
             if attribute.ident == "props" {
                 if props.is_some() {

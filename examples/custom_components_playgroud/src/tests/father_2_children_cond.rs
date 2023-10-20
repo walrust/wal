@@ -3,6 +3,7 @@ use wal::{
     component::{callback::Callback, component_node::ComponentBehavior, Component},
     virtual_dom::{VComponent, VElement, VNode},
 };
+use wal_macros::html;
 
 enum FatherMessages {
     Add,
@@ -23,29 +24,16 @@ impl Component for FatherComponent {
     fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
         let callback = _behavior.create_callback(|()| FatherMessages::Add);
 
-        VElement {
-            tag_name: "div".to_string(),
-            attr: [("father".to_string(), "true".to_string())].into(),
-            children: {
+        html! {
+            <div>
                 if self.0 % 2 == 0 {
-                    vec![
-                        VComponent::new::<ChildComponent>(ChildProperties(self.0, callback)).into(),
-                    ]
+                    <ChildComponent props = {ChildProperties(self.0, callback)} />
                 } else {
-                    vec![
-                        VComponent::new::<ChildComponent>(ChildProperties(
-                            self.0,
-                            callback.clone(),
-                        ))
-                        .into(),
-                        VComponent::new::<ChildComponent>(ChildProperties(self.0 * -1, callback))
-                            .into(),
-                    ]
+                    <ChildComponent props = {ChildProperties(self.0, callback.clone())} />
+                    <ChildComponent props = {ChildProperties(self.0 * -1, callback)} />
                 }
-            },
-            dom: None,
+            </div>
         }
-        .into()
     }
 
     fn update(&mut self, message: Self::Message) -> bool {

@@ -39,10 +39,10 @@ impl ToTokens for HtmlComponent {
         let props = if let Some(props) = &self.attributes.props {
             match &props.value {
                 HtmlAttributeValue::Literal(lit) => {
-                    quote_spanned!(props.to_spanned().span() => <#lit as #props_type>)
+                    quote_spanned!(props.to_spanned().span() => #lit)
                 }
                 HtmlAttributeValue::ExpressionBlock(expr_block) => {
-                    quote_spanned!(props.to_spanned().span() => <#expr_block as #props_type>)
+                    quote_spanned!(props.to_spanned().span() => #[allow(unused_braces)] #expr_block)
                 }
             }
         } else {

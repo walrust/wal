@@ -8,4 +8,5 @@ include!("../utils/custom_components/custom_component_props_struct_without_defau
 
 fn main() {
     html! { <CustomComponentPropsStructWithoutDefault /> };
+    html! { <CustomComponentPropsStructWithoutDefault key="key" />};
 }

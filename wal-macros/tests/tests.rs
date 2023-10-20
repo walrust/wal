@@ -27,9 +27,8 @@ fn html_macro_tests() {
     // t.pass("tests/html_macro_tests/ifs/if_let_pass.rs");
     // t.compile_fail("tests/html_macro_tests/ifs/if_let_fail.rs");
     // t.pass("tests/html_macro_tests/ifs/if_and_if_let_pass.rs");
-    t.pass(
-        "tests/html_macro_tests/custom_components/custom_component_without_props_and_key_pass.rs",
-    );
+    t.pass("tests/html_macro_tests/custom_components/custom_component_without_props_pass.rs");
     t.compile_fail("tests/html_macro_tests/custom_components/custom_component_without_props_without_default_fail.rs");
     t.compile_fail("tests/html_macro_tests/custom_components/custom_component_without_props_without_hash_fail.rs");
+    t.pass("tests/html_macro_tests/custom_components/custom_component_with_props_pass.rs");
 }
