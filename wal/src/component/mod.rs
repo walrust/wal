@@ -2,7 +2,8 @@ use crate::virtual_dom::VNode;
 use std::any::Any;
 use std::hash::Hash;
 
-use self::component_node::{AnyComponentBehavior, ComponentBehavior};
+use self::behavior::{ComponentBehavior, AnyComponentBehavior};
+
 
 pub mod behavior;
 pub mod callback;

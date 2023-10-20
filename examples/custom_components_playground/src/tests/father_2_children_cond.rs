@@ -1,6 +1,6 @@
 use gloo::timers::callback::Interval;
 use wal::{
-    component::{callback::Callback, component_node::ComponentBehavior, Component},
+    component::{callback::Callback, Component, behavior::ComponentBehavior},
     virtual_dom::{VElement, VNode},
 };
 use wal_macros::html;

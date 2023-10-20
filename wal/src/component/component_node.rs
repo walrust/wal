@@ -2,7 +2,7 @@ use crate::{virtual_dom::VNode, utils::debug_log};
 use std::{cell::RefCell, fmt, marker::PhantomData, mem, rc::Rc};
 use web_sys::Node;
 
-use super::{callback::Callback, scheduler::Scheduler, AnyComponent, Component};
+use super::{callback::Callback, scheduler::Scheduler, AnyComponent, Component, behavior::AnyComponentBehavior};
 
 pub struct AnyComponentNode {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
@@ -109,57 +109,6 @@ impl AnyComponentNode {
 impl fmt::Debug for AnyComponentNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         "AnyComponentNode".fmt(f)
-    }
-}
-
-pub struct AnyComponentBehavior {
-    component: Rc<RefCell<Box<dyn AnyComponent>>>,
-    rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-}
-
-impl AnyComponentBehavior {
-    pub fn new(
-        component: Rc<RefCell<Box<dyn AnyComponent>>>,
-        rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-    ) -> Self {
-        Self {
-            component,
-            rerender_observer,
-        }
-    }
-}
-
-pub struct ComponentBehavior<C: Component> {
-    component: Rc<RefCell<Box<dyn AnyComponent>>>,
-    rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-    _pd: PhantomData<C>,
-}
-
-impl<C: Component> ComponentBehavior<C> {
-    pub fn create_callback<IN, F>(&mut self, wrapper: F) -> Callback<IN>
-    where
-        F: Fn(IN) -> C::Message + 'static,
-    {
-        let component = self.component.clone();
-        let rerender_observer = self.rerender_observer.clone();
-        Callback::new(move |data| {
-            let message = wrapper(data);
-            Scheduler::add_update_message(
-                component.clone(),
-                Box::new(message),
-                rerender_observer.clone(),
-            );
-        })
-    }
-}
-
-impl<C: Component> From<&AnyComponentBehavior> for ComponentBehavior<C> {
-    fn from(value: &AnyComponentBehavior) -> Self {
-        Self {
-            component: value.component.clone(),
-            rerender_observer: value.rerender_observer.clone(),
-            _pd: PhantomData,
-        }
     }
 }
 
