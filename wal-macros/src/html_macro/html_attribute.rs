@@ -1,10 +1,15 @@
+use std::collections::HashSet;
+
+use once_cell::unsync::Lazy;
 use quote::ToTokens;
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
 };
 
-use super::html_component::html_component_attributes::HtmlComponentAttributeValue;
+use super::html_component::html_component_attributes::{
+    HtmlComponentAttribute, HtmlComponentAttributeValue,
+};
 
 pub struct HtmlAttribute {
     pub ident: proc_macro2::Ident,
@@ -24,6 +29,19 @@ impl Parse for HtmlAttribute {
 impl HtmlAttribute {
     pub fn peek(input: ParseStream) -> bool {
         input.peek(proc_macro2::Ident::peek_any)
+    }
+
+    pub fn is_event(&self) -> bool {
+        EVENTS.contains(&self.ident.to_string().as_str())
+    }
+}
+
+impl From<HtmlComponentAttribute> for HtmlAttribute {
+    fn from(attribute: HtmlComponentAttribute) -> Self {
+        HtmlAttribute {
+            ident: attribute.ident,
+            value: attribute.value.into(),
+        }
     }
 }
 
@@ -74,3 +92,90 @@ impl From<HtmlComponentAttributeValue> for HtmlAttributeValue {
         }
     }
 }
+
+// Events from https://www.w3schools.com/tags/ref_eventattributes.asp
+const EVENTS: Lazy<HashSet<&str>> = Lazy::new(|| {
+    [
+        // Window Event Attributes
+        "onafterprint",
+        "onbeforeprint",
+        "onbeforeunload",
+        "onerror",
+        "onhashchange",
+        "onload",
+        "onmessage",
+        "onoffline",
+        "ononline",
+        "onpagehide",
+        "onpageshow",
+        "onpopstate",
+        "onresize",
+        "onstorage",
+        "onunload",
+        // Form Events
+        "onblur",
+        "onchange",
+        "oncontextmenu",
+        "onfocus",
+        "oninput",
+        "oninvalid",
+        "onreset",
+        "onsearch",
+        "onselect",
+        "onsubmit",
+        // Keyboard Events
+        "onkeydown",
+        "onkeypress",
+        "onkeyup",
+        // Mouse Events
+        "onclick",
+        "ondblclick",
+        "onmousedown",
+        "onmousemove",
+        "onmouseout",
+        "onmouseover",
+        "onmouseup",
+        "onmousewheel",
+        "onscroll",
+        "onwheel",
+        // Drag Events
+        "ondrag",
+        "ondragend",
+        "ondragenter",
+        "ondragleave",
+        "ondragover",
+        "ondragstart",
+        "ondrop",
+        // Clipboard Events
+        "oncopy",
+        "oncut",
+        "onpaste",
+        // Media Events
+        "onabort",
+        "oncanplay",
+        "oncanplaythrough",
+        "oncuechange",
+        "ondurationchange",
+        "onemptied",
+        "onended",
+        "onerror",
+        "onloadeddata",
+        "onloadedmetadata",
+        "onloadstart",
+        "onpause",
+        "onplay",
+        "onplaying",
+        "onprogress",
+        "onratechange",
+        "onseeked",
+        "onseeking",
+        "onstalled",
+        "onsuspend",
+        "ontimeupdate",
+        "onvolumechange",
+        "onwaiting",
+        // Misc Events
+        "ontoggle",
+    ]
+    .into()
+});
