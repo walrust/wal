@@ -1,17 +1,18 @@
-use gloo::console::log;
+use gloo::{console::log, events::EventListener};
 use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 use web_sys::{Element, Node};
 
-use crate::virtual_dom::Dom;
+use crate::{events::EventHandler, virtual_dom::Dom};
 
 use super::VNode;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
     pub children: Vec<VNode>,
+    pub event_handlers: Vec<(Box<dyn EventHandler>, Option<EventListener>)>,
 
     pub dom: Option<Element>,
 }
@@ -21,11 +22,20 @@ impl VElement {
     // List of attributes - https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
     //                    - https://www.w3schools.com/tags/ref_attributes.asp
     // Maybe some oop approach with defined types for attributes and types for elements?
-    pub fn new(tag_name: String, attr: HashMap<String, String>, children: Vec<VNode>) -> VElement {
+    pub fn new(
+        tag_name: String,
+        attr: HashMap<String, String>,
+        children: Vec<VNode>,
+        event_handlers: Vec<Box<dyn EventHandler>>,
+    ) -> VElement {
         VElement {
             tag_name,
             attr,
             children,
+            event_handlers: event_handlers
+                .into_iter()
+                .map(|event_handler| (event_handler, None))
+                .collect(),
             dom: None,
         }
     }
@@ -76,6 +86,9 @@ impl VElement {
                         Dom::remove_attribute(target, key);
                     }
                 }
+                for event_handler in &mut self.event_handlers {
+                    event_handler.1 = Some(Dom::create_event_listener(target, &event_handler.0));
+                }
             }
             _ => {
                 // inverted check, if last == None || last = Some(x) that x.tag_name !=
@@ -86,6 +99,10 @@ impl VElement {
                 // add attributes
                 for (name, value) in self.attr.iter() {
                     Dom::set_attribute(&el, name, value);
+                }
+
+                for event_handler in &mut self.event_handlers {
+                    event_handler.1 = Some(Dom::create_event_listener(&el, &event_handler.0));
                 }
 
                 match &self.dom {
@@ -117,5 +134,14 @@ impl VElement {
                 }
             }
         }
+    }
+}
+
+impl PartialEq for VElement {
+    fn eq(&self, other: &Self) -> bool {
+        self.tag_name == other.tag_name
+            && self.attr == other.attr
+            && self.children == other.children
+            && self.dom == other.dom
     }
 }

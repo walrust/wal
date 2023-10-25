@@ -5,8 +5,11 @@ pub mod vnode;
 pub mod vtext;
 
 use gloo::console::log;
+use gloo::events::EventListener;
 use gloo::utils::{body, document};
 use web_sys::{Element, Node, Text};
+
+use crate::events::EventHandler;
 
 pub use self::vcomponent::VComponent;
 pub use self::velement::VElement;
@@ -69,5 +72,16 @@ impl Dom {
 
     pub fn remove_attribute(el: &Element, name: &str) {
         el.remove_attribute(name).expect("Couldnt remove attribute")
+    }
+
+    pub fn create_event_listener(
+        el: &Element,
+        event_handler: &Box<dyn EventHandler>,
+    ) -> EventListener {
+        EventListener::new(
+            el,
+            event_handler.get_event_type(),
+            event_handler.get_callback(),
+        )
     }
 }
