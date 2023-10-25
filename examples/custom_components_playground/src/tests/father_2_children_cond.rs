@@ -1,7 +1,7 @@
-use gloo::timers::callback::Interval;
+use gloo::timers::callback::Timeout;
 use wal::{
-    component::{callback::Callback, component_node::ComponentBehavior, Component},
-    virtual_dom::{VElement, VNode},
+    component::{callback::Callback, Component, behavior::Behavior},
+    virtual_dom::{VElement, VNode}, utils::debug,
 };
 use wal_macros::html;
 
@@ -21,7 +21,7 @@ impl Component for FatherComponent {
         Self(props.0)
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         let callback = _behavior.create_callback(|()| FatherMessages::Add);
 
         html! {
@@ -56,7 +56,7 @@ impl Component for ChildComponent {
 
     fn new(props: Self::Properties) -> Self {
         let cb = props.1.clone();
-        Interval::new(5000, move || {
+        Timeout::new(5000, move || {
             cb.emit(());
         })
         .forget();
@@ -64,7 +64,7 @@ impl Component for ChildComponent {
         Self(props.0, props.1)
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         VElement {
             tag_name: "div".to_string(),
             attr: [("counter-child".to_string(), self.0.to_string())].into(),
@@ -79,6 +79,13 @@ impl Component for ChildComponent {
     }
 }
 
+impl Drop for ChildComponent {
+    fn drop(&mut self) {
+        debug::warn("TO DELETE, ChildComponent is dropped");
+    }
+}
+
+#[allow(dead_code)]
 pub fn start() {
     let comp = FatherComponent(0);
     wal::app::start(comp);

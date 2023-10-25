@@ -16,16 +16,16 @@ impl VNode {
             VNode::Element(velement) => velement.patch(last, ancestor),
             VNode::Text(vtext) => vtext.patch(last, ancestor),
             VNode::Component(vcomp) => vcomp.patch(last, ancestor),
-            VNode::List(_) => todo!(),
+            VNode::List(vlist) => vlist.patch(last, ancestor),
         };
     }
 
-    pub fn get_dom(&self) -> Option<Node> {
+    pub fn erase(&self) {
         match self {
-            VNode::Element(velement) => velement.dom.as_ref().cloned().map(Into::into),
-            VNode::Text(vtext) => vtext.dom.as_ref().cloned().map(Into::into),
-            VNode::Component(vcomp) => vcomp.comp.as_ref().unwrap().borrow().vdom.get_dom(),
-            VNode::List(_) => todo!(),
+            VNode::Element(v) => v.erase(),
+            VNode::Text(v) => v.erase(),
+            VNode::List(v) => v.erase(),
+            VNode::Component(v) => v.erase(),
         }
     }
 }

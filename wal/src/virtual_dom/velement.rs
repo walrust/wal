@@ -1,9 +1,8 @@
-use gloo::console::log;
 use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 use web_sys::{Element, Node};
 
-use crate::virtual_dom::Dom;
+use crate::{virtual_dom::Dom, utils::debug};
 
 use super::VNode;
 
@@ -31,28 +30,44 @@ impl VElement {
     }
 
     pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
-        log!("Patching element");
+        debug::log("Patching element");
         let mut old_virt: Option<&VElement> = None;
 
         match last {
             None => {
-                log!("\tCreating the node for the first time");
+                debug::log("\tCreating element for the first time");
                 self.dom = None;
             }
             Some(VNode::Element(velement)) => {
-                log!("\tCopying existing node");
+                debug::log("\tComparing two elements");
                 self.dom = velement.dom.clone();
                 old_virt = Some(velement);
             }
-            Some(VNode::Text(_)) | Some(VNode::Component(_)) => {
-                log!("\tCreating the node for the first time and swapping with existing text/comp node");
+            Some(VNode::Text(v)) => {
+                debug::log("\tCreating element for the first time and swapping with existing text");
                 self.dom = None;
+                v.erase();
+            },
+            Some(VNode::Component(v)) => {
+                debug::log("\tCreating element for the first time and swapping with existing comp node");
+                self.dom = None;
+                v.erase();
             }
-            Some(VNode::List(_)) => todo!(),
+            Some(VNode::List(v)) => {
+                debug::log("\tCreating element for the first time and swapping with list");
+                self.dom = None;
+                v.erase();
+            },
         }
 
         self.render(old_virt, ancestor);
         self.handle_children(old_virt);
+    }
+
+    pub fn erase(&self) {
+        if let Some(el) = &self.dom {
+            Dom::remove_node(el);
+        }
     }
 }
 
@@ -62,7 +77,7 @@ impl VElement {
     fn render(&mut self, last: Option<&VElement>, ancestor: &Node) {
         match last {
             Some(last) if last.tag_name == self.tag_name => {
-                log!("\t\tComparing attrs");
+                debug::log("\t\tComparing attrs");
                 let target = self
                     .dom
                     .as_mut()
@@ -80,7 +95,7 @@ impl VElement {
             _ => {
                 // inverted check, if last == None || last = Some(x) that x.tag_name !=
                 // self.tag_name => Swap whole element
-                log!("\t\tRendering new node");
+                debug::log("\t\tRendering new node");
                 let el = Dom::create_element(&self.tag_name);
 
                 // add attributes
@@ -104,16 +119,14 @@ impl VElement {
         for either_child_or_both in self.children.iter_mut().zip_longest(old_children) {
             match either_child_or_both {
                 EitherOrBoth::Both(child, old_child) => {
-                    child.patch(Some(old_child), target);
+                    child.patch(Some(&old_child), target);
                 }
                 EitherOrBoth::Left(child) => {
                     child.patch(None, target);
                 }
                 EitherOrBoth::Right(old_child) => {
                     // child doesnt exist anymore
-                    if let Some(node) = old_child.get_dom() {
-                        Dom::remove_child(&target, &node);
-                    }
+                    old_child.erase();
                 }
             }
         }

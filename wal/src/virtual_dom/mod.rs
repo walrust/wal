@@ -4,9 +4,10 @@ pub mod vlist;
 pub mod vnode;
 pub mod vtext;
 
-use gloo::console::log;
 use gloo::utils::{body, document};
 use web_sys::{Element, Node, Text};
+
+use crate::utils::debug;
 
 pub use self::vcomponent::VComponent;
 pub use self::velement::VElement;
@@ -27,7 +28,7 @@ impl Dom {
                         "There was no '{}' element, adding default one",
                         Self::ROOT_ELEMENT_ID
                     );
-                    log!(message);
+                    debug::log(message);
                     let root = document().create_element("div").unwrap();
                     Dom::set_attribute(&root, "id", Self::ROOT_ELEMENT_ID);
                     Dom::append_child(&body(), &root);
@@ -44,6 +45,11 @@ impl Dom {
 
     pub fn create_text_node(data: &String) -> Text {
         document().create_text_node(data)
+    }
+
+    pub fn remove_node(node: &Node) {
+        let ancestor = node.parent_node().expect("Node does not have a parent");
+        Dom::remove_child(&ancestor, &node);
     }
 
     pub fn append_child(ancestor: &Node, child: &Node) -> Node {

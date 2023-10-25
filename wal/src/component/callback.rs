@@ -1,6 +1,6 @@
 use std::{hash::Hash, rc::Rc};
 
-use gloo::console::log;
+use crate::utils::debug;
 
 pub struct Callback<IN> {
     wrapper: Rc<dyn Fn(IN)>,
@@ -17,7 +17,7 @@ impl<IN> Callback<IN> {
     }
 
     pub fn emit(&self, input: IN) {
-        log!("Emitting callback");
+        debug::log("Emitting callback");
         (self.wrapper)(input);
     }
 }
