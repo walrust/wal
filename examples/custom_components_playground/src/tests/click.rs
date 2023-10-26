@@ -1,12 +1,10 @@
 use std::collections::HashMap;
 
-use gloo::timers::callback::{self, Interval};
 use wal::{
-    component::{callback::Callback, component_node::ComponentBehavior, Component},
+    component::{behavior::Behavior, callback::Callback, Component},
     events::MouseEventHandler,
     virtual_dom::{VComponent, VElement, VList, VNode, VText},
 };
-use wal_macros::html;
 use web_sys::MouseEvent;
 
 enum FatherMessages {
@@ -26,7 +24,7 @@ impl Component for FatherComponent {
         Self(0)
     }
 
-    fn view(&self, behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, behavior: &mut impl Behavior<Self>) -> VNode {
         let callback = behavior.create_callback(|()| FatherMessages::Clicked);
 
         VNode::List(VList::new(vec![
@@ -59,7 +57,7 @@ impl Component for ChildComponent {
         Self(props.0)
     }
 
-    fn view(&self, behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, behavior: &mut impl Behavior<Self>) -> VNode {
         let cb = self.0.clone();
         let on_click = behavior.create_callback(move |_event: MouseEvent| {
             cb.emit(());
