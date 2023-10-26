@@ -1,9 +1,8 @@
 use crate::virtual_dom::VNode;
-use gloo::console::log;
-use std::{cell::RefCell, fmt, marker::PhantomData, mem, rc::Rc};
+use std::{cell::RefCell, fmt, mem, rc::Rc};
 use web_sys::Node;
 
-use super::{callback::Callback, scheduler::Scheduler, AnyComponent, Component};
+use super::{scheduler::Scheduler, AnyComponent, Component, behavior::AnyComponentBehavior, observer::{VDomObserver, ToRerenderObserver}};
 
 pub struct AnyComponentNode {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
@@ -38,6 +37,7 @@ impl AnyComponentNode {
             component_rc.clone(),
             to_rerender_observer_rc.clone(),
         ));
+        // TODO: consider using RC::get_mut function instead of this fucking nonsense
         let vdom = component_rc.borrow().view(&behavior_rc);
         let vdom_observer_rc = Rc::new(RefCell::new(VDomObserver::new()));
 
@@ -68,7 +68,7 @@ impl AnyComponentNode {
         node_rc
     }
 
-    fn rerender_notify(&mut self) {
+    pub(crate) fn rerender_notify(&mut self) {
         let mut to_rerender = self.to_rerender.borrow_mut();
         if !*to_rerender {
             *to_rerender = true;
@@ -82,7 +82,7 @@ impl AnyComponentNode {
         }
     }
 
-    fn vdom_notify(&mut self, mut new_vdom: VNode) {
+    pub(crate) fn vdom_notify(&mut self, mut new_vdom: VNode) {
         mem::swap(&mut new_vdom, &mut self.vdom);
         self.vdom.patch(Some(&new_vdom), &self.ancestor);
     }
@@ -94,7 +94,7 @@ impl AnyComponentNode {
     ) {
         if let Some(last_component_node) = last_component_node {
             let last_component_node = last_component_node.clone();
-            let last_component_node_vdom = &last_component_node.borrow().vdom;
+            let last_component_node_vdom = &last_component_node.borrow_mut().vdom;
 
             self.vdom.patch(Some(last_component_node_vdom), ancestor);
         } else {
@@ -102,9 +102,9 @@ impl AnyComponentNode {
         }
     }
 
-    pub fn get_dom(&self) -> Option<Node> {
-        self.vdom.get_dom()
-    }
+    // pub fn get_dom(&self) -> Option<Node> {
+    //     self.vdom.get_dom()
+    // }
 }
 
 impl fmt::Debug for AnyComponentNode {
@@ -113,104 +113,3 @@ impl fmt::Debug for AnyComponentNode {
     }
 }
 
-pub struct AnyComponentBehavior {
-    component: Rc<RefCell<Box<dyn AnyComponent>>>,
-    rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-}
-
-impl AnyComponentBehavior {
-    pub fn new(
-        component: Rc<RefCell<Box<dyn AnyComponent>>>,
-        rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-    ) -> Self {
-        Self {
-            component,
-            rerender_observer,
-        }
-    }
-}
-
-pub struct ComponentBehavior<C: Component> {
-    component: Rc<RefCell<Box<dyn AnyComponent>>>,
-    rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-    _pd: PhantomData<C>,
-}
-
-impl<C: Component> ComponentBehavior<C> {
-    pub fn create_callback<IN, F>(&mut self, wrapper: F) -> Callback<IN>
-    where
-        F: Fn(IN) -> C::Message + 'static,
-    {
-        let component = self.component.clone();
-        let rerender_observer = self.rerender_observer.clone();
-        Callback::new(move |data| {
-            let message = wrapper(data);
-            Scheduler::add_update_message(
-                component.clone(),
-                Box::new(message),
-                rerender_observer.clone(),
-            );
-        })
-    }
-}
-
-impl<C: Component> From<&AnyComponentBehavior> for ComponentBehavior<C> {
-    fn from(value: &AnyComponentBehavior) -> Self {
-        Self {
-            component: value.component.clone(),
-            rerender_observer: value.rerender_observer.clone(),
-            _pd: PhantomData,
-        }
-    }
-}
-
-pub struct VDomObserver {
-    component_node: Option<Rc<RefCell<AnyComponentNode>>>,
-}
-
-impl VDomObserver {
-    fn new() -> Self {
-        Self {
-            component_node: None,
-        }
-    }
-
-    fn set_observer(&mut self, component_node: Rc<RefCell<AnyComponentNode>>) {
-        self.component_node = Some(component_node);
-    }
-
-    pub fn notify(&self, new_vdom: VNode) {
-        if let Some(any_componend_node) = &self.component_node {
-            let mut any_component_node = any_componend_node.borrow_mut();
-            any_component_node.vdom_notify(new_vdom);
-        } else {
-            log!("VDomObserver is not attached to a AnyComponentNode");
-            panic!("VDomObserver is not attached to a AnyComponentNode");
-        }
-    }
-}
-
-pub struct ToRerenderObserver {
-    any_component_node: Option<Rc<RefCell<AnyComponentNode>>>,
-}
-
-impl ToRerenderObserver {
-    fn new() -> Self {
-        Self {
-            any_component_node: None,
-        }
-    }
-
-    fn set_observer(&mut self, any_component_node: Rc<RefCell<AnyComponentNode>>) {
-        self.any_component_node = Some(any_component_node);
-    }
-
-    pub fn notify(&self) {
-        if let Some(any_component_node) = &self.any_component_node {
-            any_component_node.borrow_mut().rerender_notify();
-        } else {
-            log!("RerenderObserver is not attached to AnyComponentNode");
-            panic!("RerenderObserver is not attached to AnyComponentNode");
-        }
-    }
-}
