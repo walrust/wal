@@ -4,7 +4,6 @@ pub mod vlist;
 pub mod vnode;
 pub mod vtext;
 
-use gloo::console::log;
 use gloo::events::EventListener;
 use gloo::utils::{body, document};
 use web_sys::{Element, Node, Text};

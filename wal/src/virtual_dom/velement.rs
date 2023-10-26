@@ -1,9 +1,9 @@
-use gloo::{console::log, events::EventListener};
+use gloo::events::EventListener;
 use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 use web_sys::{Element, Node};
 
-use crate::{{events::EventHandler, virtual_dom::Dom, utils::debug}};
+use crate::{events::EventHandler, utils::debug, virtual_dom::Dom};
 
 use super::VNode;
 
@@ -58,9 +58,11 @@ impl VElement {
                 debug::log("\tCreating element for the first time and swapping with existing text");
                 self.dom = None;
                 v.erase();
-            },
+            }
             Some(VNode::Component(v)) => {
-                debug::log("\tCreating element for the first time and swapping with existing comp node");
+                debug::log(
+                    "\tCreating element for the first time and swapping with existing comp node",
+                );
                 self.dom = None;
                 v.erase();
             }
@@ -68,7 +70,7 @@ impl VElement {
                 debug::log("\tCreating element for the first time and swapping with list");
                 self.dom = None;
                 v.erase();
-            },
+            }
         }
 
         self.render(old_virt, ancestor);
@@ -102,6 +104,7 @@ impl VElement {
                         Dom::remove_attribute(target, key);
                     }
                 }
+
                 for event_handler in &mut self.event_handlers {
                     event_handler.1 = Some(Dom::create_event_listener(target, &event_handler.0));
                 }

@@ -20,7 +20,7 @@ impl Component for FatherComponent {
     type Message = FatherMessages;
     type Properties = FatherProperties;
 
-    fn new(props: Self::Properties) -> Self {
+    fn new(_props: Self::Properties) -> Self {
         Self(0)
     }
 
