@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use gloo::console::log;
 use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
     events::MouseEventHandler,
@@ -32,7 +33,9 @@ impl Component for FatherComponent {
                 text: format!("My child got clicked {} times", self.0),
                 dom: None,
             }),
-            VNode::Component(VComponent::new::<ChildComponent>(ChildProperties(callback))),
+            VNode::Component(VComponent::new::<ChildComponent>(ChildProperties(
+                callback, self.0,
+            ))),
         ]))
     }
 
@@ -45,21 +48,26 @@ impl Component for FatherComponent {
 }
 
 #[derive(Hash)]
-struct ChildProperties(Callback<()>);
+struct ChildProperties(Callback<()>, i32);
 
-struct ChildComponent(Callback<()>);
+struct ChildComponent(Callback<()>, i32);
 
 impl Component for ChildComponent {
     type Message = ();
     type Properties = ChildProperties;
 
     fn new(props: Self::Properties) -> Self {
-        Self(props.0)
+        Self(props.0, props.1)
     }
 
-    fn view(&self, behavior: &mut impl Behavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         let cb = self.0.clone();
-        let on_click = behavior.create_callback(move |_event: MouseEvent| {
+        let i = self.1;
+        let on_click = Callback::new(move |_event: MouseEvent| {
+            log!(format!(
+                "Child got clicked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {}",
+                i
+            ));
             cb.emit(());
         });
 
