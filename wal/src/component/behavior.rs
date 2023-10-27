@@ -12,13 +12,16 @@ pub struct AnyComponentBehavior {
 }
 
 impl AnyComponentBehavior {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             any_component_node: Weak::new(),
         }
     }
 
-    pub fn set_any_component_node(&mut self, any_component_node: Rc<RefCell<AnyComponentNode>>) {
+    pub(crate) fn set_any_component_node(
+        &mut self,
+        any_component_node: Rc<RefCell<AnyComponentNode>>,
+    ) {
         self.any_component_node = Rc::downgrade(&any_component_node);
     }
 }
@@ -38,7 +41,6 @@ impl<C: Component> Behavior<C> for AnyComponentBehavior {
         Callback::new(move |data| {
             let message = wrapper(data);
             Scheduler::add_update_message(Box::new(message), any_component_node.clone());
-            // TODO double clone? is it necessary?
         })
     }
 }

@@ -14,7 +14,19 @@ pub struct AnyComponentNode {
 }
 
 impl AnyComponentNode {
-    pub fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+    pub(crate) fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+        Self::new_internal(component, ancestor, true)
+    }
+
+    pub(crate) fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+        Self::new_internal(component, ancestor, false)
+    }
+
+    fn new_internal<C: Component + 'static>(
+        component: C,
+        ancestor: Node,
+        to_patch: bool,
+    ) -> Rc<RefCell<Self>> {
         let component_box = Box::new(component) as Box<dyn AnyComponent>;
         let behavior = AnyComponentBehavior::new();
 
@@ -34,34 +46,24 @@ impl AnyComponentNode {
             .behavior
             .set_any_component_node(node_rc.clone());
 
-        node_rc.borrow_mut().view_and_patch();
+        if to_patch {
+            node_rc.borrow_mut().view_and_patch();
+        } else {
+            node_rc.borrow_mut().view();
+        }
 
         node_rc
     }
 
-    pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
-        let component_box = Box::new(component) as Box<dyn AnyComponent>;
-        let behavior = AnyComponentBehavior::new();
+    fn view(&mut self) {
+        self.vdom = Some(self.component.view(&mut self.behavior));
+    }
 
-        let node = Self {
-            component: component_box,
-            depth: 0,
-            to_rerender: false,
-            behavior,
-            vdom: None,
-            ancestor,
-        };
-
-        let node_rc = Rc::new(RefCell::new(node));
-
-        node_rc
-            .borrow_mut()
-            .behavior
-            .set_any_component_node(node_rc.clone());
-
-        node_rc.borrow_mut().view();
-
-        node_rc
+    pub(crate) fn view_and_patch(&mut self) {
+        let mut new_vdom = self.component.view(&mut self.behavior);
+        new_vdom.patch(self.vdom.take(), &self.ancestor);
+        self.vdom = Some(new_vdom);
+        self.to_rerender = false;
     }
 
     pub(crate) fn update(&mut self, message: Box<dyn Any>) -> bool {
@@ -71,21 +73,6 @@ impl AnyComponentNode {
             return true;
         }
         false
-    }
-
-    pub(crate) fn view(&mut self) {
-        self.vdom = Some(self.component.view(&mut self.behavior));
-    }
-
-    pub(crate) fn view_and_patch(&mut self) {
-        let new_vdom = self.component.view(&mut self.behavior);
-        self.new_vdom_notify(new_vdom);
-        self.to_rerender = false;
-    }
-
-    pub(crate) fn new_vdom_notify(&mut self, mut new_vdom: VNode) {
-        new_vdom.patch(self.vdom.take(), &self.ancestor);
-        self.vdom = Some(new_vdom);
     }
 
     pub fn patch(
@@ -99,12 +86,14 @@ impl AnyComponentNode {
 
             self.vdom
                 .as_mut()
-                .unwrap()
+                .expect("Vdom should not be None while patching")
                 .patch(last_component_node_vdom, ancestor);
         } else {
-            self.vdom.as_mut().unwrap().patch(None, ancestor)
+            self.vdom
+                .as_mut()
+                .expect("Vdom should not be None while patching")
+                .patch(None, ancestor)
         }
-        // TODO is uwrap safe here? - check it
     }
 }
 

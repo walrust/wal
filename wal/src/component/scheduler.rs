@@ -36,7 +36,7 @@ impl UpdateMessage {
                 );
             }
         } else {
-            debug::log("UpdateMessage handle: weak reference to AnyComponentNode is not attached to AnyComponentNode");
+            debug::log("Weak reference to AnyComponentNode is not attached to AnyComponentNode");
         }
     }
 }
@@ -51,7 +51,7 @@ impl RerenderMessage {
         if let Some(any_component_node) = self.any_component_node.upgrade() {
             any_component_node.borrow_mut().view_and_patch();
         } else {
-            debug::log("RerenderMessage handle: weak reference to AnyComponentNode is not attached to AnyComponentNode");
+            debug::log("Weak reference to AnyComponentNode is not attached to AnyComponentNode");
         }
     }
 }
