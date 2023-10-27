@@ -1,6 +1,9 @@
 use web_sys::Node;
 
-use crate::{component::{Component, component_node::AnyComponentNode}, utils::debug};
+use crate::{
+    component::{component_node::AnyComponentNode, Component},
+    utils::debug,
+};
 
 use std::{
     any::Any,
@@ -60,9 +63,9 @@ impl VComponent {
         AnyComponentNode::new(C::new(*props), ancestor.clone())
     }
 
-    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching component");
-        let mut old_virt: Option<&VComponent> = None;
+        let mut old_virt: Option<VComponent> = None;
 
         match last {
             Some(VNode::Component(vcomp)) => {
@@ -72,7 +75,7 @@ impl VComponent {
             Some(VNode::Element(v)) => {
                 debug::log("\tNew component over element");
                 v.erase();
-            }, 
+            }
             Some(VNode::Text(v)) => {
                 debug::log("\tNew component over text");
                 v.erase();
@@ -92,11 +95,11 @@ impl VComponent {
     pub fn erase(&self) {
         if let Some(node) = self.comp.as_ref() {
             debug::log("Erasing vcomponent, feels kinda fucking sus");
-            node.borrow_mut().vdom.erase();
+            node.borrow_mut().vdom.as_ref().unwrap().erase(); // TODO check if unwrap is safe here
         }
     }
 
-    fn render(&mut self, last: Option<&VComponent>, ancestor: &Node) {
+    fn render(&mut self, last: Option<VComponent>, ancestor: &Node) {
         match last {
             Some(old_vcomp) if old_vcomp.hash == self.hash => {
                 debug::log("\t\tHashes are equal");

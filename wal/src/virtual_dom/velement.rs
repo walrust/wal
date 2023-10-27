@@ -40,18 +40,18 @@ impl VElement {
         }
     }
 
-    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching element");
-        let mut old_virt: Option<&VElement> = None;
+        let mut old_virt: Option<VElement> = None;
 
         match last {
             None => {
                 debug::log("\tCreating element for the first time");
                 self.dom = None;
             }
-            Some(VNode::Element(velement)) => {
+            Some(VNode::Element(mut velement)) => {
                 debug::log("\tComparing two elements");
-                self.dom = velement.dom.clone();
+                self.dom = velement.dom.take();
                 old_virt = Some(velement);
             }
             Some(VNode::Text(v)) => {
@@ -73,7 +73,7 @@ impl VElement {
             }
         }
 
-        self.render(old_virt, ancestor);
+        self.render(old_virt.as_ref(), ancestor);
         self.handle_children(old_virt);
     }
 
@@ -133,14 +133,14 @@ impl VElement {
         }
     }
 
-    fn handle_children(&mut self, old_element: Option<&VElement>) {
+    fn handle_children(&mut self, old_element: Option<VElement>) {
         let target = self.dom.as_mut().unwrap();
-        let old_children = old_element.map_or(Vec::new(), |e| e.children.iter().collect());
+        let old_children = old_element.map_or(Vec::new(), |e| e.children.into_iter().collect());
 
         for either_child_or_both in self.children.iter_mut().zip_longest(old_children) {
             match either_child_or_both {
                 EitherOrBoth::Both(child, old_child) => {
-                    child.patch(Some(&old_child), target);
+                    child.patch(Some(old_child), target);
                 }
                 EitherOrBoth::Left(child) => {
                     child.patch(None, target);

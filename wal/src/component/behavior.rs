@@ -1,21 +1,25 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{
+    cell::RefCell,
+    rc::{Rc, Weak},
+};
 
-use super::{AnyComponent, observer::ToRerenderObserver, Component, callback::Callback, scheduler::Scheduler};
+use super::{
+    callback::Callback, component_node::AnyComponentNode, scheduler::Scheduler, Component,
+};
 
 pub struct AnyComponentBehavior {
-    component: Rc<RefCell<Box<dyn AnyComponent>>>,
-    rerender_observer: Rc<RefCell<ToRerenderObserver>>,
+    any_component_node: Weak<RefCell<AnyComponentNode>>,
 }
 
 impl AnyComponentBehavior {
-    pub fn new(
-        component: Rc<RefCell<Box<dyn AnyComponent>>>,
-        rerender_observer: Rc<RefCell<ToRerenderObserver>>,
-    ) -> Self {
+    pub fn new() -> Self {
         Self {
-            component,
-            rerender_observer,
+            any_component_node: Weak::new(),
         }
+    }
+
+    pub fn set_any_component_node(&mut self, any_component_node: Rc<RefCell<AnyComponentNode>>) {
+        self.any_component_node = Rc::downgrade(&any_component_node);
     }
 }
 
@@ -25,20 +29,16 @@ pub trait Behavior<C: Component> {
         F: Fn(IN) -> C::Message + 'static;
 }
 
-impl<C: Component> Behavior<C> for Rc<AnyComponentBehavior> {
+impl<C: Component> Behavior<C> for AnyComponentBehavior {
     fn create_callback<IN, F>(&mut self, wrapper: F) -> Callback<IN>
     where
         F: Fn(IN) -> C::Message + 'static,
     {
-        let component = self.component.clone();
-        let rerender_observer = self.rerender_observer.clone();
+        let any_component_node = self.any_component_node.clone();
         Callback::new(move |data| {
             let message = wrapper(data);
-            Scheduler::add_update_message(
-                component.clone(),
-                Box::new(message),
-                rerender_observer.clone(),
-            );
+            Scheduler::add_update_message(Box::new(message), any_component_node.clone());
+            // TODO double clone? is it necessary?
         })
     }
 }
