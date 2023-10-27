@@ -14,6 +14,31 @@ pub struct AnyComponentNode {
 }
 
 impl AnyComponentNode {
+    pub fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+        let component_box = Box::new(component) as Box<dyn AnyComponent>;
+        let behavior = AnyComponentBehavior::new();
+
+        let node = Self {
+            component: component_box,
+            depth: 0,
+            to_rerender: false,
+            behavior,
+            vdom: None,
+            ancestor,
+        };
+
+        let node_rc = Rc::new(RefCell::new(node));
+
+        node_rc
+            .borrow_mut()
+            .behavior
+            .set_any_component_node(node_rc.clone());
+
+        node_rc.borrow_mut().view_and_patch();
+
+        node_rc
+    }
+
     pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
         let component_box = Box::new(component) as Box<dyn AnyComponent>;
         let behavior = AnyComponentBehavior::new();
@@ -49,6 +74,10 @@ impl AnyComponentNode {
     }
 
     pub(crate) fn view(&mut self) {
+        self.vdom = Some(self.component.view(&mut self.behavior));
+    }
+
+    pub(crate) fn view_and_patch(&mut self) {
         let new_vdom = self.component.view(&mut self.behavior);
         self.new_vdom_notify(new_vdom);
         self.to_rerender = false;
