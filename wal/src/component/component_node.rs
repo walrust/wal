@@ -23,7 +23,7 @@ impl AnyComponentNode {
             depth: 0,
             to_rerender: false,
             behavior,
-            vdom: None, // we should add new message to call view method
+            vdom: None,
             ancestor,
         };
 
@@ -33,6 +33,8 @@ impl AnyComponentNode {
             .borrow_mut()
             .behavior
             .set_any_component_node(node_rc.clone());
+
+        node_rc.borrow_mut().view();
 
         node_rc
     }

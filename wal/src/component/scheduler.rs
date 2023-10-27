@@ -6,7 +6,6 @@ use crate::utils::debug;
 
 use super::component_node::AnyComponentNode;
 
-// TODO add new kind of message that's gonna mean - run first view of component
 enum SchedulerMessage {
     Update(UpdateMessage),
     Rerender(RerenderMessage),
