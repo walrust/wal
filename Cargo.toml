@@ -3,4 +3,5 @@ members = [
     "wal",
     "wal-macros",
     "examples/*",
+    "wal-scripts/*"
 ]

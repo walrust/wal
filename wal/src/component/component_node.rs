@@ -2,7 +2,12 @@ use crate::virtual_dom::VNode;
 use std::{cell::RefCell, fmt, mem, rc::Rc};
 use web_sys::Node;
 
-use super::{scheduler::Scheduler, AnyComponent, Component, behavior::AnyComponentBehavior, observer::{VDomObserver, ToRerenderObserver}};
+use super::{
+    behavior::AnyComponentBehavior,
+    observer::{ToRerenderObserver, VDomObserver},
+    scheduler::Scheduler,
+    AnyComponent, Component,
+};
 
 pub struct AnyComponentNode {
     component: Rc<RefCell<Box<dyn AnyComponent>>>,
@@ -112,4 +117,3 @@ impl fmt::Debug for AnyComponentNode {
         "AnyComponentNode".fmt(f)
     }
 }
-
