@@ -22,11 +22,12 @@ fn get_stylesheets_paths(dir_path: &str) -> Result<Vec<PathBuf>, io::Error> {
 
 /// Script for creating a single .css file based on .css and .wal.css files form a given directory
 ///
-/// This script takes two arguemts:
+/// This script takes 2 or 3 arguments (3rd argument is optional):
 /// 1) path to directory which will be scanned for .wal.css files (f.e. ../../styles)
 /// 2) path where the file with bound styles will be created (f.e. ../../styles)
+/// 3) path to file with global styles which will be inserted on the top level (f.e. ../../styles/global_styles.css)
 ///
-/// example call : cargo run -- ../../styles ../../styles
+/// example call : cargo run -- ../../styles ../../bound_styles  ../../styles/global_styles.css
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
