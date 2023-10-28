@@ -129,6 +129,7 @@ impl HtmlElementAttributes {
             .iter()
             .map(|(ident, expr_block)| -> proc_macro2::TokenStream {
                 quote_spanned!(ident.span() => ::wal::events::EventHandler::new(
+                    #[allow(unused_braces)]
                     ::wal::events::#ident(#expr_block)
                 ))
             })

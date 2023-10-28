@@ -1,10 +1,7 @@
-use std::collections::HashMap;
-
 use gloo::console::log;
 use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
-    events::{EventHandler, MouseEventCreator},
-    virtual_dom::{VComponent, VElement, VList, VNode, VText},
+    virtual_dom::{VComponent, VList, VNode, VText},
 };
 use wal_macros::html;
 use web_sys::MouseEvent;

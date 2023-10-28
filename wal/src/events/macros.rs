@@ -42,6 +42,7 @@ macro_rules! event_creators {
 macro_rules! unspecialized_event_creators_constructor {
     ($($event_name:ident),*) => {
         $(
+            #[allow(dead_code)]
             fn $event_name(callback: Callback<Event>) -> Box<dyn EventCreator> {
                 Box::new(UnspecializedEventCreator {
                     event_type: Cow::from(stringify!($event_name)[2..].to_string()),
