@@ -1,4 +1,4 @@
-use std::{env, fs, io, path::PathBuf};
+use std::{env, error::Error, fs, io, path::PathBuf};
 
 use crate::css_binder::CssBinder;
 
@@ -27,18 +27,26 @@ fn get_stylesheets_paths(dir_path: &str) -> Result<Vec<PathBuf>, io::Error> {
 /// 2) path where the file with bound styles will be created (f.e. ../../styles)
 ///
 /// example call : cargo run -- ../../styles ../../styles
-fn main() {
+
+fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
+    if args.len() > 4 || args.len() < 3 {
+        panic!("Program takes only 2 or 3 arguments.");
+    }
+
     let dir_path = &args[1];
     let out_path = &args[2];
 
-    let stylesheets = get_stylesheets_paths(dir_path).unwrap();
-
     let mut binder = CssBinder::new(out_path);
+    if args.len() == 4 {
+        let global_path = &args[3];
+    }
 
+    let stylesheets = get_stylesheets_paths(dir_path)?;
     for stylesheet_path in stylesheets {
         binder.bind_stylesheet(stylesheet_path).unwrap();
     }
 
-    println!("Css sucessfully bound!")
+    println!("Css sucessfully bound!");
+    Ok(())
 }

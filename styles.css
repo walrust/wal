@@ -1,0 +1,17 @@
+.c1 {
+.silver {
+  color: silver;
+}
+}.c2 {
+.golden {
+  color: gold;
+}
+
+div {
+  padding: auto;
+}
+}.c_nested {
+div {
+  background-attachment: fixed;
+}
+}
