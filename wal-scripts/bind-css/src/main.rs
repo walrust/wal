@@ -20,6 +20,13 @@ fn get_stylesheets_paths(dir_path: &str) -> Result<Vec<PathBuf>, io::Error> {
     Ok(stylesheets)
 }
 
+/// Script for creating a single .css file based on .css and .wal.css files form a given directory
+///
+/// This script takes two arguemts:
+/// 1) path to directory which will be scanned for .wal.css files (f.e. ../../styles)
+/// 2) path where the file with bound styles will be created (f.e. ../../styles)
+///
+/// example call : cargo run -- ../../styles ../../styles
 fn main() {
     let args: Vec<String> = env::args().collect();
     let dir_path = &args[1];
