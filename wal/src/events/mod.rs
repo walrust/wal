@@ -5,25 +5,8 @@ use web_sys::{Event, MouseEvent};
 
 use crate::component::callback::Callback;
 
-// change fields to private
-pub struct MouseEventHandler {
-    pub event_type: Cow<'static, str>,
-    pub callback: Callback<MouseEvent>,
-}
-
-impl EventHandler for MouseEventHandler {
-    fn get_event_type(&self) -> Cow<'static, str> {
-        self.event_type.clone()
-    }
-
-    fn get_callback(&self) -> Box<dyn FnMut(&Event)> {
-        let callback = self.callback.clone();
-        Box::new(move |event: &Event| {
-            let event = event.clone().unchecked_into();
-            callback.emit(event)
-        })
-    }
-}
+#[macro_use]
+mod macros;
 
 pub trait EventHandler {
     fn get_event_type(&self) -> Cow<'static, str>;
@@ -36,52 +19,38 @@ impl Debug for dyn EventHandler {
     }
 }
 
-// use web_sys::MouseEvent;
+trait EventHandlerType {
+    type Handler: EventHandler;
+}
 
-// use crate::component::callback::Callback;
+pub struct UnspecializedEventHandler {
+    pub event_type: Cow<'static, str>,
+    pub callback: Callback<Event>,
+}
 
-// pub mod onclick {
-//     use web_sys::MouseEvent;
+impl EventHandler for UnspecializedEventHandler {
+    fn get_event_type(&self) -> Cow<'static, str> {
+        self.event_type.clone()
+    }
 
-//     use crate::component::callback::Callback;
+    fn get_callback(&self) -> Box<dyn FnMut(&Event)> {
+        let callback = self.callback.clone();
+        Box::new(move |event: &Event| {
+            let event = event.clone();
+            callback.emit(event);
+        })
+    }
+}
 
-//     use super::Listener;
+event_handlers! {
+    MouseEventHandler(MouseEvent)
+}
 
-//     pub type Event = MouseEvent;
+unspecialized_event_handlers_constructor! {
+    onabort
+}
 
-//     pub struct Wrapper {
-//         callback: Callback<Event>,
-//     }
-
-//     impl Wrapper {
-//         pub fn new(callback: Callback<Event>) -> Self {
-//             Wrapper { callback }
-//         }
-//     }
-
-//     impl Listener<Event> for Wrapper {
-//         fn kind(&self) -> super::ListenerKind {
-//             super::ListenerKind::onclick
-//         }
-
-//         fn handle(&self, event: Event) {
-//             self.callback.emit(event)
-//         }
-
-//         fn passive(&self) -> bool {
-//             false
-//         }
-//     }
-// }
-
-// pub trait Listener<Event> {
-//     /// Returns the name of the event
-//     fn kind(&self) -> ListenerKind;
-
-//     /// Handles an event firing
-//     fn handle(&self, event: Event);
-
-//     /// Makes the event listener passive. See
-//     /// [addEventListener](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener).
-//     fn passive(&self) -> bool;
-// }
+event_handlers_constructor! {
+    onclick(MouseEvent),
+    ondblclick(MouseEvent)
+}
