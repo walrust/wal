@@ -1,5 +1,8 @@
 use std::collections::HashMap;
-use wal::virtual_dom::{VElement, VList, VNode};
+use wal::{
+    events::EventHandler,
+    virtual_dom::{VElement, VList, VNode},
+};
 use wal_macros::html;
 
 include!("../utils/new_velement_str.rs");
@@ -22,6 +25,7 @@ fn single_attribute() {
             "div",
             HashMap::from([("attr", "value")]),
             Vec::new(),
+            Vec::new(),
         ))
     );
 }
@@ -33,6 +37,7 @@ fn single_key_attribute() {
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("key", "value")]),
+            Vec::new(),
             Vec::new(),
         ))
     );
@@ -46,6 +51,7 @@ fn multiple_attributes() {
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
             Vec::new(),
+            Vec::new(),
         ))
     );
 }
@@ -57,6 +63,7 @@ fn multiple_attributes_self_closing() {
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
+            Vec::new(),
             Vec::new(),
         ))
     );
@@ -75,6 +82,7 @@ fn single_expression_attribute() {
             "div",
             HashMap::from([("attr", "3")]),
             Vec::new(),
+            Vec::new(),
         ))
     );
 }
@@ -86,6 +94,7 @@ fn multiple_expression_and_literal_attributes() {
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "3"), ("attr2", "val2"), ("attr3", "val3")]),
+            Vec::new(),
             Vec::new(),
         ))
     );

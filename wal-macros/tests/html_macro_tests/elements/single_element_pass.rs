@@ -43,5 +43,10 @@ fn main() {
 }
 
 fn get_velement(tag: &str) -> VNode {
-    VNode::Element(VElement::new(tag.to_string(), HashMap::new(), Vec::new()))
+    VNode::Element(VElement::new(
+        tag.to_string(),
+        HashMap::new(),
+        Vec::new(),
+        Vec::new(),
+    ))
 }
