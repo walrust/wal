@@ -40,11 +40,11 @@ macro_rules! event_creators {
 }
 
 macro_rules! unspecialized_event_creators_constructor {
-    ($($name:ident),*) => {
+    ($($event_name:ident),*) => {
         $(
-            fn $name(callback: Callback<Event>) -> Box<dyn EventCreator> {
+            fn $event_name(callback: Callback<Event>) -> Box<dyn EventCreator> {
                 Box::new(UnspecializedEventCreator {
-                    event_type: Cow::from(stringify!($name)[2..].to_string()),
+                    event_type: Cow::from(stringify!($event_name)[2..].to_string()),
                     callback,
                 })
             }
@@ -55,9 +55,9 @@ macro_rules! unspecialized_event_creators_constructor {
 macro_rules! event_creators_constructor {
     ($($event_name:ident ($event_type:ty) ),*) => {
         $(
-            fn $event_name(callback: Callback<$event_type>) -> Box<dyn EventCreator> {
+            pub fn $event_name(callback: Callback<$event_type>) -> Box<dyn EventCreator> {
                 Box::new(<$event_type as EventCreatorType>::Creator::new(
-                    Cow::from(stringify!($name)[2..].to_string()),
+                    Cow::from(stringify!($event_name)[2..].to_string()),
                     callback
                 ))
             }

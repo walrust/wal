@@ -10,8 +10,8 @@ use super::VNode;
 pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
-    pub children: Vec<VNode>,
     pub event_handlers: Vec<EventHandler>,
+    pub children: Vec<VNode>,
 
     pub dom: Option<Element>,
 }
@@ -24,14 +24,14 @@ impl VElement {
     pub fn new(
         tag_name: String,
         attr: HashMap<String, String>,
-        children: Vec<VNode>,
         event_handlers: Vec<EventHandler>,
+        children: Vec<VNode>,
     ) -> VElement {
         VElement {
             tag_name,
             attr,
-            children,
             event_handlers,
+            children,
             dom: None,
         }
     }

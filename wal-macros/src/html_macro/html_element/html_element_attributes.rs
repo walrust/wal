@@ -102,11 +102,9 @@ impl HtmlElementAttributes {
             Ok(())
         }
     }
-}
 
-impl From<&HtmlElementAttributes> for Vec<proc_macro2::TokenStream> {
-    fn from(element_attributes: &HtmlElementAttributes) -> Vec<proc_macro2::TokenStream> {
-        let mut attributes: Vec<proc_macro2::TokenStream> = element_attributes
+    pub(crate) fn get_attributes_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
+        let mut attributes: Vec<proc_macro2::TokenStream> = self
             .attributes
             .iter()
             .map(|(ident, value)| -> proc_macro2::TokenStream {
@@ -115,7 +113,7 @@ impl From<&HtmlElementAttributes> for Vec<proc_macro2::TokenStream> {
             })
             .collect();
 
-        if let Some(key_attr) = &element_attributes.key {
+        if let Some(key_attr) = &self.key {
             let key_ident = &key_attr.ident;
             let key_ident_str = key_ident.to_string();
             let key_val = &key_attr.value;
@@ -124,5 +122,16 @@ impl From<&HtmlElementAttributes> for Vec<proc_macro2::TokenStream> {
         }
 
         attributes
+    }
+
+    pub(crate) fn get_event_handlers_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
+        self.events
+            .iter()
+            .map(|(ident, expr_block)| -> proc_macro2::TokenStream {
+                quote_spanned!(ident.span() => ::wal::events::EventHandler::new(
+                    ::wal::events::#ident(#expr_block)
+                ))
+            })
+            .collect()
     }
 }

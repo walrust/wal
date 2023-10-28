@@ -6,6 +6,7 @@ use wal::{
     events::{EventHandler, MouseEventCreator},
     virtual_dom::{VComponent, VElement, VList, VNode, VText},
 };
+use wal_macros::html;
 use web_sys::MouseEvent;
 
 enum FatherMessages {
@@ -71,20 +72,11 @@ impl Component for ChildComponent {
             cb.emit(());
         });
 
-        VElement {
-            tag_name: "button".to_string(),
-            attr: HashMap::new(),
-            children: vec![VNode::Text(VText {
-                text: "click me".to_string(),
-                dom: None,
-            })],
-            event_handlers: vec![EventHandler::new(Box::new(MouseEventCreator::new(
-                "click".to_string().into(),
-                on_click,
-            )))],
-            dom: None,
+        html! {
+            <button onclick={on_click}>
+                "click me"
+            </button>
         }
-        .into()
     }
 
     fn update(&mut self, _message: Self::Message) -> bool {
