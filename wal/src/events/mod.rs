@@ -1,42 +1,43 @@
 use std::{borrow::Cow, fmt::Debug};
 
+use gloo::events::EventListener;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    AnimationEvent, DragEvent, Event, FocusEvent, InputEvent, KeyboardEvent, MouseEvent,
+    AnimationEvent, DragEvent, Element, Event, FocusEvent, InputEvent, KeyboardEvent, MouseEvent,
     PointerEvent, ProgressEvent, SubmitEvent, TouchEvent, TransitionEvent, WheelEvent,
 };
 
-use crate::component::callback::Callback;
+use crate::{component::callback::Callback, virtual_dom::Dom};
 
 #[macro_use]
 mod macros;
 
-pub trait EventHandler {
+pub trait EventCreator {
     fn get_event_type(&self) -> Cow<'static, str>;
-    fn get_callback(&self) -> Box<dyn FnMut(&Event)>;
+    fn create_callback(&self) -> Box<dyn FnMut(&Event)>;
 }
 
-impl Debug for dyn EventHandler {
+impl Debug for dyn EventCreator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        format!("EventHandler of type {}", self.get_event_type()).fmt(f)
+        format!("EventCreator of type {}", self.get_event_type()).fmt(f)
     }
 }
 
-trait EventHandlerType {
-    type Handler: EventHandler;
+trait EventCreatorType {
+    type Creator: EventCreator;
 }
 
-pub struct UnspecializedEventHandler {
+pub struct UnspecializedEventCreator {
     pub event_type: Cow<'static, str>,
     pub callback: Callback<Event>,
 }
 
-impl EventHandler for UnspecializedEventHandler {
+impl EventCreator for UnspecializedEventCreator {
     fn get_event_type(&self) -> Cow<'static, str> {
         self.event_type.clone()
     }
 
-    fn get_callback(&self) -> Box<dyn FnMut(&Event)> {
+    fn create_callback(&self) -> Box<dyn FnMut(&Event)> {
         let callback = self.callback.clone();
         Box::new(move |event: &Event| {
             let event = event.clone();
@@ -45,22 +46,23 @@ impl EventHandler for UnspecializedEventHandler {
     }
 }
 
-event_handlers! {
-    AnimationEventHandler(AnimationEvent),
-    DragEventHandler(DragEvent),
-    FocusEventHandler(FocusEvent),
-    InputEventHandler(InputEvent),
-    KeyboardEventHandler(KeyboardEvent),
-    MouseEventHandler(MouseEvent),
-    PointerEventHandler(PointerEvent),
-    ProgressEventHandler(ProgressEvent),
-    SubmitEventHandler(SubmitEvent),
-    TouchEventHandler(TouchEvent),
-    TransitionEventHandler(TransitionEvent),
-    WheelEventHandler(WheelEvent)
+// TODO maybe insted of using web_sys events we can wrap them so that the user dont have to import web_sys
+event_creators! {
+    AnimationEventCreator(AnimationEvent),
+    DragEventCreator(DragEvent),
+    FocusEventCreator(FocusEvent),
+    InputEventCreator(InputEvent),
+    KeyboardEventCreator(KeyboardEvent),
+    MouseEventCreator(MouseEvent),
+    PointerEventCreator(PointerEvent),
+    ProgressEventCreator(ProgressEvent),
+    SubmitEventCreator(SubmitEvent),
+    TouchEventCreator(TouchEvent),
+    TransitionEventCreator(TransitionEvent),
+    WheelEventCreator(WheelEvent)
 }
 
-unspecialized_event_handlers_constructor! {
+unspecialized_event_creators_constructor! {
     onabort,
     oncancel,
     oncanplay,
@@ -107,13 +109,13 @@ unspecialized_event_handlers_constructor! {
     onformdata  // web_sys is missing `FormDataEvent`` so it is handled as Unspecialized Event
 }
 
-event_handlers_constructor! {
+event_creators_constructor! {
     // Animation Events
     onanimationcancel(AnimationEvent),
     onanimationend(AnimationEvent),
     onanimationiteration(AnimationEvent),
     onanimationstart(AnimationEvent),
-    
+
     // Drag Events
     ondrag(DragEvent),
     ondragend(DragEvent),
@@ -185,4 +187,25 @@ event_handlers_constructor! {
 
     // Wheel Events
     onwheel(WheelEvent)
+}
+
+#[derive(Debug)]
+pub struct EventHandler {
+    event_creator: Box<dyn EventCreator>,
+    event_listener: Option<EventListener>,
+}
+
+impl EventHandler {
+    pub fn new(event_creator: Box<dyn EventCreator>) -> Self {
+        Self {
+            event_creator,
+            event_listener: None,
+        }
+    }
+
+    pub fn attach(&mut self, element: &Element) {
+        let event_type = self.event_creator.get_event_type();
+        let callback = self.event_creator.create_callback();
+        self.event_listener = Some(Dom::create_event_listener(element, event_type, callback));
+    }
 }

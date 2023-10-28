@@ -1,4 +1,3 @@
-use gloo::events::EventListener;
 use itertools::{EitherOrBoth, Itertools};
 use std::collections::HashMap;
 use web_sys::{Element, Node};
@@ -12,7 +11,7 @@ pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
     pub children: Vec<VNode>,
-    pub event_handlers: Vec<(Box<dyn EventHandler>, Option<EventListener>)>,
+    pub event_handlers: Vec<EventHandler>,
 
     pub dom: Option<Element>,
 }
@@ -26,16 +25,13 @@ impl VElement {
         tag_name: String,
         attr: HashMap<String, String>,
         children: Vec<VNode>,
-        event_handlers: Vec<Box<dyn EventHandler>>,
+        event_handlers: Vec<EventHandler>,
     ) -> VElement {
         VElement {
             tag_name,
             attr,
             children,
-            event_handlers: event_handlers
-                .into_iter()
-                .map(|event_handler| (event_handler, None))
-                .collect(),
+            event_handlers,
             dom: None,
         }
     }
@@ -106,7 +102,7 @@ impl VElement {
                 }
 
                 for event_handler in &mut self.event_handlers {
-                    event_handler.1 = Some(Dom::create_event_listener(target, &event_handler.0));
+                    event_handler.attach(target);
                 }
             }
             _ => {
@@ -121,7 +117,7 @@ impl VElement {
                 }
 
                 for event_handler in &mut self.event_handlers {
-                    event_handler.1 = Some(Dom::create_event_listener(&el, &event_handler.0));
+                    event_handler.attach(&el);
                 }
 
                 match &self.dom {

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use gloo::console::log;
 use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
-    events::MouseEventHandler,
+    events::{EventHandler, MouseEventCreator},
     virtual_dom::{VComponent, VElement, VList, VNode, VText},
 };
 use web_sys::MouseEvent;
@@ -78,13 +78,10 @@ impl Component for ChildComponent {
                 text: "click me".to_string(),
                 dom: None,
             })],
-            event_handlers: vec![(
-                Box::new(MouseEventHandler {
-                    event_type: "click".into(),
-                    callback: on_click,
-                }),
-                None,
-            )],
+            event_handlers: vec![EventHandler::new(Box::new(MouseEventCreator::new(
+                "click".to_string().into(),
+                on_click,
+            )))],
             dom: None,
         }
         .into()

@@ -1,7 +1,7 @@
 // TODO
 // change fields to private
 // i should create this struct in the macro for every event that has MouseEvent as argument
-macro_rules! event_handlers {
+macro_rules! event_creators {
     ($($handler_name:ident ($event_type:ty)),*) => {
         $(
             pub struct $handler_name {
@@ -9,12 +9,12 @@ macro_rules! event_handlers {
                 pub callback: Callback<$event_type>,
             }
 
-            impl EventHandler for $handler_name {
+            impl EventCreator for $handler_name {
                 fn get_event_type(&self) -> Cow<'static, str> {
                     self.event_type.clone()
                 }
 
-                fn get_callback(&self) -> Box<dyn FnMut(&Event)> {
+                fn create_callback(&self) -> Box<dyn FnMut(&Event)> {
                     let callback = self.callback.clone();
                     Box::new(move |event: &Event| {
                         let event = event.clone().unchecked_into();
@@ -32,18 +32,18 @@ macro_rules! event_handlers {
                 }
             }
 
-            impl EventHandlerType for $event_type {
-                type Handler = $handler_name;
+            impl EventCreatorType for $event_type {
+                type Creator = $handler_name;
             }
         )*
     }
 }
 
-macro_rules! unspecialized_event_handlers_constructor {
+macro_rules! unspecialized_event_creators_constructor {
     ($($name:ident),*) => {
         $(
-            fn $name(callback: Callback<Event>) -> Box<dyn EventHandler> {
-                Box::new(UnspecializedEventHandler {
+            fn $name(callback: Callback<Event>) -> Box<dyn EventCreator> {
+                Box::new(UnspecializedEventCreator {
                     event_type: Cow::from(stringify!($name)[2..].to_string()),
                     callback,
                 })
@@ -52,11 +52,11 @@ macro_rules! unspecialized_event_handlers_constructor {
     };
 }
 
-macro_rules! event_handlers_constructor {
+macro_rules! event_creators_constructor {
     ($($event_name:ident ($event_type:ty) ),*) => {
         $(
-            fn $event_name(callback: Callback<$event_type>) -> Box<dyn EventHandler> {
-                Box::new(<$event_type as EventHandlerType>::Handler::new(
+            fn $event_name(callback: Callback<$event_type>) -> Box<dyn EventCreator> {
+                Box::new(<$event_type as EventCreatorType>::Creator::new(
                     Cow::from(stringify!($name)[2..].to_string()),
                     callback
                 ))

@@ -10,7 +10,7 @@ use crate::html_macro::{
 
 pub struct HtmlElementAttributes {
     attributes: HashMap<proc_macro2::Ident, HtmlAttributeValue>,
-    _events: HashMap<proc_macro2::Ident, syn::ExprBlock>,
+    events: HashMap<proc_macro2::Ident, syn::ExprBlock>,
     key: Option<HtmlAttribute>,
 }
 
@@ -27,7 +27,7 @@ impl Parse for HtmlElementAttributes {
 
         Ok(HtmlElementAttributes {
             attributes,
-            _events: events,
+            events,
             key,
         })
     }
