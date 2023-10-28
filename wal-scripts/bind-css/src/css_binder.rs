@@ -71,13 +71,27 @@ impl CssBinder {
     }
 
     fn apply_binding(file_str: String, component_class: &str) -> String {
-        let mut bound_css = String::new();
-        bound_css.push('.');
-        bound_css.push_str(component_class);
-        bound_css.push_str(" {\n");
-        bound_css.push_str(&file_str);
-        bound_css.push('}');
-        bound_css
+        // let mut bound_css = String::new();
+        // bound_css.push('.');
+        // bound_css.push_str(component_class);
+        // bound_css.push_str(" {\n");
+        // bound_css.push_str(&file_str);
+        // bound_css.push('}');
+        // bound_css
+
+        let mut str = Self::skip_comments(file_str);
+        str = Self::format_whitespaces(str);
+        str
+    }
+
+    fn skip_comments(str_w_comments: String) -> String {
+        let rgx = Regex::new(r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/").unwrap();
+        rgx.replace_all(&str_w_comments, "").into_owned()
+    }
+    fn format_whitespaces(str: String) -> String {
+        // TODO: add spaces and \t collapsing
+        let rgx = Regex::new(r"[\r\n]{2,}").unwrap();
+        rgx.replace_all(&str, "\r\n").into_owned()
     }
 
     fn read_file(path: PathBuf) -> Result<String, Box<dyn Error>> {
