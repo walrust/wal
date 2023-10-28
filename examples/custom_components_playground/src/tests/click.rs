@@ -1,7 +1,7 @@
 use gloo::console::log;
 use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
-    virtual_dom::{VComponent, VList, VNode, VText},
+    virtual_dom::VNode,
 };
 use wal_macros::html;
 use web_sys::MouseEvent;
@@ -26,15 +26,10 @@ impl Component for FatherComponent {
     fn view(&self, behavior: &mut impl Behavior<Self>) -> VNode {
         let callback = behavior.create_callback(|()| FatherMessages::Clicked);
 
-        VNode::List(VList::new(vec![
-            VNode::Text(VText {
-                text: format!("My child got clicked {} times", self.0),
-                dom: None,
-            }),
-            VNode::Component(VComponent::new::<ChildComponent>(ChildProperties(
-                callback, self.0,
-            ))),
-        ]))
+        html! {
+            { format!("My child got clicked {} times", self.0) }
+            <ChildComponent props={ChildProperties(callback, self.0)} />
+        }
     }
 
     fn update(&mut self, message: Self::Message) -> bool {
@@ -62,10 +57,7 @@ impl Component for ChildComponent {
         let cb = self.0.clone();
         let i = self.1;
         let on_click = Callback::new(move |_event: MouseEvent| {
-            log!(format!(
-                "Child got clicked!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {}",
-                i
-            ));
+            log!(format!("Child got clicked {}", i));
             cb.emit(());
         });
 
