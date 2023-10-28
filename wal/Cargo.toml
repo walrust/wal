@@ -16,11 +16,22 @@ console_error_panic_hook = "0.1.7"
 [dependencies.web-sys]
 version = "0.3.64"
 features = [
+    "AnimationEvent",
     "console",
-    "Window",
     "Document",
-    "Node",
+    "DragEvent",
     "Element",
-    "Text",
+    "FocusEvent",
+    "InputEvent",
+    "KeyboardEvent",
+    "Node",
     "MouseEvent",
+    "PointerEvent",
+    "ProgressEvent",
+    "SubmitEvent",
+    "Text",
+    "TouchEvent",
+    "TransitionEvent",
+    "WheelEvent",
+    "Window",
 ]
