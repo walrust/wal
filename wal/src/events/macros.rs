@@ -1,12 +1,9 @@
-// TODO
-// change fields to private
-// i should create this struct in the macro for every event that has MouseEvent as argument
 macro_rules! event_creators {
     ($($handler_name:ident ($event_type:ty)),*) => {
         $(
-            pub struct $handler_name {
-                pub event_type: Cow<'static, str>,
-                pub callback: Callback<$event_type>,
+            struct $handler_name {
+                event_type: Cow<'static, str>,
+                callback: Callback<$event_type>,
             }
 
             impl EventCreator for $handler_name {
@@ -24,7 +21,7 @@ macro_rules! event_creators {
             }
 
             impl $handler_name {
-                pub fn new(event_type: Cow<'static, str>, callback: Callback<$event_type>) -> Self {
+                fn new(event_type: Cow<'static, str>, callback: Callback<$event_type>) -> Self {
                     Self {
                         event_type,
                         callback,
@@ -43,7 +40,7 @@ macro_rules! unspecialized_event_creators_constructor {
     ($($event_name:ident),*) => {
         $(
             #[allow(dead_code)]
-            fn $event_name(callback: Callback<Event>) -> Box<dyn EventCreator> {
+            pub fn $event_name(callback: Callback<Event>) -> Box<dyn EventCreator> {
                 Box::new(UnspecializedEventCreator {
                     event_type: Cow::from(stringify!($event_name)[2..].to_string()),
                     callback,

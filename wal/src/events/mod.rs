@@ -1,4 +1,4 @@
-use std::{borrow::Cow, fmt::Debug};
+use std::{borrow::Cow, fmt::Debug, hash::Hash};
 
 use gloo::events::EventListener;
 use wasm_bindgen::JsCast;
@@ -20,6 +20,12 @@ pub trait EventCreator {
 impl Debug for dyn EventCreator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         format!("EventCreator of type {}", self.get_event_type()).fmt(f)
+    }
+}
+
+impl PartialEq for dyn EventCreator {
+    fn eq(&self, other: &Self) -> bool {
+        self.get_event_type() == other.get_event_type()
     }
 }
 
@@ -203,9 +209,34 @@ impl EventHandler {
         }
     }
 
-    pub fn attach(&mut self, element: &Element) {
+    pub(crate) fn attach(&mut self, element: &Element) {
         let event_type = self.event_creator.get_event_type();
         let callback = self.event_creator.create_callback();
         self.event_listener = Some(Dom::create_event_listener(element, event_type, callback));
+    }
+
+    pub(crate) fn get_event_type_from_creator(&self) -> Cow<'static, str> {
+        self.event_creator.get_event_type()
+    }
+}
+
+impl PartialEq for EventHandler {
+    fn eq(&self, other: &Self) -> bool {
+        let event_listener_eq = match (&self.event_listener, &other.event_listener) {
+            (Some(self_event_listener), Some(other_event_listener)) => {
+                self_event_listener.event_type() == other_event_listener.event_type()
+            }
+            (None, None) => true,
+            _ => false,
+        };
+        event_listener_eq && *self.event_creator == *other.event_creator
+    }
+}
+
+impl Eq for EventHandler {}
+
+impl Hash for EventHandler {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.get_event_type_from_creator().hash(state);
     }
 }

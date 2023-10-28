@@ -1,5 +1,5 @@
 use itertools::{EitherOrBoth, Itertools};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use web_sys::{Element, Node};
 
 use crate::{events::EventHandler, utils::debug, virtual_dom::Dom};
@@ -152,9 +152,13 @@ impl VElement {
 
 impl PartialEq for VElement {
     fn eq(&self, other: &Self) -> bool {
+        let self_event_handlers: HashSet<_> = self.event_handlers.iter().collect();
+        let other_event_handlers: HashSet<_> = other.event_handlers.iter().collect();
+
         self.tag_name == other.tag_name
             && self.attr == other.attr
             && self.children == other.children
             && self.dom == other.dom
+            && self_event_handlers == other_event_handlers
     }
 }

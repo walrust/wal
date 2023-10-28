@@ -17,7 +17,7 @@ use std::{
 use super::VNode;
 
 pub(crate) type PropertiesHash = u64;
-pub(crate) type AnyProps = Option<Box<dyn Any>>; // TODO: remove Option since props are always present - the only reason i see for Option rn is to run take() function and pass Properties to new function for component not &Properties
+pub(crate) type AnyProps = Option<Box<dyn Any>>;
 pub(crate) type ComponentNodeGenerator =
     Box<dyn Fn(AnyProps, &Node) -> Rc<RefCell<AnyComponentNode>> + 'static>;
 
@@ -95,7 +95,7 @@ impl VComponent {
     pub fn erase(&self) {
         if let Some(node) = self.comp.as_ref() {
             debug::log("Erasing vcomponent, feels kinda fucking sus");
-            node.borrow_mut().vdom.as_ref().unwrap().erase(); // TODO check if unwrap is safe here
+            node.borrow_mut().vdom.as_ref().unwrap().erase();
         }
     }
 
