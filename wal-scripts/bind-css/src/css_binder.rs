@@ -3,7 +3,7 @@ use std::{
     error::Error,
     fs::{self, OpenOptions},
     io::Write,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use regex::Regex;
@@ -58,8 +58,8 @@ impl CssBinder {
         Ok(())
     }
 
-    fn get_component_name_from_path<'a>(path: &PathBuf) -> String {
-        let path_str = path.as_path().display().to_string();
+    fn get_component_name_from_path(path: &Path) -> String {
+        let path_str = path.display().to_string();
         let rgx = Regex::new(r"/|\\").unwrap();
         let parts = rgx.split(&path_str);
         parts
