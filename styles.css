@@ -1,17 +1,38 @@
-.c1 {
-.silver {
-  color: silver;
-}
-}.c2 {
-.golden {
-  color: gold;
+div {
+  padding: 10px;
+  margin: 10px;
+  border: 2px solid black;
 }
 
-div {
-  padding: auto;
+.container[data-component="Parent"] {
+  background-color: aquamarine;
 }
-}.c_nested {
-div {
-  background-attachment: fixed;
+
+.inner-div1[data-component="Parent"],
+.inner-div2[data-component="Parent"] {
+  background-color: blue;
 }
+
+.container[data-component="Child"] {
+  background-color: goldenrod;
+  color: white;
+}
+.c1 {
+  .silver {
+    color: silver;
+  }
+}
+.c2 {
+  .golden {
+    color: gold;
+  }
+
+  div {
+    padding: auto;
+  }
+}
+.c_nested {
+  div {
+    background-attachment: fixed;
+  }
 }

@@ -40,6 +40,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut binder = CssBinder::new(out_path);
     if args.len() == 4 {
         let global_path = &args[3];
+        binder.bind_global_stylesheet(PathBuf::from(global_path))?;
     }
 
     let stylesheets = get_stylesheets_paths(dir_path)?;

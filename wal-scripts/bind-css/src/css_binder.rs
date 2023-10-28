@@ -47,6 +47,17 @@ impl CssBinder {
         Ok(())
     }
 
+    pub fn bind_global_stylesheet(&mut self, path: PathBuf) -> Result<(), Box<dyn Error>> {
+        if !path.exists() {
+            panic!("found path does not exist: {}", path.display());
+        }
+
+        let global_stylesheet_str = Self::read_file(path)?;
+        self.write_to_output(global_stylesheet_str)?;
+
+        Ok(())
+    }
+
     fn get_component_name_from_path<'a>(path: &PathBuf) -> String {
         let path_str = path.as_path().display().to_string();
         let rgx = Regex::new(r"/|\\").unwrap();

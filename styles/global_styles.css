@@ -11,6 +11,13 @@ div {
 .inner-div1[data-component="Parent"],
 .inner-div2[data-component="Parent"] {
   background-color: blue;
+  color: aliceblue;
+  width: 100px;
+  height: 100px;
+  transition: width 2s;
+  &:hover {
+    width: 300px;
+  }
 }
 
 .container[data-component="Child"] {
