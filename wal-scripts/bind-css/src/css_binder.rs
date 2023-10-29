@@ -93,6 +93,44 @@ impl CssBinder {
         let rgx = Regex::new(r"[\r\n]{2,}").unwrap();
         rgx.replace_all(&str, "\r\n").into_owned()
     }
+    fn append_attribute(selector: &mut String, c_name: &str) {
+        selector.push_str("[data-component=");
+        selector.push_str(c_name);
+        selector.push(']');
+    }
+    fn get_selector(css_str: &mut String) -> String {
+        let mut selector = String::new();
+        while !css_str.is_empty() && !css_str.starts_with('{') {
+            selector.push(css_str.remove(0));
+        }
+        return selector;
+    }
+    fn cut_body(css_str: &mut String) -> String {
+        let mut body = String::new();
+        let mut depth_lvl = 0;
+
+        while !css_str.is_empty() && !css_str.starts_with('{') {
+            css_str.remove(0);
+        }
+        if css_str.is_empty() {
+            return body;
+        }
+        if css_str.starts_with('{') {
+            depth_lvl += 1;
+            css_str.remove(0);
+        }
+
+        while !css_str.is_empty() && depth_lvl > 0 {
+            let c = css_str.remove(0);
+            match c {
+                '{' => depth_lvl += 1,
+                '}' => depth_lvl -= 1,
+                _ => (),
+            }
+            body.push(c);
+        }
+        body
+    }
 
     fn read_file(path: PathBuf) -> Result<String, Box<dyn Error>> {
         let file_str = fs::read_to_string(path)?.parse()?;
