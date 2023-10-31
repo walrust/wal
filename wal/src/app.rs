@@ -2,7 +2,7 @@ extern crate console_error_panic_hook;
 use std::{cell::RefCell, rc::Rc};
 
 use crate::{
-    component::{component_node::AnyComponentNode, Component},
+    component::{node::AnyComponentNode, Component},
     virtual_dom::Dom,
 };
 

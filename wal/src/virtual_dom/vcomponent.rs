@@ -1,7 +1,7 @@
 use web_sys::Node;
 
 use crate::{
-    component::{component_node::AnyComponentNode, Component},
+    component::{node::AnyComponentNode, Component},
     utils::debug,
 };
 

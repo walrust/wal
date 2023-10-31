@@ -4,37 +4,36 @@ pub mod vlist;
 pub mod vnode;
 pub mod vtext;
 
-use std::borrow::Cow;
-
-use gloo::events::EventListener;
-use gloo::utils::{body, document};
-use web_sys::{Element, Node, Text, Event};
-
-use crate::utils::debug;
-
 pub use self::vcomponent::VComponent;
 pub use self::velement::VElement;
 pub use self::vlist::VList;
 pub use self::vnode::VNode;
 pub use self::vtext::VText;
 
-pub struct Dom;
-impl Dom {
-    const ROOT_ELEMENT_ID: &'static str = "walrust-root";
+pub mod Dom {
+    use std::borrow::Cow;
+
+    use gloo::events::EventListener;
+    use gloo::utils::{body, document};
+    use web_sys::{Element, Node, Text, Event};
+
+    use crate::utils::debug;
+
+    pub const ROOT_ELEMENT_ID: &'static str = "walrust-root";
 
     pub fn get_root_element() -> Node {
         Node::from(
             document()
-                .get_element_by_id(Self::ROOT_ELEMENT_ID)
+                .get_element_by_id(ROOT_ELEMENT_ID)
                 .unwrap_or_else(|| {
                     let message = format!(
                         "There was no '{}' element, adding default one",
-                        Self::ROOT_ELEMENT_ID
+                        ROOT_ELEMENT_ID
                     );
                     debug::log(message);
                     let root = document().create_element("div").unwrap();
-                    Dom::set_attribute(&root, "id", Self::ROOT_ELEMENT_ID);
-                    Dom::append_child(&body(), &root);
+                    set_attribute(&root, "id", ROOT_ELEMENT_ID);
+                    append_child(&body(), &root);
                     root
                 }),
         )
@@ -52,7 +51,7 @@ impl Dom {
 
     pub fn remove_node(node: &Node) {
         let ancestor = node.parent_node().expect("Node does not have a parent");
-        Dom::remove_child(&ancestor, &node);
+        remove_child(&ancestor, &node);
     }
 
     pub fn append_child(ancestor: &Node, child: &Node) -> Node {

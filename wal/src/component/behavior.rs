@@ -4,7 +4,7 @@ use std::{
 };
 
 use super::{
-    callback::Callback, component_node::AnyComponentNode, scheduler::Scheduler, Component,
+    callback::Callback, node::AnyComponentNode, scheduler::Scheduler, Component,
 };
 
 pub struct AnyComponentBehavior {

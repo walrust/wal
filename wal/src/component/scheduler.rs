@@ -4,7 +4,7 @@ use wasm_bindgen_futures::spawn_local;
 
 use crate::utils::debug;
 
-use super::component_node::AnyComponentNode;
+use super::node::AnyComponentNode;
 
 enum SchedulerMessage {
     Update(UpdateMessage),
