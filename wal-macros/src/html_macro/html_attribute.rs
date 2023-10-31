@@ -1,10 +1,15 @@
+use std::collections::HashSet;
+
+use once_cell::unsync::Lazy;
 use quote::ToTokens;
 use syn::{
     ext::IdentExt,
     parse::{Parse, ParseStream},
 };
 
-use super::html_component::html_component_attributes::HtmlComponentAttributeValue;
+use super::html_component::html_component_attributes::{
+    HtmlComponentAttribute, HtmlComponentAttributeValue,
+};
 
 pub struct HtmlAttribute {
     pub ident: proc_macro2::Ident,
@@ -24,6 +29,19 @@ impl Parse for HtmlAttribute {
 impl HtmlAttribute {
     pub fn peek(input: ParseStream) -> bool {
         input.peek(proc_macro2::Ident::peek_any)
+    }
+
+    pub fn is_event(&self) -> bool {
+        EVENTS.contains(&self.ident.to_string().as_str())
+    }
+}
+
+impl From<HtmlComponentAttribute> for HtmlAttribute {
+    fn from(attribute: HtmlComponentAttribute) -> Self {
+        HtmlAttribute {
+            ident: attribute.ident,
+            value: attribute.value.into(),
+        }
     }
 }
 
@@ -74,3 +92,120 @@ impl From<HtmlComponentAttributeValue> for HtmlAttributeValue {
         }
     }
 }
+
+// Events from https://www.w3schools.com/tags/ref_eventattributes.asp
+const EVENTS: Lazy<HashSet<&str>> = Lazy::new(|| {
+    [
+        // Animation Events
+        "onanimationcancel",
+        "onanimationend",
+        "onanimationiteration",
+        "onanimationstart",
+        // Drag Events
+        "ondrag",
+        "ondragend",
+        "ondragenter",
+        "ondragexit",
+        "ondragleave",
+        "ondragover",
+        "ondragstart",
+        "ondrop",
+        // Focus Events
+        "onblur",
+        "onfocus",
+        "onfocusin",
+        "onfocusout",
+        // FormData Events
+        "onformdata", // web_sys is missing `FormDataEvent`` so it is handled as Unspecialized Event
+        // Input Events
+        "oninput",
+        // Keyboard Events
+        "onkeydown",
+        "onkeypress",
+        "onkeyup",
+        // Mouse Events
+        "onauxclick",
+        "onclick",
+        "oncontextmenu",
+        "ondblclick",
+        "onmousedown",
+        "onmouseenter",
+        "onmouseleave",
+        "onmousemove",
+        "onmouseout",
+        "onmouseover",
+        "onmouseup",
+        // Pointer Events
+        "ongotpointercapture",
+        "onlostpointercapture",
+        "onpointercancel",
+        "onpointerdown",
+        "onpointerenter",
+        "onpointerleave",
+        "onpointermove",
+        "onpointerout",
+        "onpointerover",
+        "onpointerup",
+        // Progress Events
+        "onloadend",
+        "onloadstart",
+        "onprogress",
+        // Submit Events
+        "onsubmit",
+        // Touch Events
+        "ontouchcancel",
+        "ontouchend",
+        "ontouchmove",
+        "ontouchstart",
+        // Transition Events
+        "ontransitioncancel",
+        "ontransitionend",
+        "ontransitionrun",
+        "ontransitionstart",
+        // Unspecialized Events
+        "onabort",
+        "oncancel",
+        "oncanplay",
+        "oncanplaythrough",
+        "onchange",
+        "onclose",
+        "oncopy",
+        "oncuechange",
+        "oncut",
+        "ondurationchange",
+        "onemptied",
+        "onended",
+        "onerror",
+        "oninvalid",
+        "onload",
+        "onloadeddata",
+        "onloadedmetadata",
+        "onpaste",
+        "onpause",
+        "onplay",
+        "onplaying",
+        "onpointerlockchange",
+        "onpointerlockerror",
+        "onratechange",
+        "onreset",
+        "onresize",
+        "onscroll",
+        "onsecuritypolicyviolation",
+        "onseeked",
+        "onseeking",
+        "onselect",
+        "onselectionchange",
+        "onselectstart",
+        "onshow",
+        "onslotchange",
+        "onstalled",
+        "onsuspend",
+        "ontimeupdate",
+        "ontoggle",
+        "onvolumechange",
+        "onwaiting",
+        // Wheel Events
+        "onwheel",
+    ]
+    .into()
+});

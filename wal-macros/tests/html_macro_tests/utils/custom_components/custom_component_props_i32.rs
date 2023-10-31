@@ -8,7 +8,7 @@ impl Component for CustomComponentPropsI32 {
         unimplemented!();
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         unimplemented!();
     }
 

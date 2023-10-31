@@ -18,9 +18,9 @@ impl VText {
         }
     }
 
-    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching TextNode");
-        let mut old_virt: Option<&VText> = None;
+        let mut old_virt: Option<VText> = None;
 
         match last {
             None => {
@@ -35,9 +35,11 @@ impl VText {
                 debug::log("\tCreating text for the first time and swapping with existing element");
                 self.dom = None;
                 v.erase();
-            },
+            }
             Some(VNode::Component(v)) => {
-                debug::log("\tCreating text for the first time and swapping with existing comp node");
+                debug::log(
+                    "\tCreating text for the first time and swapping with existing comp node",
+                );
                 self.dom = None;
                 v.erase();
             }
@@ -45,7 +47,7 @@ impl VText {
                 debug::log("\tCreating text for the first time and swapping with list");
                 self.dom = None;
                 v.erase();
-            },
+            }
         }
 
         self.render(old_virt, ancestor);
@@ -61,7 +63,7 @@ impl VText {
 impl VText {
     /// Renders virtual text node over concrete DOM Text object. If the last VText
     /// isnt None and text value is the same, function does nothing
-    fn render(&mut self, last: Option<&VText>, ancestor: &Node) {
+    fn render(&mut self, last: Option<VText>, ancestor: &Node) {
         match last {
             // Different value => just change node value
             Some(last) if self.text != last.text => {

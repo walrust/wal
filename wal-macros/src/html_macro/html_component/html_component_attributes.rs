@@ -22,38 +22,61 @@ impl Parse for HtmlComponentAttributes {
 
         while HtmlComponentAttribute::peek(input) {
             let attribute = input.parse::<HtmlComponentAttribute>()?;
-            if attribute.ident == PROPS_STR {
-                if props.is_some() {
-                    return Err(syn::Error::new(
-                        attribute.ident.span(),
-                        format!("Duplicate attribute `{}`", attribute.ident),
-                    ));
-                }
-                props = Some(attribute);
-            } else if attribute.ident == KEY_STR {
-                if key.is_some() {
-                    return Err(syn::Error::new(
-                        attribute.ident.span(),
-                        format!("Duplicate attribute `{}`", attribute.ident),
-                    ));
-                }
-                key = Some(HtmlAttribute {
-                    ident: attribute.ident,
-                    value: attribute.value.into(),
-                });
-            } else {
-                return Err(syn::Error::new(
-                    attribute.ident.span(),
-                    format!(
-                        "Unsupported attribute `{}`. Custom components supports only `{}` and `{}` attributes",
-                        attribute.ident,
-                        PROPS_STR,
-                        KEY_STR
-                    ),
-                ));
-            }
+            Self::process_attribute(&mut props, &mut key, attribute)?;
         }
         Ok(HtmlComponentAttributes { props, _key: key })
+    }
+}
+
+impl HtmlComponentAttributes {
+    fn process_attribute(
+        props: &mut Option<HtmlComponentAttribute>,
+        key: &mut Option<HtmlAttribute>,
+        attribute: HtmlComponentAttribute,
+    ) -> syn::Result<()> {
+        if attribute.ident == PROPS_STR {
+            Self::process_props_attribute(props, attribute)
+        } else if attribute.ident == KEY_STR {
+            Self::process_key_attribute(key, attribute)
+        } else {
+            Err(syn::Error::new(
+                attribute.ident.span(),
+                format!(
+                    "Unsupported attribute `{}`. Custom components supports only `{}` and `{}` attributes",
+                    attribute.ident,
+                    PROPS_STR,
+                    KEY_STR
+                ),
+            ))
+        }
+    }
+
+    fn process_props_attribute(
+        props: &mut Option<HtmlComponentAttribute>,
+        attribute: HtmlComponentAttribute,
+    ) -> syn::Result<()> {
+        if props.is_some() {
+            return Err(syn::Error::new(
+                attribute.ident.span(),
+                format!("Duplicate attribute `{}`", attribute.ident),
+            ));
+        }
+        *props = Some(attribute);
+        Ok(())
+    }
+
+    fn process_key_attribute(
+        key: &mut Option<HtmlAttribute>,
+        attribute: HtmlComponentAttribute,
+    ) -> syn::Result<()> {
+        if key.is_some() {
+            return Err(syn::Error::new(
+                attribute.ident.span(),
+                format!("Duplicate attribute `{}`", attribute.ident),
+            ));
+        }
+        *key = Some(attribute.into());
+        Ok(())
     }
 }
 
