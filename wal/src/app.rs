@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     component::{node::AnyComponentNode, Component},
-    virtual_dom::Dom,
+    virtual_dom::dom,
 };
 
 thread_local! {
@@ -12,7 +12,7 @@ thread_local! {
 
 pub fn start<C: Component + 'static>(root_component: C) {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-    let ancestor = Dom::get_root_element();
+    let ancestor = dom::get_root_element();
     let root = AnyComponentNode::new_root(root_component, ancestor);
 
     ROOT_INSTANCE.with(move |root_instance| {

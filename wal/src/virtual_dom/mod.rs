@@ -10,7 +10,7 @@ pub use self::vlist::VList;
 pub use self::vnode::VNode;
 pub use self::vtext::VText;
 
-pub mod Dom {
+pub mod dom {
     use std::borrow::Cow;
 
     use gloo::events::EventListener;

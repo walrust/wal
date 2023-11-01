@@ -2,17 +2,12 @@ use std::{collections::HashMap, marker::PhantomData};
 
 use wal::component::{node::AnyComponentNode, Component};
 
-use super::App;
-
-pub enum Page {
-    NotRendered(Box<dyn FnOnce() -> AnyComponentNode>),
-    Rendered(AnyComponentNode),
-}
+use super::{LazyPage, App};
 
 pub struct EmptyApp;
 pub struct ValidApp;
 pub struct AppBuilder<T> {
-    pages: HashMap<&'static str, Page>,
+    pages: HashMap<&'static str, LazyPage>,
     _marker: PhantomData<T>,
 }
 
@@ -34,16 +29,22 @@ impl<T> AppBuilder<T> {
             move || 
             AnyComponentNode::new(
                 C::new(props), 
-                wal::virtual_dom::Dom::get_root_element()
+                wal::virtual_dom::dom::get_root_element()
             )
         );
 
         let mut pages = self.pages;
-        //pages.insert(path, Page::NotRendered(generator));
+        pages.insert(path, LazyPage::new(generator));
 
         AppBuilder { 
             pages, 
             _marker: PhantomData 
         }
+    }
+}
+
+impl AppBuilder<ValidApp> {
+    pub fn build(self) -> App {
+        App::new(self.pages)
     }
 }

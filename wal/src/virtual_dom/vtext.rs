@@ -2,7 +2,7 @@ use web_sys::{Node, Text};
 
 use crate::utils::debug;
 
-use super::{Dom, VNode};
+use super::{dom, VNode};
 
 #[derive(PartialEq, Debug)]
 pub struct VText {
@@ -55,7 +55,7 @@ impl VText {
 
     pub fn erase(&self) {
         if let Some(text) = &self.dom {
-            Dom::remove_node(text);
+            dom::remove_node(text);
         }
     }
 }
@@ -75,11 +75,11 @@ impl VText {
             // Same thing => do nothing
             Some(_) => (),
             None => {
-                let el = Dom::create_text_node(&self.text);
+                let el = dom::create_text_node(&self.text);
 
                 match &self.dom {
-                    Some(old_child) => Dom::replace_child(ancestor, &old_child, &el),
-                    None => Dom::append_child(ancestor, &el),
+                    Some(old_child) => dom::replace_child(ancestor, &old_child, &el),
+                    None => dom::append_child(ancestor, &el),
                 };
                 self.dom = Some(el);
             }

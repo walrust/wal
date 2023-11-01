@@ -2,7 +2,7 @@ use itertools::{EitherOrBoth, Itertools};
 use std::collections::{HashMap, HashSet};
 use web_sys::{Element, Node};
 
-use crate::{events::EventHandler, utils::debug, virtual_dom::Dom};
+use crate::{events::EventHandler, utils::debug, virtual_dom::dom};
 
 use super::VNode;
 
@@ -75,7 +75,7 @@ impl VElement {
 
     pub fn erase(&self) {
         if let Some(el) = &self.dom {
-            Dom::remove_node(el);
+            dom::remove_node(el);
         }
     }
 }
@@ -93,11 +93,11 @@ impl VElement {
                     .expect("Target dom object not created before rendering element");
                 // Compare attributes
                 for (key, val) in self.attr.iter() {
-                    Dom::set_attribute(target, key, val);
+                    dom::set_attribute(target, key, val);
                 }
                 for (key, _val) in last.attr.iter() {
                     if !self.attr.contains_key(key) {
-                        Dom::remove_attribute(target, key);
+                        dom::remove_attribute(target, key);
                     }
                 }
 
@@ -109,11 +109,11 @@ impl VElement {
                 // inverted check, if last == None || last = Some(x) that x.tag_name !=
                 // self.tag_name => Swap whole element
                 debug::log("\t\tRendering new node");
-                let el = Dom::create_element(&self.tag_name);
+                let el = dom::create_element(&self.tag_name);
 
                 // add attributes
                 for (name, value) in self.attr.iter() {
-                    Dom::set_attribute(&el, name, value);
+                    dom::set_attribute(&el, name, value);
                 }
 
                 for event_handler in &mut self.event_handlers {
@@ -121,8 +121,8 @@ impl VElement {
                 }
 
                 match &self.dom {
-                    Some(old_child) => Dom::replace_child(ancestor, old_child, &el),
-                    None => Dom::append_child(ancestor, &el),
+                    Some(old_child) => dom::replace_child(ancestor, old_child, &el),
+                    None => dom::append_child(ancestor, &el),
                 };
                 self.dom = Some(el);
             }
