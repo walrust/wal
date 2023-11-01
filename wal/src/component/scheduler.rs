@@ -103,7 +103,7 @@ pub struct Scheduler {
 }
 
 impl Scheduler {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             messages: BinaryHeap::new(),
             is_handle_messages_scheduled: false,

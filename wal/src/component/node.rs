@@ -1,4 +1,4 @@
-use crate::virtual_dom::VNode;
+use crate::{virtual_dom::VNode, utils::debug};
 use std::{any::Any, cell::RefCell, fmt, rc::Rc};
 use web_sys::Node;
 
@@ -14,11 +14,12 @@ pub struct AnyComponentNode {
 }
 
 impl AnyComponentNode {
-    pub(crate) fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+    pub fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
         Self::new_internal(component, ancestor, true)
     }
 
     pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+        debug::log("anycomponentnode::new");
         Self::new_internal(component, ancestor, false)
     }
 

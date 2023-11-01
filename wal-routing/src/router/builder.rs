@@ -2,26 +2,27 @@ use std::{collections::HashMap, marker::PhantomData};
 
 use wal::component::{node::AnyComponentNode, Component};
 
-use super::{LazyPage, App};
+use super::{LazyPage, Router};
 
-pub struct EmptyApp;
-pub struct ValidApp;
-pub struct AppBuilder<T> {
+
+pub struct Invalid;
+pub struct Valid;
+pub struct Builder<T> {
     pages: HashMap<&'static str, LazyPage>,
     _marker: PhantomData<T>,
 }
 
-impl AppBuilder<EmptyApp> {
-    pub fn new() -> AppBuilder<EmptyApp> {
-        AppBuilder {
+impl Builder<Invalid> {
+    pub fn new() -> Builder<Invalid> {
+        Builder {
             pages: HashMap::new(),
             _marker: PhantomData,
         }
     }
 }
 
-impl<T> AppBuilder<T> {
-    pub fn add_page<C>(self, path: &'static str, props: C::Properties) -> AppBuilder<ValidApp>
+impl<T> Builder<T> {
+    pub fn add_page<C>(self, path: &'static str, props: C::Properties) -> Builder<Valid>
     where 
         C: Component + 'static
     {
@@ -36,15 +37,15 @@ impl<T> AppBuilder<T> {
         let mut pages = self.pages;
         pages.insert(path, LazyPage::new(generator));
 
-        AppBuilder { 
+        Builder { 
             pages, 
             _marker: PhantomData 
         }
     }
 }
 
-impl AppBuilder<ValidApp> {
-    pub fn build(self) -> App {
-        App::new(self.pages)
+impl Builder<Valid> {
+    pub fn build(self) -> Router {
+        Router::new(self.pages)
     }
 }

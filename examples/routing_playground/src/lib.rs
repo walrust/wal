@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::wasm_bindgen;
-use wal_routing::app;
+use wal_routing::router;
 use wal::{self, component::{Component, behavior::Behavior, callback::Callback}, utils::debug};
 use wal_macros::html;
 use web_sys::MouseEvent;
@@ -36,8 +36,9 @@ impl Component for RootComp {
 
 #[wasm_bindgen(start)]
 fn start() {
-    wal::app::start(RootComp);
-    // let _app = app::builder::AppBuilder::new()
-    //     .add_page::<RootComp>("/", RootProp{})
-    //     .build();
+    // wal::app::start(RootComp);
+    router::builder::Builder::new()
+        .add_page::<RootComp>("/", RootProp{})
+        .build()
+        .start();
 }
