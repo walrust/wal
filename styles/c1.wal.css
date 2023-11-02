@@ -15,6 +15,13 @@ div,
     color: aqua;
   }
 }
+
+@media only screen and (max-width: 600px) {
+  .silver3 {
+    color: black;
+  }
+}
+
 .silver3 {
   color: silver;
 }

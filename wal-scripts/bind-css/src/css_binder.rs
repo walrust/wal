@@ -48,7 +48,7 @@ impl CssBinder {
 
         // loop
         while !stylesheet_str.is_empty() {
-            let parsed_instruction = self.parse_instruction(&mut stylesheet_str, &stylesheet_name);
+            let parsed_instruction = Self::parse_instruction(&mut stylesheet_str, &stylesheet_name);
             self.write_to_output(parsed_instruction)?;
         }
 
@@ -97,7 +97,7 @@ impl CssBinder {
         let rgx = Regex::new(r"[\r\n]{2,}").unwrap();
         rgx.replace_all(&str, "\r\n").into_owned()
     }
-    fn append_attribute(selector: String, c_name: &str) -> String {
+    fn append_attribute(selector: &str, c_name: &str) -> String {
         //check for complex selector
         let mut s_selectors = selector.split(',').peekable();
 
@@ -116,13 +116,13 @@ impl CssBinder {
         result
     }
 
-    pub fn get_instruction(css_str: &mut String) -> String {
+    fn get_instruction(css_str: &mut String) -> String {
         let end_idx = css_str
             .find(|c: char| c == '{' || c == ';')
             .expect("error getting instruction");
         css_str.drain(..end_idx).collect()
     }
-    pub fn get_body(css_str: &mut String) -> String {
+    fn get_body(css_str: &mut String) -> String {
         let mut nest_lvl = 1;
         let mut body_str = String::new();
 
@@ -142,13 +142,13 @@ impl CssBinder {
 
     fn wrap_in_nesting(str: &str) -> String {
         let mut wrapped = String::new();
-        wrapped.push('{');
+        wrapped.push_str("\n{");
         wrapped.push_str(str);
-        wrapped.push('}');
+        wrapped.push_str("}\n");
         wrapped
     }
 
-    pub fn parse_instruction(&mut self, css_str: &mut String, comp_name: &str) -> String {
+    fn parse_instruction(css_str: &mut String, comp_name: &str) -> String {
         let mut parsed_str = String::new();
         Self::trim_front_whitespaces(css_str);
         if css_str.is_empty() {
@@ -159,23 +159,25 @@ impl CssBinder {
         let c = css_str.remove(0);
         let mut body: Option<String> = None;
         match c {
-            '{' => {
-                body = Some(Self::get_body(css_str));
-                // println!("body: {}", body.unwrap())
-            }
+            '{' => body = Some(Self::get_body(css_str)),
             ';' => println!("semicolon end"),
             _ => println!("unexpected char"),
         }
 
         if !instruction.trim().starts_with('@') {
-            parsed_str.push_str(&Self::append_attribute(instruction, comp_name));
+            parsed_str.push_str(&Self::append_attribute(&instruction, comp_name));
         } else {
             parsed_str.push_str(&instruction);
-            parsed_str.push_str(";\n");
+            if body.is_none() {
+                parsed_str.push_str(";\n")
+            };
         }
-        if let Some(body) = body {
+
+        if let Some(mut body) = body {
+            if instruction.starts_with("@media") || instruction.starts_with("@supports") {
+                body = Self::parse_instruction(&mut body, comp_name);
+            }
             parsed_str.push_str(&Self::wrap_in_nesting(&body));
-            parsed_str.push('\n');
         }
         parsed_str
     }
