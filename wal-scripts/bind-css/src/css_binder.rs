@@ -47,12 +47,10 @@ impl CssBinder {
         stylesheet_str = Self::collapse_whitespaces(stylesheet_str);
 
         // loop
-        Self::trim_front_whitespaces(&mut stylesheet_str);
-        self.handle_instruction(&mut stylesheet_str, &stylesheet_name);
-        Self::trim_front_whitespaces(&mut stylesheet_str);
-        self.handle_instruction(&mut stylesheet_str, &stylesheet_name);
-        Self::trim_front_whitespaces(&mut stylesheet_str);
-        self.handle_instruction(&mut stylesheet_str, &stylesheet_name);
+        while !stylesheet_str.is_empty() {
+            let parsed_instruction = self.parse_instruction(&mut stylesheet_str, &stylesheet_name);
+            self.write_to_output(parsed_instruction)?;
+        }
 
         Ok(())
     }
@@ -150,8 +148,13 @@ impl CssBinder {
         wrapped
     }
 
-    pub fn handle_instruction(&mut self, css_str: &mut String, comp_name: &str) {
-        let mut instruction = Self::get_instruction(css_str);
+    pub fn parse_instruction(&mut self, css_str: &mut String, comp_name: &str) -> String {
+        let mut parsed_str = String::new();
+        Self::trim_front_whitespaces(css_str);
+        if css_str.is_empty() {
+            return parsed_str;
+        }
+        let instruction = Self::get_instruction(css_str);
         println!("instruction: {}", instruction);
         let c = css_str.remove(0);
         let mut body: Option<String> = None;
@@ -165,17 +168,16 @@ impl CssBinder {
         }
 
         if !instruction.trim().starts_with('@') {
-            let bound_selector = Self::append_attribute(instruction, comp_name);
-            Self::write_to_output(&self, bound_selector);
+            parsed_str.push_str(&Self::append_attribute(instruction, comp_name));
         } else {
-            instruction.push_str(";\n");
-            Self::write_to_output(&self, instruction);
+            parsed_str.push_str(&instruction);
+            parsed_str.push_str(";\n");
         }
-        if let Some(mut body) = body {
-            let mut wrapped_body = Self::wrap_in_nesting(&body);
-            wrapped_body.push('\n');
-            Self::write_to_output(&self, wrapped_body);
+        if let Some(body) = body {
+            parsed_str.push_str(&Self::wrap_in_nesting(&body));
+            parsed_str.push('\n');
         }
+        parsed_str
     }
 
     fn read_file(path: PathBuf) -> Result<String, Box<dyn Error>> {
