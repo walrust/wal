@@ -1,0 +1,10 @@
+@import url("my-imported-styles.css");
+.silver[data-component=FILE_NAME]{
+  color: silver;
+}
+.silver2[data-component=FILE_NAME]{
+  color: silver;
+  .nested-selector {
+    color: aqua;
+  }
+}

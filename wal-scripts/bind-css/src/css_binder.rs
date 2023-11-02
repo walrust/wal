@@ -3,6 +3,7 @@ use std::{
     error::Error,
     fs::{self, OpenOptions},
     io::Write,
+    ops::Add,
     path::{Path, PathBuf},
 };
 
@@ -45,11 +46,11 @@ impl CssBinder {
         // self.write_to_output(Self::apply_binding(stylesheet_str, &stylesheet_name))?;
 
         Self::trim_front_whitespaces(&mut stylesheet_str);
-        Self::handle_instruction(&mut stylesheet_str);
+        self.handle_instruction(&mut stylesheet_str);
         Self::trim_front_whitespaces(&mut stylesheet_str);
-        Self::handle_instruction(&mut stylesheet_str);
+        self.handle_instruction(&mut stylesheet_str);
         Self::trim_front_whitespaces(&mut stylesheet_str);
-        Self::handle_instruction(&mut stylesheet_str);
+        self.handle_instruction(&mut stylesheet_str);
 
         Ok(())
     }
@@ -96,6 +97,11 @@ impl CssBinder {
             str.remove(0);
         }
     }
+    fn trim_back_whitespaces(str: &mut String) {
+        while str.ends_with(|c: char| c.is_whitespace()) {
+            str.pop();
+        }
+    }
     fn skip_comments(str_w_comments: String) -> String {
         let rgx = Regex::new(r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/").unwrap();
         rgx.replace_all(&str_w_comments, "").into_owned()
@@ -106,16 +112,10 @@ impl CssBinder {
         rgx.replace_all(&str, "\r\n").into_owned()
     }
     fn append_attribute(selector: &mut String, c_name: &str) {
+        Self::trim_back_whitespaces(selector);
         selector.push_str("[data-component=");
         selector.push_str(c_name);
         selector.push(']');
-    }
-    fn get_selector(css_str: &mut String) -> String {
-        let mut selector = String::new();
-        while !css_str.is_empty() && !css_str.starts_with('{') {
-            selector.push(css_str.remove(0));
-        }
-        return selector;
     }
 
     pub fn get_instruction(css_str: &mut String) -> String {
@@ -126,7 +126,7 @@ impl CssBinder {
     }
     pub fn get_body(css_str: &mut String) -> String {
         let mut nest_lvl = 1;
-        let mut body_str = String::new();
+        let mut body_str = String::from("{");
 
         while !css_str.is_empty() && nest_lvl > 0 {
             let c = css_str.remove(0);
@@ -137,25 +137,32 @@ impl CssBinder {
             }
             body_str.push(c);
         }
-
-        if body_str.ends_with('}') {
-            body_str.pop();
-        }
         body_str
     }
 
-    pub fn handle_instruction(css_str: &mut String) {
-        let instruction = Self::get_instruction(css_str);
+    pub fn handle_instruction(&mut self, css_str: &mut String) {
+        let mut instruction = Self::get_instruction(css_str);
         println!("instruction: {}", instruction);
         let c = css_str.remove(0);
-        let body;
+        let mut body: Option<String> = None;
         match c {
             '{' => {
-                body = Self::get_body(css_str);
-                println!("body: {}", body)
+                body = Some(Self::get_body(css_str));
+                // println!("body: {}", body.unwrap())
             }
             ';' => println!("semicolon end"),
             _ => println!("unexpected char"),
+        }
+
+        if !instruction.trim().starts_with('@') {
+            Self::append_attribute(&mut instruction, "FILE_NAME");
+        } else {
+            instruction.push_str(";\n");
+        }
+        Self::write_to_output(&self, instruction);
+        if let Some(mut body) = body {
+            body.push('\n');
+            Self::write_to_output(&self, body);
         }
     }
 
