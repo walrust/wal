@@ -126,7 +126,7 @@ impl CssBinder {
     }
     pub fn get_body(css_str: &mut String) -> String {
         let mut nest_lvl = 1;
-        let mut body_str = String::from("{");
+        let mut body_str = String::new();
 
         while !css_str.is_empty() && nest_lvl > 0 {
             let c = css_str.remove(0);
@@ -137,7 +137,17 @@ impl CssBinder {
             }
             body_str.push(c);
         }
+        body_str.pop();
+        println!("BODY: {}", body_str);
         body_str
+    }
+
+    fn wrap_in_nesting(str: &str) -> String {
+        let mut wrapped = String::new();
+        wrapped.push('{');
+        wrapped.push_str(str);
+        wrapped.push('}');
+        wrapped
     }
 
     pub fn handle_instruction(&mut self, css_str: &mut String, comp_name: &str) {
@@ -162,8 +172,9 @@ impl CssBinder {
             Self::write_to_output(&self, instruction);
         }
         if let Some(mut body) = body {
-            body.push('\n');
-            Self::write_to_output(&self, body);
+            let mut wrapped_body = Self::wrap_in_nesting(&body);
+            wrapped_body.push('\n');
+            Self::write_to_output(&self, wrapped_body);
         }
     }
 

@@ -2,8 +2,8 @@
 .silver[data-component="c1"] {
   color: silver;
 }
-.silver2[data-component="c1"], 
-div[data-component="c1"], 
+.silver2[data-component="c1"],
+div[data-component="c1"],
 .silver2_5[data-component="c1"] {
   color: silver;
   .nested-selector {
