@@ -2,9 +2,11 @@ pub mod builder;
 
 use std::{rc::{Rc, Weak}, cell::RefCell, collections::HashMap, path, ptr::null};
 
-use wal::{component::{node::AnyComponentNode, scheduler::Scheduler}, virtual_dom::dom, app::ROOT_INSTANCE, utils::debug};
-use web_sys::{Node, window, Location};
-use wasm_bindgen::{prelude::{self, Closure}, JsCast};
+use gloo::utils::{document, window, history, body};
+use wal::{component::{node::AnyComponentNode, scheduler::Scheduler}, virtual_dom::dom, utils::debug};
+// use wal::app::ROOT_INSTANCE;
+use web_sys::{Node, Location, MouseEvent, EventTarget, Element, Event};
+use wasm_bindgen::{prelude::{self, Closure}, JsCast, JsValue};
 
 // Consider using this enum in whole thing, maybe not rly threadsafe but we are singlethreaded still
 // pub enum Lazy<T> {
@@ -58,6 +60,8 @@ thread_local!{
     pub static ROUTER: RefCell<Router> = RefCell::new(Router::mock());
 }
 
+const WAL_ROUTING_ATTR: &'static str = "data_link";
+
 pub struct Router {
     pages: HashMap<&'static str, LazyPage>,
     cur_page: Weak<RefCell<AnyComponentNode>>,
@@ -82,35 +86,63 @@ impl Router {
 
     pub fn start(self) {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-        let root = self.cur_page.upgrade().unwrap();
-
-        ROOT_INSTANCE.with(move |root_instance| {
-            *root_instance.borrow_mut() = Some(root);
+        let click = Closure::<dyn Fn(Event)>::new(|e: Event| {
+            debug::log("In click");
+            let target = e.target().unwrap().unchecked_into::<Element>();
+            let b = target.matches(&("[".to_owned() + WAL_ROUTING_ATTR + "]")).unwrap();
+            if b {
+                debug::log("\tNavigating in spa");
+                e.prevent_default();
+                Self::navigate_to(target.get_attribute("href").unwrap().as_str());
+            }
         });
+        let router = Closure::<dyn Fn()>::new(Self::route);
+        
+        body()
+            .add_event_listener_with_callback(
+                "click", 
+                click.as_ref().unchecked_ref()
+            )
+            .unwrap();
+
+        window()
+            .add_event_listener_with_callback(
+                "popstate", 
+                router.as_ref().unchecked_ref()
+            )
+            .unwrap();
+
         ROUTER.with(move |router| {
-            *router.borrow_mut() = self;
+            let mut router = router.borrow_mut();
+            *router = self;
         });
+        click.forget();
+        router.forget();
+        // Self::route();
+    }
 
-        let closure = Closure::<dyn Fn()>::new(|| {
-            ROUTER.with(|router| { ROOT_INSTANCE.with(move |root_instance| {
-                let path = window().unwrap().location().pathname().unwrap();
-                let mut router = router.borrow_mut();
-                if let Some(page) = router.pages.get_mut(path.as_str()) {
-                    debug::log(format!("There is page {}", path));
-                    router.cur_page = page.page();
-                } else {
-                    debug::log(format!("There is no page {}", path));
-                    router.cur_page = router.pages.get_mut("/").unwrap().page();
-                }
-                let mut instance = root_instance.borrow_mut();
-                let old = instance.take();
-                *instance = Some(router.cur_page.upgrade().unwrap());
-                let mut node = instance.as_mut().unwrap().borrow_mut();
-                node.patch(old, &dom::get_root_element());
-            });});
-        });
-        window().unwrap().add_event_listener_with_callback("popstate", closure.as_ref().unchecked_ref()).unwrap();
-        closure.forget();
+    fn route() {
+    ROUTER.with(|router| {
+        let mut router = router.borrow_mut();
+        let x = router.pages.iter().find(|(s, _p)| window().location().pathname().unwrap().eq(*s));
+        let x = x.map(|(s, _p)| s);
+
+        debug::log(format!("{:#?}", x));
+
+        let pathname = window().location().pathname().unwrap();
+        let new_page = router
+        .pages.get_mut(pathname.as_str()).unwrap()
+        .page()
+        .upgrade().unwrap();
+        let old_page = router.cur_page.upgrade().unwrap();
+        new_page.borrow_mut().patch(None, &dom::get_root_element());
+        router.cur_page = Rc::downgrade(&new_page);
+    });
+    }
+
+    fn navigate_to(url: &str) {
+        history().push_state_with_url(&JsValue::null(), "", Some(url)).unwrap();
+        Self::route();
     }
 
     // pub fn switch_page(&mut self, path: &'static str) {

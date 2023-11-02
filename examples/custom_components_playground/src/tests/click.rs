@@ -75,5 +75,5 @@ impl Component for ChildComponent {
 
 pub fn start() {
     let comp = FatherComponent(0);
-    wal::app::start(comp);
+    // wal::app::start(comp);
 }
