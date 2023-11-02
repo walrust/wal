@@ -3,7 +3,17 @@
 /* 
 This is a multiline comment { . } } 
 */
+@import url("my-imported-styles.css");
 .silver {
+  color: silver;
+}
+.silver2 {
+  color: silver;
+  .nested-selector {
+    color: aqua;
+  }
+}
+.silver3 {
   color: silver;
 }
 

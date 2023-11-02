@@ -41,8 +41,15 @@ impl CssBinder {
             panic!("error inserting stylesheet name: {}", stylesheet_name);
         }
 
-        let stylesheet_str = Self::read_file(path)?;
-        self.write_to_output(Self::apply_binding(stylesheet_str, &stylesheet_name))?;
+        let mut stylesheet_str = Self::apply_binding(Self::read_file(path)?, "a");
+        // self.write_to_output(Self::apply_binding(stylesheet_str, &stylesheet_name))?;
+
+        Self::trim_front_whitespaces(&mut stylesheet_str);
+        Self::handle_instruction(&mut stylesheet_str);
+        Self::trim_front_whitespaces(&mut stylesheet_str);
+        Self::handle_instruction(&mut stylesheet_str);
+        Self::trim_front_whitespaces(&mut stylesheet_str);
+        Self::handle_instruction(&mut stylesheet_str);
 
         Ok(())
     }
@@ -84,6 +91,11 @@ impl CssBinder {
         str
     }
 
+    fn trim_front_whitespaces(str: &mut String) {
+        while str.starts_with(|c: char| c.is_whitespace()) {
+            str.remove(0);
+        }
+    }
     fn skip_comments(str_w_comments: String) -> String {
         let rgx = Regex::new(r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/").unwrap();
         rgx.replace_all(&str_w_comments, "").into_owned()
@@ -105,37 +117,53 @@ impl CssBinder {
         }
         return selector;
     }
-    fn cut_body(css_str: &mut String) -> String {
-        let mut body = String::new();
-        let mut depth_lvl = 0;
 
-        while !css_str.is_empty() && !css_str.starts_with('{') {
-            css_str.remove(0);
-        }
-        if css_str.is_empty() {
-            return body;
-        }
-        if css_str.starts_with('{') {
-            depth_lvl += 1;
-            css_str.remove(0);
-        }
+    pub fn get_instruction(css_str: &mut String) -> String {
+        let end_idx = css_str
+            .find(|c: char| c == '{' || c == ';')
+            .expect("error getting instruction");
+        css_str.drain(..end_idx).collect()
+    }
+    pub fn get_body(css_str: &mut String) -> String {
+        let mut nest_lvl = 1;
+        let mut body_str = String::new();
 
-        while !css_str.is_empty() && depth_lvl > 0 {
+        while !css_str.is_empty() && nest_lvl > 0 {
             let c = css_str.remove(0);
             match c {
-                '{' => depth_lvl += 1,
-                '}' => depth_lvl -= 1,
+                '{' => nest_lvl += 1,
+                '}' => nest_lvl -= 1,
                 _ => (),
             }
-            body.push(c);
+            body_str.push(c);
         }
-        body
+
+        if body_str.ends_with('}') {
+            body_str.pop();
+        }
+        body_str
+    }
+
+    pub fn handle_instruction(css_str: &mut String) {
+        let instruction = Self::get_instruction(css_str);
+        println!("instruction: {}", instruction);
+        let c = css_str.remove(0);
+        let body;
+        match c {
+            '{' => {
+                body = Self::get_body(css_str);
+                println!("body: {}", body)
+            }
+            ';' => println!("semicolon end"),
+            _ => println!("unexpected char"),
+        }
     }
 
     fn read_file(path: PathBuf) -> Result<String, Box<dyn Error>> {
         let file_str = fs::read_to_string(path)?.parse()?;
         Ok(file_str)
     }
+
     fn write_to_output(&self, new_content: String) -> Result<(), Box<dyn Error>> {
         let mut file = OpenOptions::new()
             .append(true)
