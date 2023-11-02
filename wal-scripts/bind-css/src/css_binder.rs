@@ -42,15 +42,17 @@ impl CssBinder {
             panic!("error inserting stylesheet name: {}", stylesheet_name);
         }
 
-        let mut stylesheet_str = Self::apply_binding(Self::read_file(path)?, "a");
-        // self.write_to_output(Self::apply_binding(stylesheet_str, &stylesheet_name))?;
+        let mut stylesheet_str = Self::read_file(path)?;
+        stylesheet_str = Self::skip_comments(stylesheet_str);
+        stylesheet_str = Self::collapse_whitespaces(stylesheet_str);
 
+        // loop
         Self::trim_front_whitespaces(&mut stylesheet_str);
-        self.handle_instruction(&mut stylesheet_str);
+        self.handle_instruction(&mut stylesheet_str, &stylesheet_name);
         Self::trim_front_whitespaces(&mut stylesheet_str);
-        self.handle_instruction(&mut stylesheet_str);
+        self.handle_instruction(&mut stylesheet_str, &stylesheet_name);
         Self::trim_front_whitespaces(&mut stylesheet_str);
-        self.handle_instruction(&mut stylesheet_str);
+        self.handle_instruction(&mut stylesheet_str, &stylesheet_name);
 
         Ok(())
     }
@@ -78,20 +80,6 @@ impl CssBinder {
             .to_owned()
     }
 
-    fn apply_binding(file_str: String, component_class: &str) -> String {
-        // let mut bound_css = String::new();
-        // bound_css.push('.');
-        // bound_css.push_str(component_class);
-        // bound_css.push_str(" {\n");
-        // bound_css.push_str(&file_str);
-        // bound_css.push('}');
-        // bound_css
-
-        let mut str = Self::skip_comments(file_str);
-        str = Self::format_whitespaces(str);
-        str
-    }
-
     fn trim_front_whitespaces(str: &mut String) {
         while str.starts_with(|c: char| c.is_whitespace()) {
             str.remove(0);
@@ -106,16 +94,28 @@ impl CssBinder {
         let rgx = Regex::new(r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/").unwrap();
         rgx.replace_all(&str_w_comments, "").into_owned()
     }
-    fn format_whitespaces(str: String) -> String {
+    fn collapse_whitespaces(str: String) -> String {
         // TODO: add spaces and \t collapsing
         let rgx = Regex::new(r"[\r\n]{2,}").unwrap();
         rgx.replace_all(&str, "\r\n").into_owned()
     }
-    fn append_attribute(selector: &mut String, c_name: &str) {
-        Self::trim_back_whitespaces(selector);
-        selector.push_str("[data-component=");
-        selector.push_str(c_name);
-        selector.push(']');
+    fn append_attribute(selector: String, c_name: &str) -> String {
+        //check for complex selector
+        let mut s_selectors = selector.split(',').peekable();
+
+        let mut result = String::new();
+        while let Some(s) = s_selectors.next() {
+            result.push_str(s.trim_end());
+            result.push_str("[data-component=\"");
+            result.push_str(c_name);
+            result.push_str("\"]");
+            if s_selectors.peek().is_some() {
+                result.push(',');
+            }
+            result.push(' ');
+        }
+
+        result
     }
 
     pub fn get_instruction(css_str: &mut String) -> String {
@@ -140,7 +140,7 @@ impl CssBinder {
         body_str
     }
 
-    pub fn handle_instruction(&mut self, css_str: &mut String) {
+    pub fn handle_instruction(&mut self, css_str: &mut String, comp_name: &str) {
         let mut instruction = Self::get_instruction(css_str);
         println!("instruction: {}", instruction);
         let c = css_str.remove(0);
@@ -155,11 +155,12 @@ impl CssBinder {
         }
 
         if !instruction.trim().starts_with('@') {
-            Self::append_attribute(&mut instruction, "FILE_NAME");
+            let bound_selector = Self::append_attribute(instruction, comp_name);
+            Self::write_to_output(&self, bound_selector);
         } else {
             instruction.push_str(";\n");
+            Self::write_to_output(&self, instruction);
         }
-        Self::write_to_output(&self, instruction);
         if let Some(mut body) = body {
             body.push('\n');
             Self::write_to_output(&self, body);

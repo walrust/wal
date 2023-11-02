@@ -7,7 +7,9 @@ This is a multiline comment { . } }
 .silver {
   color: silver;
 }
-.silver2 {
+.silver2,
+div,
+.silver2_5 {
   color: silver;
   .nested-selector {
     color: aqua;
