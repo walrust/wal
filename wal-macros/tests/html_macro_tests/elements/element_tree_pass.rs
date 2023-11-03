@@ -1,5 +1,8 @@
 use std::collections::HashMap;
-use wal::virtual_dom::{VElement, VNode};
+use wal::{
+    events::EventHandler,
+    virtual_dom::{VElement, VNode},
+};
 use wal_macros::html;
 
 include!("../utils/new_velement_str.rs");
@@ -19,16 +22,33 @@ fn main() {
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
+            Vec::new(),
             vec![
                 VNode::Element(new_velement_str(
                     "div",
                     HashMap::new(),
+                    Vec::new(),
                     vec![
-                        VNode::Element(new_velement_str("input", HashMap::new(), Vec::new())),
-                        VNode::Element(new_velement_str("div", HashMap::new(), Vec::new())),
+                        VNode::Element(new_velement_str(
+                            "input",
+                            HashMap::new(),
+                            Vec::new(),
+                            Vec::new()
+                        )),
+                        VNode::Element(new_velement_str(
+                            "div",
+                            HashMap::new(),
+                            Vec::new(),
+                            Vec::new()
+                        )),
                     ],
                 )),
-                VNode::Element(new_velement_str("div", HashMap::new(), Vec::new())),
+                VNode::Element(new_velement_str(
+                    "div",
+                    HashMap::new(),
+                    Vec::new(),
+                    Vec::new()
+                )),
             ],
         ))
     )

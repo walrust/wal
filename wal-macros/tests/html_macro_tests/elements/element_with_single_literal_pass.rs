@@ -39,6 +39,7 @@ fn get_div_with<T: ToString>(t: T) -> VNode {
     VNode::Element(VElement::new(
         "div".to_string(),
         HashMap::new(),
+        Vec::new(),
         vec![VNode::Text(VText::new(t.to_string()))],
     ))
 }

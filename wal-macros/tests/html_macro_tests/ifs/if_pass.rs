@@ -148,6 +148,7 @@ fn if_in_element() {
         VNode::Element(VElement::new(
             String::from("div"),
             HashMap::new(),
+            Vec::new(),
             vec![VNode::Text(VText::new("hello"))],
         ))
     );

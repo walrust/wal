@@ -4,8 +4,11 @@ pub mod vlist;
 pub mod vnode;
 pub mod vtext;
 
+use std::borrow::Cow;
+
+use gloo::events::EventListener;
 use gloo::utils::{body, document};
-use web_sys::{Element, Node, Text};
+use web_sys::{Element, Node, Text, Event};
 
 use crate::utils::debug;
 
@@ -75,5 +78,16 @@ impl Dom {
 
     pub fn remove_attribute(el: &Element, name: &str) {
         el.remove_attribute(name).expect("Couldnt remove attribute")
+    }
+
+    pub fn create_event_listener<F>(
+        element: &Element,
+        event_type: Cow<'static, str>,
+        callback: F,
+    ) -> EventListener
+    where
+        F: FnMut(&Event) + 'static,
+    {
+        EventListener::new(element, event_type, callback)
     }
 }

@@ -1,15 +1,16 @@
 use itertools::{EitherOrBoth, Itertools};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use web_sys::{Element, Node};
 
-use crate::{virtual_dom::Dom, utils::debug};
+use crate::{events::EventHandler, utils::debug, virtual_dom::Dom};
 
 use super::VNode;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
+    pub event_handlers: Vec<EventHandler>,
     pub children: Vec<VNode>,
 
     pub dom: Option<Element>,
@@ -20,36 +21,44 @@ impl VElement {
     // List of attributes - https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
     //                    - https://www.w3schools.com/tags/ref_attributes.asp
     // Maybe some oop approach with defined types for attributes and types for elements?
-    pub fn new(tag_name: String, attr: HashMap<String, String>, children: Vec<VNode>) -> VElement {
+    pub fn new(
+        tag_name: String,
+        attr: HashMap<String, String>,
+        event_handlers: Vec<EventHandler>,
+        children: Vec<VNode>,
+    ) -> VElement {
         VElement {
             tag_name,
             attr,
+            event_handlers,
             children,
             dom: None,
         }
     }
 
-    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching element");
-        let mut old_virt: Option<&VElement> = None;
+        let mut old_virt: Option<VElement> = None;
 
         match last {
             None => {
                 debug::log("\tCreating element for the first time");
                 self.dom = None;
             }
-            Some(VNode::Element(velement)) => {
+            Some(VNode::Element(mut velement)) => {
                 debug::log("\tComparing two elements");
-                self.dom = velement.dom.clone();
+                self.dom = velement.dom.take();
                 old_virt = Some(velement);
             }
             Some(VNode::Text(v)) => {
                 debug::log("\tCreating element for the first time and swapping with existing text");
                 self.dom = None;
                 v.erase();
-            },
+            }
             Some(VNode::Component(v)) => {
-                debug::log("\tCreating element for the first time and swapping with existing comp node");
+                debug::log(
+                    "\tCreating element for the first time and swapping with existing comp node",
+                );
                 self.dom = None;
                 v.erase();
             }
@@ -57,10 +66,10 @@ impl VElement {
                 debug::log("\tCreating element for the first time and swapping with list");
                 self.dom = None;
                 v.erase();
-            },
+            }
         }
 
-        self.render(old_virt, ancestor);
+        self.render(old_virt.as_ref(), ancestor);
         self.handle_children(old_virt);
     }
 
@@ -91,6 +100,10 @@ impl VElement {
                         Dom::remove_attribute(target, key);
                     }
                 }
+
+                for event_handler in &mut self.event_handlers {
+                    event_handler.attach(target);
+                }
             }
             _ => {
                 // inverted check, if last == None || last = Some(x) that x.tag_name !=
@@ -103,6 +116,10 @@ impl VElement {
                     Dom::set_attribute(&el, name, value);
                 }
 
+                for event_handler in &mut self.event_handlers {
+                    event_handler.attach(&el);
+                }
+
                 match &self.dom {
                     Some(old_child) => Dom::replace_child(ancestor, old_child, &el),
                     None => Dom::append_child(ancestor, &el),
@@ -112,14 +129,14 @@ impl VElement {
         }
     }
 
-    fn handle_children(&mut self, old_element: Option<&VElement>) {
+    fn handle_children(&mut self, old_element: Option<VElement>) {
         let target = self.dom.as_mut().unwrap();
-        let old_children = old_element.map_or(Vec::new(), |e| e.children.iter().collect());
+        let old_children = old_element.map_or(Vec::new(), |e| e.children.into_iter().collect());
 
         for either_child_or_both in self.children.iter_mut().zip_longest(old_children) {
             match either_child_or_both {
                 EitherOrBoth::Both(child, old_child) => {
-                    child.patch(Some(&old_child), target);
+                    child.patch(Some(old_child), target);
                 }
                 EitherOrBoth::Left(child) => {
                     child.patch(None, target);
@@ -130,5 +147,18 @@ impl VElement {
                 }
             }
         }
+    }
+}
+
+impl PartialEq for VElement {
+    fn eq(&self, other: &Self) -> bool {
+        let self_event_handlers: HashSet<_> = self.event_handlers.iter().collect();
+        let other_event_handlers: HashSet<_> = other.event_handlers.iter().collect();
+
+        self.tag_name == other.tag_name
+            && self.attr == other.attr
+            && self.children == other.children
+            && self.dom == other.dom
+            && self_event_handlers == other_event_handlers
     }
 }
