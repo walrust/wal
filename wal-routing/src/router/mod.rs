@@ -1,12 +1,11 @@
 pub mod builder;
 
-use std::{rc::{Rc, Weak}, cell::RefCell, collections::HashMap, path, ptr::null};
+use std::{rc::{Rc, Weak}, cell::RefCell, collections::HashMap};
 
-use gloo::utils::{document, window, history, body};
-use wal::{component::{node::AnyComponentNode, scheduler::Scheduler}, virtual_dom::dom, utils::debug};
-// use wal::app::ROOT_INSTANCE;
-use web_sys::{Node, Location, MouseEvent, EventTarget, Element, Event};
-use wasm_bindgen::{prelude::{self, Closure}, JsCast, JsValue};
+use gloo::utils::{window, history, body};
+use wal::{component::node::AnyComponentNode, virtual_dom::dom};
+use web_sys::{EventTarget, Element, Event};
+use wasm_bindgen::{prelude:: Closure, JsCast, JsValue};
 
 // Consider using this enum in whole thing, maybe not rly threadsafe but we are singlethreaded still
 // pub enum Lazy<T> {
@@ -70,13 +69,11 @@ pub struct Router {
 
 impl Router {
     pub(crate) fn mock() -> Router {
-        debug::log("router::mock");
-        Router { pages: [].into(), cur_path: "/404".to_string(), cur_page: Weak::new() } 
+        Router { pages: [].into(), cur_path: "undefined".to_string(), cur_page: Weak::new() } 
     }
 
     pub(crate) fn new(pages: HashMap<&'static str, LazyPage>) -> Router {
         let mut pages = pages;
-        debug::log("router::new");
         let cur_path = "/".to_string();
         let cur_page = pages.get_mut(cur_path.as_str()).unwrap().page();
         cur_page.upgrade().unwrap().borrow_mut().patch(None, &dom::get_root_element());
@@ -89,63 +86,50 @@ impl Router {
 
     pub fn start(self) {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-        let click = Closure::<dyn Fn(Event)>::new(|e: Event| {
-            debug::log("In click");
-            let target = e.target().unwrap().unchecked_into::<Element>();
-            let b = target.matches(&("[".to_owned() + WAL_ROUTING_ATTR + "]")).unwrap();
-            if b {
-                debug::log("\tNavigating in spa");
-                e.prevent_default();
-                Self::navigate_to(target.get_attribute("href").unwrap().as_str());
-            }
-        });
-        let router = Closure::<dyn Fn()>::new(Self::route);
         
-        body()
-            .add_event_listener_with_callback(
-                "click", 
-                click.as_ref().unchecked_ref()
-            )
-            .unwrap();
+        let click = Closure::<dyn Fn(Event)>::new(Self::click);
+        Self::add_event_listener(body().into(), "click", &click);
+        click.forget();
 
-        window()
-            .add_event_listener_with_callback(
-                "popstate", 
-                router.as_ref().unchecked_ref()
-            )
-            .unwrap();
+        let route = Closure::<dyn Fn()>::new(Self::route);
+        Self::add_event_listener(window().into(), "popstate", &route);
+        route.forget();
 
         ROUTER.with(move |router| {
             let mut router = router.borrow_mut();
             *router = self;
         });
-        click.forget();
-        router.forget();
-        // Self::route();
     }
+}
 
+impl Router {
     fn route() {
     ROUTER.with(|router| {
         let mut router = router.borrow_mut();
-        let x = router.pages.iter().find(|(s, _p)| window().location().pathname().unwrap().eq(*s));
-        let x = x.map(|(s, _p)| s);
-
-        debug::log(format!("{:#?}", x));
-
         let pathname = window().location().pathname().unwrap();
-        if pathname.eq(&router.cur_path) {
-            return;
-        }
-        let new_page = router
-        .pages.get_mut(pathname.as_str()).unwrap()
-        .page()
-        .upgrade().unwrap();
+        if pathname.eq(&router.cur_path) { return; }
+
+        let lazy_page = router.pages.get_mut(pathname.as_str()).unwrap();
+        let new_weak_page = lazy_page.page();
+        let new_page = new_weak_page.upgrade().unwrap();
+            
         let old_page = router.cur_page.upgrade().unwrap();
+
         new_page.borrow_mut().view();
         new_page.borrow_mut().patch(Some(old_page), &dom::get_root_element());
-        router.cur_page = Rc::downgrade(&new_page);
+
+        router.cur_page = new_weak_page;
         router.cur_path = pathname;
     });
+    }
+
+    fn click(e: Event) {
+        let target = e.target().unwrap().unchecked_into::<Element>();
+        let matches = target.matches(&("[".to_owned() + WAL_ROUTING_ATTR + "]")).unwrap();
+        if matches {
+            e.prevent_default();
+            Self::navigate_to(target.get_attribute("href").unwrap().as_str());
+        }
     }
 
     fn navigate_to(url: &str) {
@@ -153,7 +137,14 @@ impl Router {
         Self::route();
     }
 
-    // pub fn switch_page(&mut self, path: &'static str) {
-    //     self.cur_page = self.pages.get_mut(path).unwrap().page();
-    // }
+
+    fn add_event_listener<T: ?Sized>(target: EventTarget, type_: &str, listener: &Closure<T>) 
+    {
+        target
+            .add_event_listener_with_callback(
+                type_, 
+                listener.as_ref().unchecked_ref()
+            )
+            .unwrap();
+    }
 }
