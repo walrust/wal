@@ -64,22 +64,25 @@ const WAL_ROUTING_ATTR: &'static str = "data_link";
 
 pub struct Router {
     pages: HashMap<&'static str, LazyPage>,
+    cur_path: String,
     cur_page: Weak<RefCell<AnyComponentNode>>,
 }
 
 impl Router {
     pub(crate) fn mock() -> Router {
         debug::log("router::mock");
-        Router { pages: [].into(), cur_page: Weak::new() } 
+        Router { pages: [].into(), cur_path: "/404".to_string(), cur_page: Weak::new() } 
     }
 
     pub(crate) fn new(pages: HashMap<&'static str, LazyPage>) -> Router {
         let mut pages = pages;
         debug::log("router::new");
-        let cur_page = pages.get_mut("/").unwrap().page();
+        let cur_path = "/".to_string();
+        let cur_page = pages.get_mut(cur_path.as_str()).unwrap().page();
         cur_page.upgrade().unwrap().borrow_mut().patch(None, &dom::get_root_element());
         Router {
             pages,
+            cur_path,
             cur_page,
         }
     }
@@ -130,13 +133,18 @@ impl Router {
         debug::log(format!("{:#?}", x));
 
         let pathname = window().location().pathname().unwrap();
+        if pathname.eq(&router.cur_path) {
+            return;
+        }
         let new_page = router
         .pages.get_mut(pathname.as_str()).unwrap()
         .page()
         .upgrade().unwrap();
         let old_page = router.cur_page.upgrade().unwrap();
-        new_page.borrow_mut().patch(None, &dom::get_root_element());
+        new_page.borrow_mut().view();
+        new_page.borrow_mut().patch(Some(old_page), &dom::get_root_element());
         router.cur_page = Rc::downgrade(&new_page);
+        router.cur_path = pathname;
     });
     }
 

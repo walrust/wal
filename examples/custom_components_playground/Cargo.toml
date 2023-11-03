@@ -3,15 +3,13 @@ name = "custom_components_playground"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 wasm-bindgen = "0.2.87"
 wal = { path = "../../wal" }
 wal-macros = { path = "../../wal-macros" }
+wal-routing = { path = "../../wal-routing" }
 gloo = { version = "0.10.0", features = ["utils"] }
 
 [dependencies.web-sys]

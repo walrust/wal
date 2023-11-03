@@ -56,7 +56,7 @@ impl AnyComponentNode {
         node_rc
     }
 
-    fn view(&mut self) {
+    pub fn view(&mut self) {
         self.vdom = Some(self.component.view(&mut self.behavior));
     }
 

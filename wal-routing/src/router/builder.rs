@@ -7,22 +7,22 @@ use super::{LazyPage, Router};
 
 pub struct Invalid;
 pub struct Valid;
-pub struct Builder<T> {
+pub struct AppBuilder<T> {
     pages: HashMap<&'static str, LazyPage>,
     _marker: PhantomData<T>,
 }
 
-impl Builder<Invalid> {
-    pub fn new() -> Builder<Invalid> {
-        Builder {
+impl AppBuilder<Invalid> {
+    pub fn new() -> AppBuilder<Invalid> {
+        AppBuilder {
             pages: HashMap::new(),
             _marker: PhantomData,
         }
     }
 }
 
-impl<T> Builder<T> {
-    pub fn add_page<C>(self, path: &'static str, props: C::Properties) -> Builder<Valid>
+impl<T> AppBuilder<T> {
+    pub fn add_page<C>(self, path: &'static str, props: C::Properties) -> AppBuilder<Valid>
     where 
         C: Component + 'static
     {
@@ -37,14 +37,14 @@ impl<T> Builder<T> {
         let mut pages = self.pages;
         pages.insert(path, LazyPage::new(generator));
 
-        Builder { 
+        AppBuilder { 
             pages, 
             _marker: PhantomData 
         }
     }
 }
 
-impl Builder<Valid> {
+impl AppBuilder<Valid> {
     pub fn build(self) -> Router {
         Router::new(self.pages)
     }

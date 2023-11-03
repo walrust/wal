@@ -12,8 +12,8 @@ impl Component for NavigationComp {
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
         html! {
             <nav>
-                <a href="/" data_link="/">"Homepage"</a>
-                <a href="/alt" data_link="/alt">"Alt"</a>
+                <a href="/" data_link="/">"Homepage"</a><br/>
+                <a href="/alt" data_link="/alt">"Alt"</a><br/>
                 <a href="/another" data_link="/another">"Another"</a>
             </nav>
         }
@@ -86,7 +86,7 @@ impl Component for AnotherComp {
 
 fn main() {
     // wal::app::start(RootComp);
-    router::builder::Builder::new()
+    router::builder::AppBuilder::new()
         .add_page::<RootComp>("/", RootProp{})
         .add_page::<AltComp>("/alt", AltProp{})
         .add_page::<AnotherComp>("/another", AnotherProp{})

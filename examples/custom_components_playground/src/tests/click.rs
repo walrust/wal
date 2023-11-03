@@ -1,3 +1,4 @@
+use wal_routing::prelude::AppBuilder;
 use gloo::console::log;
 use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
@@ -74,6 +75,8 @@ impl Component for ChildComponent {
 }
 
 pub fn start() {
-    let comp = FatherComponent(0);
-    // wal::app::start(comp);
+    AppBuilder::new()
+        .add_page::<FatherComponent>("/", FatherProperties)
+        .build()
+        .start();
 }

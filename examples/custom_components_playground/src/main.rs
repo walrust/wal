@@ -1,8 +1,7 @@
 pub mod tests;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-#[wasm_bindgen(start)]
-fn start() {
+fn main() {
     tests::jazda();
 }
 
