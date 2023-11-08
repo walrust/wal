@@ -165,7 +165,7 @@ impl CssBinder {
         // extract instruction
         let instruction = Self::extract_instruction(css_str);
 
-        // get the instruction end symbol to determine if insruction has body or not
+        // get the instruction end symbol to determine whether insruction has body or not
         let c = css_str.remove(0);
 
         // extract instruction body
