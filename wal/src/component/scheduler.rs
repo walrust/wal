@@ -1,12 +1,12 @@
-use std::{any::Any, cell::RefCell, collections::BinaryHeap, rc::Rc};
-
+use std::{any::Any, cell::RefCell, collections::BinaryHeap, rc::Weak};
 use wasm_bindgen_futures::spawn_local;
-
 use super::{
     behavior::AnyComponentBehavior,
     observer::{ToRerenderObserver, VDomObserver},
     AnyComponent,
 };
+use crate::utils::debug;
+use super::component_node::AnyComponentNode;
 
 enum SchedulerMessage {
     Update(UpdateMessage),
@@ -23,34 +23,38 @@ impl SchedulerMessage {
 }
 
 struct UpdateMessage {
-    component: Rc<RefCell<Box<dyn AnyComponent>>>,
     message: Box<dyn Any>,
-    to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
+    any_component_node: Weak<RefCell<AnyComponentNode>>,
 }
 
 impl UpdateMessage {
     fn handle(self) {
-        let to_rerender = self.component.borrow_mut().update(self.message);
-
-        if to_rerender {
-            self.to_rerender_observer.borrow().notify();
+        if let Some(any_component_node) = self.any_component_node.upgrade() {
+            let to_rerender = any_component_node.borrow_mut().update(self.message);
+            if to_rerender {
+                Scheduler::add_rerender_message(
+                    self.any_component_node,
+                    any_component_node.borrow().depth,
+                );
+            }
+        } else {
+            debug::log("Weak reference to AnyComponentNode is not attached to AnyComponentNode");
         }
     }
 }
 
 struct RerenderMessage {
-    component: Rc<RefCell<Box<dyn AnyComponent>>>,
-    behavior: Rc<AnyComponentBehavior>,
-    vdom_observer: Rc<RefCell<VDomObserver>>,
-    to_rerender: Rc<RefCell<bool>>,
+    any_component_node: Weak<RefCell<AnyComponentNode>>,
     depth: u32,
 }
 
 impl RerenderMessage {
     fn handle(self) {
-        let vdom = self.component.borrow().view(&self.behavior);
-        self.vdom_observer.borrow().notify(vdom);
-        *std::cell::RefCell::<_>::borrow_mut(&self.to_rerender) = false;
+        if let Some(any_component_node) = self.any_component_node.upgrade() {
+            any_component_node.borrow_mut().view_and_patch();
+        } else {
+            debug::log("Weak reference to AnyComponentNode is not attached to AnyComponentNode");
+        }
     }
 }
 
@@ -58,14 +62,11 @@ impl PartialEq for SchedulerMessage {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::Update(s_msg), Self::Update(o_msg)) => {
-                Rc::ptr_eq(&s_msg.component, &o_msg.component)
+                Weak::ptr_eq(&s_msg.any_component_node, &o_msg.any_component_node)
                     && &s_msg.message as *const dyn Any == &o_msg.message as *const dyn Any
-                    && Rc::ptr_eq(&s_msg.to_rerender_observer, &o_msg.to_rerender_observer)
             }
             (Self::Rerender(s_msg), Self::Rerender(o_msg)) => {
-                Rc::ptr_eq(&s_msg.component, &o_msg.component)
-                    && Rc::ptr_eq(&s_msg.behavior, &o_msg.behavior)
-                    && Rc::ptr_eq(&s_msg.vdom_observer, &o_msg.vdom_observer)
+                Weak::ptr_eq(&s_msg.any_component_node, &o_msg.any_component_node)
                     && s_msg.depth == o_msg.depth
             }
             _ => false,
@@ -134,30 +135,19 @@ impl Scheduler {
     }
 
     pub fn add_update_message(
-        component: Rc<RefCell<Box<dyn AnyComponent>>>,
         message: Box<dyn Any>,
-        to_rerender_observer: Rc<RefCell<ToRerenderObserver>>,
+        any_component_node: Weak<RefCell<AnyComponentNode>>,
     ) {
         let message = SchedulerMessage::Update(UpdateMessage {
-            component,
             message,
-            to_rerender_observer,
+            any_component_node,
         });
         Self::add_message(message);
     }
 
-    pub fn add_rerender_message(
-        component: Rc<RefCell<Box<dyn AnyComponent>>>,
-        behavior: Rc<AnyComponentBehavior>,
-        vdom_observer: Rc<RefCell<VDomObserver>>,
-        to_rerender: Rc<RefCell<bool>>,
-        depth: u32,
-    ) {
+    pub fn add_rerender_message(any_component_node: Weak<RefCell<AnyComponentNode>>, depth: u32) {
         let message = SchedulerMessage::Rerender(RerenderMessage {
-            component,
-            behavior,
-            vdom_observer,
-            to_rerender,
+            any_component_node,
             depth,
         });
         Self::add_message(message);

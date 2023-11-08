@@ -1,5 +1,9 @@
 use std::collections::HashMap;
-use wal::virtual_dom::{VElement, VList, VNode};
+use wal::{
+    component::callback::Callback,
+    events::{onclick, EventHandler},
+    virtual_dom::{VElement, VList, VNode},
+};
 use wal_macros::html;
 
 include!("../utils/new_velement_str.rs");
@@ -12,6 +16,7 @@ fn main() {
     fragment_with_key_attribute();
     single_expression_attribute();
     multiple_expression_and_literal_attributes();
+    attributes_and_event_attributes();
 }
 
 fn single_attribute() {
@@ -21,6 +26,7 @@ fn single_attribute() {
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr", "value")]),
+            Vec::new(),
             Vec::new(),
         ))
     );
@@ -34,6 +40,7 @@ fn single_key_attribute() {
             "div",
             HashMap::from([("key", "value")]),
             Vec::new(),
+            Vec::new(),
         ))
     );
 }
@@ -46,6 +53,7 @@ fn multiple_attributes() {
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
             Vec::new(),
+            Vec::new(),
         ))
     );
 }
@@ -57,6 +65,7 @@ fn multiple_attributes_self_closing() {
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
+            Vec::new(),
             Vec::new(),
         ))
     );
@@ -75,6 +84,7 @@ fn single_expression_attribute() {
             "div",
             HashMap::from([("attr", "3")]),
             Vec::new(),
+            Vec::new(),
         ))
     );
 }
@@ -86,6 +96,22 @@ fn multiple_expression_and_literal_attributes() {
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "3"), ("attr2", "val2"), ("attr3", "val3")]),
+            Vec::new(),
+            Vec::new(),
+        ))
+    );
+}
+
+fn attributes_and_event_attributes() {
+    let html = html! { <div attr1="val1" onclick={Callback::new(|_event: web_sys::MouseEvent| {})} attr2="val2"></div> };
+    assert_eq!(
+        html,
+        VNode::Element(new_velement_str(
+            "div",
+            HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
+            vec![EventHandler::new(onclick(Callback::new(
+                |_event: web_sys::MouseEvent| {}
+            )))],
             Vec::new(),
         ))
     );

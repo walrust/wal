@@ -11,7 +11,7 @@ pub enum VNode {
 }
 
 impl VNode {
-    pub fn patch(&mut self, last: Option<&VNode>, ancestor: &Node) {
+    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         match self {
             VNode::Element(velement) => velement.patch(last, ancestor),
             VNode::Text(vtext) => vtext.patch(last, ancestor),

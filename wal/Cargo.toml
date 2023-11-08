@@ -9,9 +9,29 @@ edition = "2021"
 wal-macros = { path = "../wal-macros" }
 gloo = { version = "0.10.0", features = ["utils"] }
 wasm-bindgen-futures = "0.4"
+wasm-bindgen = "0.2"
 itertools = "0.11"
 console_error_panic_hook = "0.1.7"
 
 [dependencies.web-sys]
 version = "0.3.64"
-features = ["console", "Window", "Document", "Node", "Element", "Text"]
+features = [
+    "AnimationEvent",
+    "console",
+    "Document",
+    "DragEvent",
+    "Element",
+    "FocusEvent",
+    "InputEvent",
+    "KeyboardEvent",
+    "Node",
+    "MouseEvent",
+    "PointerEvent",
+    "ProgressEvent",
+    "SubmitEvent",
+    "Text",
+    "TouchEvent",
+    "TransitionEvent",
+    "WheelEvent",
+    "Window",
+]

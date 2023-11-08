@@ -11,7 +11,7 @@ impl Component for CustomComponentPropsStructWithoutDefault {
         unimplemented!();
     }
 
-    fn view(&self, _behavior: &mut ComponentBehavior<Self>) -> VNode {
+    fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         unimplemented!();
     }
 

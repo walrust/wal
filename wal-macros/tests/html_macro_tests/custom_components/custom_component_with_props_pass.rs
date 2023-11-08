@@ -1,5 +1,5 @@
 use wal::{
-    component::{component_node::ComponentBehavior, Component},
+    component::{behavior::Behavior, Component},
     virtual_dom::{VComponent, VNode},
 };
 use wal_macros::html;
