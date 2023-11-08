@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate lazy_static;
 use std::{env, error::Error, fs, io, path::PathBuf};
 
 use css_binder::COMPNENT_STYLE_SUFFIX;

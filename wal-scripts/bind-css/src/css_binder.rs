@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::{
     collections::HashSet,
     error::Error,
@@ -6,13 +7,15 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use regex::Regex;
-const COMMENTS_REGEX: &str = r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/";
-const MULTIPLE_NEWLINES_REGEX: &str = r"[\r\n]{2,}";
-const PATH_SEPARATOR_REGEX: &str = r"/|\\";
-
 pub const COMPNENT_STYLE_SUFFIX: &str = ".wal.css";
 const HTML_COMPONENT_ATTTRIBUTE: &str = "data-component";
+
+lazy_static! {
+    static ref COMMENTS_REGEX: Regex =
+        Regex::new(r"/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/").unwrap();
+    static ref MULTIPLE_NEWLINES_REGEX: Regex = Regex::new(r"[\r\n]{2,}").unwrap();
+    static ref PATH_SEPARATOR_REGEX: Regex = Regex::new(r"/|\\").unwrap();
+}
 
 pub struct CssBinder {
     output_path: PathBuf,
@@ -75,9 +78,8 @@ impl CssBinder {
     // utility private methods
     fn get_component_name_from_path(path: &Path) -> String {
         let path_str = path.display().to_string();
-        let rgx = Regex::new(PATH_SEPARATOR_REGEX).unwrap();
-        let parts = rgx.split(&path_str);
-        parts
+        PATH_SEPARATOR_REGEX
+            .split(&path_str)
             .last()
             .unwrap()
             .strip_suffix(COMPNENT_STYLE_SUFFIX)
@@ -94,13 +96,13 @@ impl CssBinder {
     }
 
     fn skip_comments(str_w_comments: String) -> String {
-        let rgx = Regex::new(COMMENTS_REGEX).unwrap();
-        rgx.replace_all(&str_w_comments, "").into_owned()
+        COMMENTS_REGEX.replace_all(&str_w_comments, "").into_owned()
     }
 
     fn collapse_newlines(str: String) -> String {
-        let rgx = Regex::new(MULTIPLE_NEWLINES_REGEX).unwrap();
-        rgx.replace_all(&str, "\r\n").into_owned()
+        MULTIPLE_NEWLINES_REGEX
+            .replace_all(&str, "\r\n")
+            .into_owned()
     }
 
     fn append_attribute(selector: &str, c_name: &str) -> String {
@@ -162,6 +164,8 @@ impl CssBinder {
 
         // extract instruction
         let instruction = Self::extract_instruction(css_str);
+
+        // get the instruction end symbol to determine if insruction has body or not
         let c = css_str.remove(0);
 
         // extract instruction body
@@ -207,10 +211,12 @@ impl CssBinder {
             fs::remove_file(path).expect("error deleting file.");
         }
     }
+
     fn read_file(path: PathBuf) -> Result<String, Box<dyn Error>> {
         let file_str = fs::read_to_string(path)?.parse()?;
         Ok(file_str)
     }
+
     fn write_to_output(&self, new_content: String) -> Result<(), Box<dyn Error>> {
         let mut file = OpenOptions::new()
             .append(true)
