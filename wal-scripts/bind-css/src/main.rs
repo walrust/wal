@@ -1,5 +1,7 @@
 use std::{env, error::Error, fs, io, path::PathBuf};
 
+use css_binder::COMPNENT_STYLE_SUFFIX;
+
 use crate::css_binder::CssBinder;
 
 pub mod css_binder;
@@ -13,7 +15,7 @@ fn get_stylesheets_paths(dir_path: &str) -> Result<Vec<PathBuf>, io::Error> {
             stylesheets.append(&mut get_stylesheets_paths(
                 path.display().to_string().as_str(),
             )?);
-        } else if path.display().to_string().ends_with(".wal.css") {
+        } else if path.display().to_string().ends_with(COMPNENT_STYLE_SUFFIX) {
             stylesheets.push(path);
         }
     }
@@ -27,7 +29,7 @@ fn get_stylesheets_paths(dir_path: &str) -> Result<Vec<PathBuf>, io::Error> {
 /// 2) path where the file with bound styles will be created (f.e. ../../styles)
 /// 3) path to file with global styles which will be inserted on the top level (f.e. ../../styles/global_styles.css)
 ///
-/// example call : cargo run -- ../../styles ../../bound_styles  ../../styles/global_styles.css
+/// example call : cargo run -- ../../styles ../../bound_styles.css  ../../styles/global_styles.css
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
@@ -50,5 +52,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     println!("Css sucessfully bound!");
+
     Ok(())
 }
