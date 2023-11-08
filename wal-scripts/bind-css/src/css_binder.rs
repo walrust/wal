@@ -42,13 +42,16 @@ impl CssBinder {
 
         let stylesheet_name = Self::get_component_name_from_path(&path);
 
+        // mark stylesheet_name as bound
         if !self.bound_stylesheets.insert(stylesheet_name.to_owned()) {
             panic!("error inserting stylesheet name: {}", stylesheet_name);
         }
 
+        // read the file
         let mut stylesheet_str = Self::read_file(path)?;
         stylesheet_str = Self::clean_file_string(stylesheet_str);
 
+        // parse file instuctions and write them to output
         while !stylesheet_str.is_empty() {
             let parsed_instruction = Self::parse_instruction(&mut stylesheet_str, &stylesheet_name);
             self.write_to_output(parsed_instruction)?;
@@ -121,6 +124,7 @@ impl CssBinder {
         let mut nest_lvl = 1;
         let mut end_idx = 0;
 
+        // find the ending } on level 0
         for (i, c) in css_str.chars().enumerate() {
             if nest_lvl == 0 {
                 end_idx = i;
@@ -133,12 +137,14 @@ impl CssBinder {
             }
         }
 
+        // if found delete the body from css_str and return it without top lvl brackets
         if end_idx > 0 {
             let body_with_bracket: String = css_str.drain(..end_idx).collect();
             return body_with_bracket[0..body_with_bracket.len() - 1].to_owned();
         }
 
-        String::new()
+        // if not found panic
+        panic!("incorrect css file")
     }
 
     fn wrap_in_nesting(str: &str) -> String {
