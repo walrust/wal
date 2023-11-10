@@ -10,6 +10,7 @@ impl Component for NavigationComp {
 
     fn new(_props: Self::Properties) -> Self { NavigationComp }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
+        // idea: <route href="/elo">"Homepage"</route> should be treated as <a href="/elo" data_link>"Homepage"</a>
         html! {
             <nav>
                 <a href="/" data_link="/">"Homepage"</a><br/>
