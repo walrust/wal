@@ -22,9 +22,9 @@ impl ToTokens for HtmlForest {
         match self.0.as_slice() {
             [single_tree] => single_tree.to_tokens(tokens),
             trees => tokens.extend(quote! {
-                ::wal_vdom::virtual_dom::VNode::List {
-                    vlist: ::wal_vdom::virtual_dom::VList::new(vec![#(#trees),*])
-                }
+                ::wal::virtual_dom::VNode::List(
+                    ::wal::virtual_dom::VList::new(vec![#(#trees),*])
+                )
             }),
         }
     }

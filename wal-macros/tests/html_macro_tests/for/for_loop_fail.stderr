@@ -12,6 +12,31 @@ error: expected curly braces
 14 |             for vec![1, 2, 3]
    |                 ^^^
 
+warning: unnecessary braces around function argument
+ --> tests/html_macro_tests/for/for_loop_fail.rs:9:17
+  |
+9 |     html! { for { () } };
+  |                 ^^  ^^
+  |
+  = note: `#[warn(unused_braces)]` on by default
+help: remove these braces
+  |
+9 -     html! { for { () } };
+9 +     html! { for () };
+  |
+
+warning: unnecessary braces around function argument
+  --> tests/html_macro_tests/for/for_loop_fail.rs:11:17
+   |
+11 |     html! { for { Vec::<NonDisplayStruct>::new() } };
+   |                 ^^                              ^^
+   |
+help: remove these braces
+   |
+11 -     html! { for { Vec::<NonDisplayStruct>::new() } };
+11 +     html! { for Vec::<NonDisplayStruct>::new() };
+   |
+
 error[E0277]: `()` is not an iterator
  --> tests/html_macro_tests/for/for_loop_fail.rs:7:17
   |

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
+use wal::virtual_dom::{VElement, VList, VNode};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VElement, VList, VNode};
 
 fn main() {
     let html = html! {
@@ -10,18 +10,19 @@ fn main() {
     };
     assert_eq!(
         html,
-        VNode::List {
-            vlist: VList::new(vec![
-                VNode::Element {
-                    velement: VElement::new("div".to_string(), HashMap::new(), Vec::new()),
-                },
-                VNode::Element {
-                    velement: VElement::new("span".to_string(), HashMap::new(), Vec::new()),
-                },
-                VNode::Element {
-                    velement: VElement::new("input".to_string(), HashMap::new(), Vec::new()),
-                },
-            ]),
-        }
+        VNode::List(VList::new(vec![
+            get_velement("div"),
+            get_velement("span"),
+            get_velement("input"),
+        ]))
     )
+}
+
+fn get_velement(tag: &str) -> VNode {
+    VNode::Element(VElement::new(
+        tag.to_string(),
+        HashMap::new(),
+        Vec::new(),
+        Vec::new(),
+    ))
 }

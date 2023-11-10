@@ -90,19 +90,21 @@ fn parse_children(
 impl ToTokens for HtmlElement {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let name = &self.name.to_string();
-        let attributes: Vec<proc_macro2::TokenStream> = (&self.attributes).into();
+        let attributes = self.attributes.get_attributes_token_stream();
+        let event_handlers = self.attributes.get_event_handlers_token_stream();
         let children = &self.children;
 
         tokens.extend(quote_spanned! { self.name.span() =>
-            ::wal_vdom::virtual_dom::VNode::Element {
-                velement: ::wal_vdom::virtual_dom::VElement::new(
+            ::wal::virtual_dom::VNode::Element(
+                ::wal::virtual_dom::VElement::new(
                     ::std::string::String::from(#name),
                     ::std::collections::HashMap::from([
                         #(#attributes,)*
                     ]),
+                    ::std::vec![#(#event_handlers,)*],
                     ::std::vec![#(#children,)*],
                 ),
-            }
+            )
         });
     }
 }

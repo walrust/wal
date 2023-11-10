@@ -1,5 +1,5 @@
+use wal::virtual_dom::{VList, VNode, VText};
 use wal_macros::html;
-use wal_vdom::virtual_dom::{VList, VNode, VText};
 
 fn main() {
     if_let_true();
@@ -12,71 +12,27 @@ fn main() {
     if_let_else_if_lets();
     if_let_else_if_lets_else();
     if_let_false_else_if_lets_false_else();
-
-    html! { if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello" } };
-    html! { if let std::option::Option::Some(value) = std::option::Option::Some("hello") { value } };
-    html! { if let std::option::Option::Some(value) = std::option::Option::Some("hello") { <div>{ value }</div> } };
-
-    html! {
-        if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello1" }
-        else { "hello2" }
-    };
-    html! {
-        if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello1" }
-        else if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello2" }
-    };
-    html! {
-        if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello1" }
-        else if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello2" }
-        else if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello3" }
-    };
-    html! {
-        if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello1" }
-        else if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello2" }
-        else { "hello3" }
-    };
-    html! {
-        if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello1" }
-        else if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello2" }
-        else if let std::option::Option::Some(_value) = std::option::Option::Some("hello") { "hello3" }
-        else { "hello4" }
-    };
 }
 
 fn if_let_true() {
     let html = html! {
         if let Some(_val) = Some("hello") { "hello" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello")));
 }
 
 fn if_let_false() {
     let html = html! {
         if let Some(_val) = None::<i32> { "hello" }
     };
-    assert_eq!(
-        html,
-        VNode::List {
-            vlist: VList::new_empty()
-        }
-    );
+    assert_eq!(html, VNode::List(VList::new_empty()));
 }
 
 fn if_let_true_using_value_from_let() {
     let html = html! {
         if let Some(val) = Some("hello") { val }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello")));
 }
 
 fn if_let_true_else() {
@@ -84,12 +40,7 @@ fn if_let_true_else() {
         if let Some(_val) = Some("hello") { "hello" }
         else { "hello2" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello")));
 }
 
 fn if_let_false_else() {
@@ -97,12 +48,7 @@ fn if_let_false_else() {
         if let Some(_val) = None::<i32> { "hello" }
         else { "hello2" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello2")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello2")));
 }
 
 fn if_let_true_else_if_let() {
@@ -110,12 +56,7 @@ fn if_let_true_else_if_let() {
         if let Some(_val) = Some("hello") { "hello" }
         else if let Some(..) = None::<i32> { "hello2" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello")));
 }
 
 fn if_let_false_else_if_let_true() {
@@ -123,12 +64,7 @@ fn if_let_false_else_if_let_true() {
         if let Some(_val) = None::<i32> { "hello" }
         else if let Some(_val) = Some("hello2") { "hello2" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello2")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello2")));
 }
 
 fn if_let_else_if_lets() {
@@ -137,12 +73,7 @@ fn if_let_else_if_lets() {
         else if let Some(_val) = Some("hello2") { "hello2" }
         else if let Some(..) = None::<i32> { "hello3" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello2")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello2")));
 }
 
 fn if_let_else_if_lets_else() {
@@ -152,12 +83,7 @@ fn if_let_else_if_lets_else() {
         else if let Some(..) = None::<i32> { "hello3" }
         else { "hello4" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello2")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello2")));
 }
 
 fn if_let_false_else_if_lets_false_else() {
@@ -167,10 +93,5 @@ fn if_let_false_else_if_lets_false_else() {
         else if let Some(..) = None::<i32> { "hello3" }
         else { "hello4" }
     };
-    assert_eq!(
-        html,
-        VNode::Text {
-            vtext: VText::new("hello4")
-        }
-    );
+    assert_eq!(html, VNode::Text(VText::new("hello4")));
 }

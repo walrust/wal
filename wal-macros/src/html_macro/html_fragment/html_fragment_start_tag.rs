@@ -1,7 +1,10 @@
 use quote::{quote, ToTokens};
 use syn::parse::Parse;
 
-use crate::html_macro::html_attribute::{HtmlAttribute, HtmlAttributeValue};
+use crate::html_macro::{
+    html_attribute::{HtmlAttribute, HtmlAttributeValue},
+    KEY_STR,
+};
 
 pub struct HtmlFragmentStartTag {
     lt: syn::token::Lt,
@@ -23,15 +26,18 @@ impl Parse for HtmlFragmentStartTag {
 
         let attribute = input.parse::<HtmlAttribute>()?;
 
-        if attribute.ident != "key" {
+        if attribute.ident != KEY_STR {
             return Err(syn::Error::new(
                 attribute.ident.span(),
-                "Fragment supports only the `key` attribute",
+                format!("Fragment supports only the `{}` attribute", KEY_STR),
             ));
         }
 
         if !input.peek(syn::token::Gt) {
-            return Err(input.error("Fragment supports only a single `key` attribute"));
+            return Err(input.error(format!(
+                "Fragment supports only a single `{}` attribute",
+                KEY_STR
+            )));
         }
 
         let gt = input.parse()?;
