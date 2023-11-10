@@ -4,7 +4,7 @@ use wal::{
     virtual_dom::VNode, utils::debug,
 };
 use wal_macros::html;
-use wal_routing::prelude::AppBuilder;
+use wal_routing::prelude::RouterBuilder;
 
 enum FatherMessages {
     Add,
@@ -85,7 +85,7 @@ impl Drop for ChildComponent {
 
 #[allow(dead_code)]
 pub fn start() {
-    AppBuilder::new()
+    RouterBuilder::new()
         .add_page::<FatherComponent>("/", FatherProperties(1))
         .build()
         .start();

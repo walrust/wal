@@ -1,4 +1,4 @@
-use wal_routing::router;
+use wal_routing::prelude::RouterBuilder;
 use wal::{self, component::{Component, behavior::Behavior, callback::Callback}, utils::debug};
 use wal_macros::html;
 use web_sys::MouseEvent;
@@ -86,7 +86,7 @@ impl Component for AnotherComp {
 
 fn main() {
     // wal::app::start(RootComp);
-    router::builder::AppBuilder::new()
+    RouterBuilder::new()
         .add_page::<RootComp>("/", RootProp{})
         .add_page::<AltComp>("/alt", AltProp{})
         .add_page::<AnotherComp>("/another", AnotherProp{})

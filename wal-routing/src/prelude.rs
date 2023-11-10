@@ -1,2 +1,2 @@
 pub use super::router;
-pub use router::builder::AppBuilder;
+pub use router::builder::RouterBuilder;
