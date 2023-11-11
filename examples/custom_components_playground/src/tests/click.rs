@@ -1,11 +1,17 @@
 use gloo::console::log;
+use std::thread_local;
 use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
     virtual_dom::VNode,
 };
+use wal_css::css::Css;
+use wal_css::css_stylesheet;
 use wal_macros::html;
 use web_sys::MouseEvent;
 
+thread_local! {
+    static CSS1: Css = css_stylesheet!("../styles/styles1.css");
+}
 enum FatherMessages {
     Clicked,
 }
@@ -61,11 +67,18 @@ impl Component for ChildComponent {
             cb.emit(());
         });
 
-        html! {
-            <button onclick={on_click}>
-                "click me"
-            </button>
-        }
+        CSS1.with(|css| {
+            html! {
+                <button onclick={on_click}>
+                    "click me"
+                </button>
+            }
+        })
+        // html! {
+        //     <button onclick={on_click}>
+        //         "click me"
+        //     </button>
+        // }
     }
 
     fn update(&mut self, _message: Self::Message) -> bool {

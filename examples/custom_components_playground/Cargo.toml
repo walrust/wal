@@ -12,6 +12,7 @@ crate-type = ["cdylib", "rlib"]
 wasm-bindgen = "0.2.87"
 wal = { path = "../../wal" }
 wal-macros = { path = "../../wal-macros" }
+wal-css = { path = "../../wal-css" }
 gloo = { version = "0.10.0", features = ["utils"] }
 
 [dependencies.web-sys]

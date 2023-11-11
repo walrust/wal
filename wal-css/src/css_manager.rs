@@ -1,3 +1,4 @@
+use gloo::console::log;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use web_sys::{window, Document, Element};
 
@@ -7,13 +8,6 @@ thread_local! {
     static ID_GENERATOR: Rc<RefCell<IdGenerator>> = Rc::new(RefCell::new(IdGenerator::new()));
 }
 
-#[macro_export]
-macro_rules! css_stylesheet {
-    ($filepath: expr) => {
-        $crate::CssManager::new().attach_css(include_str!($filepath))
-    };
-}
-
 pub struct CssManager {
     document: Document,
 }
@@ -21,12 +15,14 @@ pub struct CssManager {
 #[allow(dead_code)]
 impl CssManager {
     pub fn new() -> Self {
+        log!("creating css manager");
         CssManager {
             document: window().unwrap().document().unwrap(),
         }
     }
 
     pub fn attach_css(&mut self, css: &str) -> Css {
+        log!("attaching css");
         // generate new id and prefix for the css stylesheet
         let id = ID_GENERATOR.with(|gen| gen.as_ref().borrow_mut().get_new_id());
         let prefix = generate_prefix(id);
