@@ -36,4 +36,6 @@ fn html_macro_tests() {
     t.compile_fail(
         "tests/html_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs",
     );
+    t.pass("tests/html_macro_tests/links/link_should_pass.rs");
+    t.compile_fail("tests/html_macro_tests/links/link_should_fail.rs");
 }

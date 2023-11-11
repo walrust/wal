@@ -3,7 +3,6 @@ use wal::virtual_dom::{VElement, VNode};
 use wal_macros::html;
 
 fn main() {
-    format!("Hello world!");
     let html = html! { <div></div> };
     assert_eq!(html, get_velement("div"));
     let html = html! { <span></span> };
