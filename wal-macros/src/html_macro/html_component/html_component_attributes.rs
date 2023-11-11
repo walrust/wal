@@ -1,13 +1,12 @@
 use quote::{quote, ToTokens};
 use syn::{
-    ext::IdentExt,
     parse::{Parse, ParseStream},
     spanned::Spanned,
 };
 
 use crate::html_macro::{
     html_attribute::{HtmlAttribute, HtmlAttributeValue},
-    KEY_STR, PROPS_STR,
+    KEY_ATTR, PROPS_ATTR,
 };
 
 pub struct HtmlComponentAttributes {
@@ -34,9 +33,9 @@ impl HtmlComponentAttributes {
         key: &mut Option<HtmlAttribute>,
         attribute: HtmlComponentAttribute,
     ) -> syn::Result<()> {
-        if attribute.ident == PROPS_STR {
+        if attribute.ident == PROPS_ATTR {
             Self::process_props_attribute(props, attribute)
-        } else if attribute.ident == KEY_STR {
+        } else if attribute.ident == KEY_ATTR {
             Self::process_key_attribute(key, attribute)
         } else {
             Err(syn::Error::new(
@@ -44,8 +43,8 @@ impl HtmlComponentAttributes {
                 format!(
                     "Unsupported attribute `{}`. Custom components supports only `{}` and `{}` attributes",
                     attribute.ident,
-                    PROPS_STR,
-                    KEY_STR
+                    PROPS_ATTR,
+                    KEY_ATTR
                 ),
             ))
         }
@@ -87,12 +86,12 @@ pub struct HtmlComponentAttribute {
 
 impl Parse for HtmlComponentAttribute {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let ident = proc_macro2::Ident::parse_any(&input)?;
+        let ident = input.parse::<proc_macro2::Ident>()?;
         input.parse::<syn::token::Eq>()?;
 
-        let value = if ident == PROPS_STR {
+        let value = if ident == PROPS_ATTR {
             input.parse::<HtmlComponentAttributeValue>()?
-        } else if ident == KEY_STR {
+        } else if ident == KEY_ATTR {
             input.parse::<HtmlAttributeValue>()?.into()
         } else {
             return Err(syn::Error::new(
@@ -100,8 +99,8 @@ impl Parse for HtmlComponentAttribute {
                 format!(
                     "Unsupported attribute `{}`. Custom components supports only `{}` and `{}` attributes",
                     ident,
-                    PROPS_STR,
-                    KEY_STR
+                    PROPS_ATTR,
+                    KEY_ATTR
                 ),
             ));
         };
@@ -112,7 +111,7 @@ impl Parse for HtmlComponentAttribute {
 
 impl HtmlComponentAttribute {
     pub fn peek(input: ParseStream) -> bool {
-        input.peek(proc_macro2::Ident::peek_any)
+        input.peek(syn::Ident)
     }
 
     pub fn span(&self) -> proc_macro2::Span {

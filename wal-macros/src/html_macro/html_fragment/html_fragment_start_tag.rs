@@ -3,7 +3,7 @@ use syn::parse::Parse;
 
 use crate::html_macro::{
     html_attribute::{HtmlAttribute, HtmlAttributeValue},
-    KEY_STR,
+    KEY_ATTR,
 };
 
 pub struct HtmlFragmentStartTag {
@@ -26,17 +26,17 @@ impl Parse for HtmlFragmentStartTag {
 
         let attribute = input.parse::<HtmlAttribute>()?;
 
-        if attribute.ident != KEY_STR {
+        if attribute.ident != KEY_ATTR {
             return Err(syn::Error::new(
                 attribute.ident.span(),
-                format!("Fragment supports only the `{}` attribute", KEY_STR),
+                format!("Fragment supports only the `{}` attribute", KEY_ATTR),
             ));
         }
 
         if !input.peek(syn::token::Gt) {
             return Err(input.error(format!(
                 "Fragment supports only a single `{}` attribute",
-                KEY_STR
+                KEY_ATTR
             )));
         }
 

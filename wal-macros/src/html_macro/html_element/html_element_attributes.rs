@@ -5,7 +5,7 @@ use syn::parse::Parse;
 
 use crate::html_macro::{
     html_attribute::{HtmlAttribute, HtmlAttributeValue},
-    KEY_STR,
+    KEY_ATTR,
 };
 
 pub struct HtmlElementAttributes {
@@ -40,7 +40,7 @@ impl HtmlElementAttributes {
         key: &mut Option<HtmlAttribute>,
         attribute: HtmlAttribute,
     ) -> syn::Result<()> {
-        if attribute.ident == KEY_STR {
+        if attribute.ident == KEY_ATTR {
             Self::process_key_attribute(key, attribute)
         } else if attribute.is_event() {
             Self::process_event_attribute(events, attribute)
