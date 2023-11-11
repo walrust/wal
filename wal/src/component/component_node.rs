@@ -14,7 +14,10 @@ pub struct AnyComponentNode {
 }
 
 impl AnyComponentNode {
-    pub(crate) fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+    pub(crate) fn new_root<C: Component + 'static>(
+        component: C,
+        ancestor: Node,
+    ) -> Rc<RefCell<Self>> {
         Self::new_internal(component, ancestor, true)
     }
 
