@@ -10,6 +10,18 @@ pub enum Instruction<'a> {
         parameters: &'a str,
     },
 }
+impl<'a> Instruction<'a> {
+    pub fn gen_mapping(&self, prefix: &str) -> Vec<(String, String)> {
+        if let Instruction::ComplexSelector(selectors) = self {
+            return selectors
+                .iter()
+                .filter_map(|s| s.gen_mapping(prefix))
+                .collect();
+        }
+        vec![]
+    }
+    pub fn gen_css(&self) {}
+}
 
 #[derive(Debug, PartialEq)]
 pub enum Selector<'a> {
@@ -17,17 +29,16 @@ pub enum Selector<'a> {
     Class(&'a str),
     Element(&'a str),
 }
-// impl<'a> Selector<'a> {
-//     pub fn gen_mapping(&self, prefix: &str) -> Option<(String, String)> {
-//         match self {
-//             Self::Class(class) => {
-//                 return Some((class.to_owned(), format!("{}{}", prefix, class).to_owned()))
-//             }
-//             Self::Id(id) => return Some((id.to_owned(), format!("{}{}", prefix, id).to_owned())),
-//             _ => return None,
-//         }
-//     }
-// }
+impl<'a> Selector<'a> {
+    pub fn gen_mapping(&self, prefix: &str) -> Option<(String, String)> {
+        match self {
+            Selector::Id(id) => Some((id.to_string(), format!("{}{}", prefix, id))),
+            Selector::Class(class) => Some((class.to_string(), format!("{}{}", prefix, class))),
+            Selector::Element(_) => None,
+        }
+    }
+    pub fn gen_css(&self) {}
+}
 
 #[derive(Debug, PartialEq)]
 pub enum Section<'a> {
@@ -36,6 +47,20 @@ pub enum Section<'a> {
         body: Body<'a>,
     },
     WithoutBody(Instruction<'a>),
+}
+impl<'a> Section<'a> {
+    pub fn gen_mapping(&self, prefix: &str) -> Vec<(String, String)> {
+        if let Section::WithBody { instruction, body } = self {
+            let mut mapping = instruction.gen_mapping(prefix);
+
+            if let Body::ParsedBody(stylesheet) = body {
+                mapping.extend(stylesheet.gen_mapping(prefix));
+            }
+            return mapping;
+        }
+        vec![]
+    }
+    pub fn gen_css(&self) {}
 }
 
 #[derive(Debug, PartialEq)]
@@ -52,40 +77,144 @@ impl<'a> Stylesheet<'a> {
     pub fn new(sections: Vec<Section<'a>>) -> Self {
         Stylesheet { sections }
     }
+    pub fn gen_mapping(&self, prefix: &str) -> Vec<(String, String)> {
+        self.sections
+            .iter()
+            .flat_map(|s| s.gen_mapping(prefix))
+            .collect::<Vec<(String, String)>>()
 
-    // pub fn generate_mapping(&self, prefix: &str) -> HashMap<String, String> {
-    //     let mut mapping = HashMap::<String, String>::new();
-    //     for section in &self.sections {
-    //         match section {
-    //             // body instruction
-    //             Section::WithBody { instruction, body } => match instruction {
-    //                 // get mappings from selectors
-    //                 Instruction::ComplexSelector(selectors) => {
-    //                     // for each selector generate new mapping
-    //                     for selector in selectors {
-    //                         if let Some((key, val)) = selector.gen_mapping(prefix) {
-    //                             mapping.insert(key, val);
-    //                         }
-    //                     }
-    //                 }
-    //                 // for some special instructions generate mappings form their body as well
-    //                 Instruction::SpecialInstruction { command, .. } => {
-    //                     if needs_nested_parsing(command) {
-    //                         // parse the body as another stylesheet
-    //                         let (_, sub_stylesheet) = parse_stylesheet(body).unwrap();
-    //                         let sub_mapping = sub_stylesheet.generate_mapping(prefix);
-    //                         // append sub_mapping to the current mapping
-    //                         mapping.extend(sub_mapping);
-    //                     }
-    //                 }
-    //             },
-    //             // instructions without body don't have an influence on mapping
-    //             Section::WithoutBody(_) => (),
-    //         }
-    //     }
-    //     mapping
-    // }
+        // let mut mapping = vec![];
+        // for section in &self.sections {
+        //     mapping.extend(section.gen_mapping(prefix))
+        // }
+        // mapping
+    }
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use crate::parser::types::{Body, Instruction, Section, Stylesheet};
+
+    use super::Selector;
+
+    #[test]
+    fn class_selector_gens_correct_mapping() {
+        let selector = Selector::Class("class");
+        let prefix = "test-";
+        let expected = Some(("class".to_owned(), "test-class".to_owned()));
+
+        assert_eq!(expected, selector.gen_mapping(prefix))
+    }
+    #[test]
+    fn id_selector_gens_correct_mapping() {
+        let selector = Selector::Id("id");
+        let prefix = "test-";
+        let expected = Some(("id".to_owned(), "test-id".to_owned()));
+
+        assert_eq!(expected, selector.gen_mapping(prefix))
+    }
+    #[test]
+    fn element_selector_does_not_gen_mapping() {
+        let selector = Selector::Element("body");
+        let prefix = "test-";
+        let expected = None;
+
+        assert_eq!(expected, selector.gen_mapping(prefix))
+    }
+    #[test]
+    fn instruction_complex_selector_gens_correct_mapping() {
+        let instruction = Instruction::ComplexSelector(vec![
+            Selector::Class("class"),
+            Selector::Element("body"),
+            Selector::Id("id"),
+        ]);
+        let prefix = "test-";
+        let expected = vec![
+            ("class".to_owned(), "test-class".to_owned()),
+            ("id".to_owned(), "test-id".to_owned()),
+        ];
+
+        assert_eq!(expected, instruction.gen_mapping(prefix))
+    }
+    #[test]
+    fn instruction_special_insruction_gens_no_mapping() {
+        let instruction = Instruction::SpecialInstruction {
+            command: "namespace",
+            parameters: " svg url('http://www.w3.org/2000/svg')",
+        };
+        let prefix = "test-";
+        let expected: Vec<(String, String)> = vec![];
+
+        assert_eq!(expected, instruction.gen_mapping(prefix))
+    }
+    #[test]
+    fn section_with_literal_body_gens_correct_mapping() {
+        let section = Section::WithBody {
+            instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
+            body: Body::LiteralBody(" color: red; "),
+        };
+        let prefix = "test-";
+        let expected = vec![("class".to_owned(), "test-class".to_owned())];
+
+        assert_eq!(expected, section.gen_mapping(prefix))
+    }
+    #[test]
+    fn section_with_parsed_body_gens_correct_mapping() {
+        let section = Section::WithBody {
+            instruction: Instruction::SpecialInstruction {
+                command: "media",
+                parameters: " (hover: hover) ",
+            },
+            body: Body::ParsedBody(Stylesheet::new(vec![Section::WithBody {
+                instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
+                body: Body::LiteralBody(" color: green; "),
+            }])),
+        };
+        let prefix = "test-";
+        let expected = vec![("class".to_owned(), "test-class".to_owned())];
+
+        assert_eq!(expected, section.gen_mapping(prefix))
+    }
+    #[test]
+    fn section_without_body_gens_no_mapping() {
+        let section = Section::WithoutBody(Instruction::SpecialInstruction {
+            command: "namespace",
+            parameters: " svg url('http://www.w3.org/2000/svg')",
+        });
+        let prefix = "test-";
+        let expected: Vec<(String, String)> = vec![];
+
+        assert_eq!(expected, section.gen_mapping(prefix))
+    }
+    #[test]
+    fn stylesheet_gens_correct_mapping() {
+        let stylesheet = Stylesheet::new(vec![
+            Section::WithBody {
+                instruction: Instruction::SpecialInstruction {
+                    command: "media",
+                    parameters: " (hover: hover) ",
+                },
+                body: Body::ParsedBody(Stylesheet::new(vec![Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
+                    body: Body::LiteralBody(" color: green; "),
+                }])),
+            },
+            Section::WithBody {
+                instruction: Instruction::ComplexSelector(vec![Selector::Class("class2")]),
+                body: Body::LiteralBody(" color: red; "),
+            },
+            Section::WithBody {
+                instruction: Instruction::ComplexSelector(vec![Selector::Id("id1")]),
+                body: Body::LiteralBody(" color: green; "),
+            },
+        ]);
+        let prefix = "test-";
+        let expected = vec![
+            ("class1".to_owned(), "test-class1".to_owned()),
+            ("class2".to_owned(), "test-class2".to_owned()),
+            ("id1".to_owned(), "test-id1".to_owned()),
+        ];
+
+        assert_eq!(expected, stylesheet.gen_mapping(prefix))
+    }
+}
