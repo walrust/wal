@@ -22,3 +22,14 @@ pub enum Section<'a> {
     },
     WithoutBody(Instruction<'a>),
 }
+
+#[derive(Debug, PartialEq)]
+pub struct Stylesheet<'a> {
+    sections: Vec<Section<'a>>,
+}
+
+impl<'a> Stylesheet<'a> {
+    pub fn new(sections: Vec<Section<'a>>) -> Self {
+        Stylesheet { sections }
+    }
+}

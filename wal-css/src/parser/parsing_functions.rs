@@ -4,11 +4,18 @@ use nom::branch::alt;
 use nom::bytes::complete::{tag, take_till, take_till1, take_until, take_while1};
 use nom::character::complete::multispace0;
 use nom::error::{Error, ErrorKind, ParseError};
-use nom::multi::separated_list1;
+use nom::multi::{separated_list0, separated_list1};
 use nom::sequence::{delimited, separated_pair, tuple};
 use nom::{combinator::map, sequence::pair, Err, IResult};
 
 use super::types::*;
+
+// TODO: Add tests (especialy for whitespaces between sections, instruction etc.)
+pub fn parse_stylesheet(i: &str) -> IResult<&str, Stylesheet> {
+    map(separated_list0(multispace0, p_section), |sections| {
+        Stylesheet::new(sections)
+    })(i)
+}
 
 fn p_id(i: &str) -> IResult<&str, Selector> {
     map(
@@ -76,6 +83,10 @@ fn p_bodyless_section(i: &str) -> IResult<&str, Section> {
     map(pair(p_instruction, tag(";")), |(instr, _)| {
         Section::WithoutBody(instr)
     })(i)
+}
+
+fn p_section(i: &str) -> IResult<&str, Section> {
+    map(alt((p_body_section, p_bodyless_section)), |s| s)(i)
 }
 /// used to parse self nested expression delimited with brackets
 pub fn p_until_unbalanced(
