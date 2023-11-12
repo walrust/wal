@@ -126,7 +126,7 @@ impl<'a> Stylesheet<'a> {
             .iter()
             .map(|s| s.gen_css(prefix))
             .collect::<Vec<String>>()
-            .join("\n")
+            .join(" ")
     }
 }
 
@@ -349,5 +349,32 @@ mod tests {
         let expected = "@media (hover: hover) { .test-class { color: green; } }";
 
         assert_eq!(expected, section.gen_css(prefix))
+    }
+    #[test]
+    fn stylesheet_gens_correct_css() {
+        let stylesheet = Stylesheet::new(vec![
+            Section::WithBody {
+                instruction: Instruction::SpecialInstruction {
+                    command: "media",
+                    parameters: " (hover: hover) ",
+                },
+                body: Body::ParsedBody(Stylesheet::new(vec![Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
+                    body: Body::LiteralBody(" color: green; "),
+                }])),
+            },
+            Section::WithBody {
+                instruction: Instruction::ComplexSelector(vec![Selector::Class("class2")]),
+                body: Body::LiteralBody(" color: red; "),
+            },
+            Section::WithBody {
+                instruction: Instruction::ComplexSelector(vec![Selector::Id("id1")]),
+                body: Body::LiteralBody(" color: green; "),
+            },
+        ]);
+        let prefix = "test-";
+        let expected = "@media (hover: hover) { .test-class1 { color: green; } } .test-class2 { color: red; } #test-id1 { color: green; }".to_owned();
+
+        assert_eq!(expected, stylesheet.gen_css(prefix))
     }
 }
