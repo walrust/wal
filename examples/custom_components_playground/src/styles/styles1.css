@@ -1,3 +1,27 @@
-.red_text {
-  color: red;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: rgb(85, 85, 85);
+  color: white;
+}
+
+.btn {
+  border-radius: 15px;
+  padding: 20x;
+  background-color: aliceblue;
+  color: black;
+}
+
+.wrapper {
+  margin: 2vw;
+  background-color: cadetblue;
+  padding: 5vw;
+  display: flex;
+  justify-content: center;
+}
+
+@media screen and (max-width: 500px) {
+  .wrapper {
+    background-color: lightgreen;
+  }
 }

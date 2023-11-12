@@ -32,10 +32,14 @@ impl Component for FatherComponent {
     fn view(&self, behavior: &mut impl Behavior<Self>) -> VNode {
         let callback = behavior.create_callback(|()| FatherMessages::Clicked);
 
-        html! {
-            { format!("My child got clicked {} times", self.0) }
-            <ChildComponent props={ChildProperties(callback, self.0)} />
-        }
+        CSS1.with(|css| {
+            html! {
+                <div class={&css["wrapper"]}>
+                    { format!("My child got clicked {} times", self.0) }
+                </div>
+                <ChildComponent props={ChildProperties(callback, self.0)} />
+            }
+        })
     }
 
     fn update(&mut self, message: Self::Message) -> bool {
@@ -69,9 +73,11 @@ impl Component for ChildComponent {
 
         CSS1.with(|css| {
             html! {
-                <button onclick={on_click} class={&css["red_text"]}>
-                    "click me"
-                </button>
+                <div class={&css["wrapper"]}>
+                    <button onclick={on_click} class={&css["btn"]}>
+                        "click me"
+                    </button>
+                </div>
             }
         })
     }
