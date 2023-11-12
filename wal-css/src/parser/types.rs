@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::format};
 
 use super::parsing_functions::parse_stylesheet;
 
@@ -20,7 +20,19 @@ impl<'a> Instruction<'a> {
         }
         vec![]
     }
-    pub fn gen_css(&self) {}
+    pub fn gen_css(&self, prefix: &str) -> String {
+        match self {
+            Instruction::ComplexSelector(selectors) => selectors
+                .iter()
+                .map(|s| s.gen_css(prefix))
+                .collect::<Vec<String>>()
+                .join(", "),
+            Instruction::SpecialInstruction {
+                command,
+                parameters,
+            } => format!("{command}{parameters}").to_owned(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -37,7 +49,13 @@ impl<'a> Selector<'a> {
             Selector::Element(_) => None,
         }
     }
-    pub fn gen_css(&self) {}
+    pub fn gen_css(&self, prefix: &str) -> String {
+        match self {
+            Selector::Id(id) => format!("#{}{}", prefix, id).to_owned(),
+            Selector::Class(class) => format!(".{}{}", prefix, class).to_owned(),
+            Selector::Element(element) => element.to_string(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -60,18 +78,38 @@ impl<'a> Section<'a> {
         }
         vec![]
     }
-    pub fn gen_css(&self) {}
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Stylesheet<'a> {
-    sections: Vec<Section<'a>>,
+    pub fn gen_css(&self, prefix: &str) -> String {
+        match self {
+            Section::WithBody { instruction, body } => format!(
+                "{} {{ {} }}",
+                instruction.gen_css(prefix),
+                body.gen_css(prefix)
+            )
+            .to_owned(),
+            Section::WithoutBody(instruction) => {
+                format!("{};", instruction.gen_css(prefix)).to_owned()
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
 pub enum Body<'a> {
     ParsedBody(Stylesheet<'a>),
     LiteralBody(&'a str),
+}
+impl<'a> Body<'a> {
+    pub fn gen_css(&self, prefix: &str) -> String {
+        match self {
+            Body::LiteralBody(body_str) => body_str.to_string(),
+            Body::ParsedBody(stylesheet) => stylesheet.gen_css(prefix),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Stylesheet<'a> {
+    sections: Vec<Section<'a>>,
 }
 impl<'a> Stylesheet<'a> {
     pub fn new(sections: Vec<Section<'a>>) -> Self {
@@ -82,12 +120,13 @@ impl<'a> Stylesheet<'a> {
             .iter()
             .flat_map(|s| s.gen_mapping(prefix))
             .collect::<Vec<(String, String)>>()
-
-        // let mut mapping = vec![];
-        // for section in &self.sections {
-        //     mapping.extend(section.gen_mapping(prefix))
-        // }
-        // mapping
+    }
+    pub fn gen_css(&self, prefix: &str) -> String {
+        self.sections
+            .iter()
+            .map(|s| s.gen_css(prefix))
+            .collect::<Vec<String>>()
+            .join("\n")
     }
 }
 
@@ -216,5 +255,52 @@ mod tests {
         ];
 
         assert_eq!(expected, stylesheet.gen_mapping(prefix))
+    }
+    #[test]
+    fn class_selector_gens_correct_css() {
+        let selector = Selector::Class("class");
+        let prefix = "test-";
+        let expected = ".test-class".to_owned();
+
+        assert_eq!(expected, selector.gen_css(prefix))
+    }
+    #[test]
+    fn id_selector_gens_correct_css() {
+        let selector = Selector::Id("id");
+        let prefix = "test-";
+        let expected = "#test-id".to_owned();
+
+        assert_eq!(expected, selector.gen_css(prefix))
+    }
+    #[test]
+    fn element_selector_gens_correct_css() {
+        let selector = Selector::Element("body");
+        let prefix = "test-";
+        let expected = "body";
+
+        assert_eq!(expected, selector.gen_css(prefix))
+    }
+    #[test]
+    fn instruction_complex_selector_gens_correct_css() {
+        let instruction = Instruction::ComplexSelector(vec![
+            Selector::Class("class"),
+            Selector::Element("body"),
+            Selector::Id("id"),
+        ]);
+        let prefix = "test-";
+        let expected = ".test-class, body, #test-id".to_owned();
+
+        assert_eq!(expected, instruction.gen_css(prefix))
+    }
+    #[test]
+    fn instruction_special_insruction_gens_correct_css() {
+        let instruction = Instruction::SpecialInstruction {
+            command: "namespace",
+            parameters: " svg url('http://www.w3.org/2000/svg')",
+        };
+        let prefix = "test-";
+        let expected = "namespace svg url('http://www.w3.org/2000/svg')".to_owned();
+
+        assert_eq!(expected, instruction.gen_css(prefix))
     }
 }
