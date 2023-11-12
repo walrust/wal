@@ -1,8 +1,8 @@
 use gloo::console::log;
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 use web_sys::{window, Document, Element};
 
-use crate::{css::Css, id_generator::IdGenerator};
+use crate::{css::Css, id_generator::IdGenerator, parser::process_css};
 
 thread_local! {
     static ID_GENERATOR: Rc<RefCell<IdGenerator>> = Rc::new(RefCell::new(IdGenerator::new()));
@@ -27,15 +27,15 @@ impl CssManager {
         let id = ID_GENERATOR.with(|gen| gen.as_ref().borrow_mut().get_new_id());
         let prefix = generate_prefix(id);
 
-        // TODO: parse the css and append the prefix
-        let selector_map = HashMap::<String, String>::new();
+        // parse the css and generate new css with mapping
+        let (new_css, mapping) = process_css(css, &prefix);
 
         // generate new style element
         let style: Element = add_new_style_element(&self.document);
-        style.set_text_content(Some(css));
+        style.set_text_content(Some(&new_css));
 
-        // return Css object
-        Css::new(id, style, selector_map)
+        // return new Css object
+        Css::new(id, style, mapping)
     }
 }
 
@@ -53,5 +53,5 @@ fn add_new_style_element(document: &Document) -> Element {
 }
 
 fn generate_prefix(id: u8) -> String {
-    format!("{}-", id)
+    format!("_{}-", id)
 }

@@ -1,7 +1,3 @@
-use std::{collections::HashMap, fmt::format};
-
-use super::parsing_functions::parse_stylesheet;
-
 #[derive(Debug, PartialEq)]
 pub enum Instruction<'a> {
     ComplexSelector(Vec<Selector<'a>>),

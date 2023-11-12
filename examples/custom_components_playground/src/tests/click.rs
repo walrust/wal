@@ -69,16 +69,11 @@ impl Component for ChildComponent {
 
         CSS1.with(|css| {
             html! {
-                <button onclick={on_click}>
+                <button onclick={on_click} class={&css["red_text"]}>
                     "click me"
                 </button>
             }
         })
-        // html! {
-        //     <button onclick={on_click}>
-        //         "click me"
-        //     </button>
-        // }
     }
 
     fn update(&mut self, _message: Self::Message) -> bool {

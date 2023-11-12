@@ -1,5 +1,3 @@
-// #![allow(dead_code)]
-
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_till, take_till1, take_until};
 use nom::character::complete::{multispace0, multispace1};
@@ -10,6 +8,7 @@ use nom::{combinator::map, sequence::pair, Err, IResult};
 
 use super::types::*;
 
+/// parses css string into Stylesheet object
 pub fn parse_stylesheet(i: &str) -> IResult<&str, Stylesheet> {
     map(separated_list0(multispace1, p_section), |sections| {
         Stylesheet::new(sections)
@@ -43,7 +42,7 @@ fn p_selector(i: &str) -> IResult<&str, Selector> {
 fn p_complex_selector(i: &str) -> IResult<&str, Instruction> {
     map(
         separated_list1(tuple((multispace0, tag(","), multispace0)), p_selector),
-        |s| Instruction::ComplexSelector(s),
+        Instruction::ComplexSelector,
     )(i)
 }
 
@@ -75,7 +74,6 @@ fn p_body_section(i: &str) -> IResult<&str, Section> {
     let (remainig_input, (instruction, body_str)) =
         map(separated_pair(p_instruction, multispace0, p_body), |r| r)(i)?;
 
-    println!("BODY_STR: [{}]", body_str);
     // parse body recursively if needed
     if let Instruction::SpecialInstruction { command, .. } = instruction {
         if needs_nested_parsing(command) {
