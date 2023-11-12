@@ -64,6 +64,7 @@ fn p_body(i: &str) -> IResult<&str, &str> {
         |body| body,
     )(i)
 }
+
 fn p_body_section(i: &str) -> IResult<&str, Section> {
     map(
         separated_pair(p_instruction, multispace0, p_body),
@@ -71,6 +72,11 @@ fn p_body_section(i: &str) -> IResult<&str, Section> {
     )(i)
 }
 
+fn p_bodyless_section(i: &str) -> IResult<&str, Section> {
+    map(pair(p_instruction, tag(";")), |(instr, _)| {
+        Section::WithoutBody(instr)
+    })(i)
+}
 /// used to parse self nested expression delimited with brackets
 pub fn p_until_unbalanced(
     opening_bracket: char,
@@ -143,7 +149,6 @@ mod tests {
         assert_eq!(rest, "#rest-part");
         assert_eq!(class, Selector::Class("class1"))
     }
-
     #[test]
     fn parses_selector_class() {
         let (rest, class) = p_selector(".class").unwrap();
@@ -176,7 +181,7 @@ mod tests {
         )
     }
     #[test]
-    fn parses_special_instruction() {
+    fn parses_special_complex_instruction() {
         let (rest, spec_instr) = p_special_instruction("@media (hover: hover) { }").unwrap();
         assert_eq!(rest, "{ }");
         assert_eq!(
@@ -187,7 +192,19 @@ mod tests {
             }
         )
     }
-
+    #[test]
+    fn parses_special_simple_instruction() {
+        let (rest, spec_instr) =
+            p_special_instruction("@namespace svg url('http://www.w3.org/2000/svg')").unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            spec_instr,
+            Instruction::SpecialInstruction {
+                command: "namespace",
+                parameters: " svg url('http://www.w3.org/2000/svg')"
+            }
+        )
+    }
     #[test]
     fn parses_unnested_body() {
         let (rest, body) = p_body("{this is my body}").unwrap();
@@ -202,8 +219,49 @@ mod tests {
     }
     #[test]
     fn parses_nested_body_leaving_rest() {
-        let (rest, body) = p_body("{ color: red; &:hover { color: green } } }").unwrap();
+        let (rest, body) = p_body("{ color: red; &:hover { color: green; } } }").unwrap();
         assert_eq!(rest, " }");
-        assert_eq!(body, " color: red; &:hover { color: green } ")
+        assert_eq!(body, " color: red; &:hover { color: green; } ")
+    }
+    #[test]
+    fn parses_selector_section_with_body() {
+        let (rest, section) = p_body_section(".class { color: green; }").unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            section,
+            Section::WithBody {
+                instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
+                body: " color: green; "
+            }
+        )
+    }
+    #[test]
+    fn parses_special_section_with_body() {
+        let (rest, section) =
+            p_body_section("@media (hover: hover) { .class { color: green; } }").unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            section,
+            Section::WithBody {
+                instruction: Instruction::SpecialInstruction {
+                    command: "media",
+                    parameters: " (hover: hover) "
+                },
+                body: " .class { color: green; } "
+            }
+        )
+    }
+    #[test]
+    fn parses_special_section_without_body() {
+        let (rest, section) =
+            p_bodyless_section("@namespace svg url('http://www.w3.org/2000/svg');").unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            section,
+            Section::WithoutBody(Instruction::SpecialInstruction {
+                command: "namespace",
+                parameters: " svg url('http://www.w3.org/2000/svg')"
+            })
+        )
     }
 }

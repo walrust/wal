@@ -20,5 +20,5 @@ pub enum Section<'a> {
         instruction: Instruction<'a>,
         body: &'a str,
     },
-    WithoutBody(&'a str),
+    WithoutBody(Instruction<'a>),
 }
