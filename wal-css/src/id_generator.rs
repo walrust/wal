@@ -20,4 +20,18 @@ impl Default for IdGenerator {
     }
 }
 
-// TODO: Add tests
+#[cfg(test)]
+mod tests {
+    use web_sys::Element;
+
+    use super::IdGenerator;
+
+    #[test]
+    fn generator_generates_new_ids() {
+        let mut gen = IdGenerator::new();
+
+        assert_eq!(0, gen.get_new_id());
+        assert_eq!(1, gen.get_new_id());
+        assert_eq!(2, gen.get_new_id());
+    }
+}

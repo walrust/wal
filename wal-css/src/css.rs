@@ -1,6 +1,4 @@
 use std::{collections::HashMap, ops::Index};
-
-use gloo::console::log;
 use web_sys::Element;
 
 pub struct Css {
@@ -11,7 +9,6 @@ pub struct Css {
 #[allow(dead_code)]
 impl Css {
     pub fn new(stylesheet_id: u8, element: Element, selector_map: HashMap<String, String>) -> Self {
-        log!("creating css");
         Css {
             stylesheet_id,
             element,
@@ -29,7 +26,7 @@ impl Css {
     }
 }
 
-// Indexing operator for accessing selectors with prefixes by original selector names
+// Indexing operator for accessing prepended selectors by original selector names
 impl Index<&str> for Css {
     type Output = String;
     fn index(&self, index: &str) -> &Self::Output {
