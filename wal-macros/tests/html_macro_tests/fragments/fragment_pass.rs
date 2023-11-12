@@ -17,7 +17,7 @@ fn main() {
 
 fn empty() {
     let html = html! { <></> };
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(html, VNode::List(VList::new_empty(None)));
 }
 
 fn with_single_element() {
@@ -28,12 +28,16 @@ fn with_single_element() {
     };
     assert_eq!(
         html,
-        VNode::List(VList::new(vec![VNode::Element(new_velement_str(
-            "div",
-            HashMap::new(),
-            Vec::new(),
-            Vec::new()
-        ))]),)
+        VNode::List(VList::new(
+            vec![VNode::Element(new_velement_str(
+                "div",
+                HashMap::new(),
+                Vec::new(),
+                None,
+                Vec::new()
+            ))],
+            None
+        ),)
     );
 }
 
@@ -46,20 +50,25 @@ fn with_multiple_elements() {
     };
     assert_eq!(
         html,
-        VNode::List(VList::new(vec![
-            VNode::Element(new_velement_str(
-                "div",
-                HashMap::new(),
-                Vec::new(),
-                Vec::new()
-            )),
-            VNode::Element(new_velement_str(
-                "div",
-                HashMap::new(),
-                Vec::new(),
-                Vec::new()
-            ),),
-        ]))
+        VNode::List(VList::new(
+            vec![
+                VNode::Element(new_velement_str(
+                    "div",
+                    HashMap::new(),
+                    Vec::new(),
+                    None,
+                    Vec::new()
+                )),
+                VNode::Element(new_velement_str(
+                    "div",
+                    HashMap::new(),
+                    Vec::new(),
+                    None,
+                    Vec::new()
+                ),),
+            ],
+            None
+        ))
     );
 }
 
@@ -75,12 +84,13 @@ fn inside_element() {
             "div",
             HashMap::new(),
             Vec::new(),
-            vec![VNode::List(VList::new_empty())],
+            None,
+            vec![VNode::List(VList::new_empty(None))],
         ))
     );
 }
 
 fn with_key_attribute() {
     let html = html! { <key="value"></> };
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(html, VNode::List(VList::new_empty(Some("value".to_string()))));
 }

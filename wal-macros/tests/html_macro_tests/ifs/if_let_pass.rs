@@ -25,7 +25,7 @@ fn if_let_false() {
     let html = html! {
         if let Some(_val) = None::<i32> { "hello" }
     };
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(html, VNode::List(VList::new_empty(None)));
 }
 
 fn if_let_true_using_value_from_let() {

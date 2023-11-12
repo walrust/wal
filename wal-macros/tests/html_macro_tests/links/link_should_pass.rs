@@ -24,6 +24,7 @@ fn link_with_to_attr_as_string() {
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),
             Vec::new(),
+            None,
             Vec::new(),
         ))
     );
@@ -37,6 +38,7 @@ fn non_self_closing_link_with_to_attr_as_string() {
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),
             Vec::new(),
+            None,
             Vec::new(),
         ))
     );
@@ -51,6 +53,7 @@ fn link_with_to_attr_as_expr() {
             "a",
             HashMap::from([("href", link), ("data_link", link)]),
             Vec::new(),
+            None,
             Vec::new(),
         ))
     );
@@ -62,12 +65,14 @@ fn link_with_key_attr() {
         html,
         VNode::Element(new_velement_str(
             "a",
-            HashMap::from([("href", "/home"), ("data_link", "/home"), ("key", "value")]),
+            HashMap::from([("href", "/home"), ("data_link", "/home")]),
             Vec::new(),
+            Some("value"),
             Vec::new(),
         ))
     );
 }
+
 fn link_with_single_child() {
     let html = html! { <Link to="/home">"Home"</Link> };
     assert_eq!(
@@ -76,6 +81,7 @@ fn link_with_single_child() {
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),
             Vec::new(),
+            None,
             vec![VNode::Text(VText::new("Home"))],
         ))
     );
@@ -94,12 +100,14 @@ fn link_with_multiple_children() {
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),
             Vec::new(),
+            None,
             vec![
                 VNode::Text(VText::new("Home")),
                 VNode::Element(new_velement_str(
                     "span",
                     HashMap::new(),
                     Vec::new(),
+                    None,
                     vec![VNode::Text(VText::new("Span"))],
                 ))
             ],

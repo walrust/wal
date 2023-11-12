@@ -10,11 +10,14 @@ fn main() {
     };
     assert_eq!(
         html,
-        VNode::List(VList::new(vec![
-            get_velement("div"),
-            get_velement("span"),
-            get_velement("input"),
-        ]))
+        VNode::List(VList::new(
+            vec![
+                get_velement("div"),
+                get_velement("span"),
+                get_velement("input"),
+            ],
+            None
+        ))
     )
 }
 
@@ -23,6 +26,7 @@ fn get_velement(tag: &str) -> VNode {
         tag.to_string(),
         HashMap::new(),
         Vec::new(),
+        None,
         Vec::new(),
     ))
 }

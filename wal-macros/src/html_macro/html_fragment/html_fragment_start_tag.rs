@@ -1,14 +1,11 @@
-use quote::{quote, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::parse::Parse;
 
-use crate::html_macro::{
-    html_attribute::{HtmlAttribute, HtmlAttributeValue},
-    KEY_ATTR,
-};
+use crate::html_macro::{html_attribute::HtmlAttribute, KEY_ATTR};
 
 pub struct HtmlFragmentStartTag {
     lt: syn::token::Lt,
-    _key: Option<HtmlAttributeValue>,
+    key: Option<HtmlAttribute>,
     gt: syn::token::Gt,
 }
 
@@ -19,7 +16,7 @@ impl Parse for HtmlFragmentStartTag {
         if input.peek(syn::token::Gt) {
             return Ok(HtmlFragmentStartTag {
                 lt,
-                _key: None,
+                key: None,
                 gt: input.parse()?,
             });
         }
@@ -44,16 +41,25 @@ impl Parse for HtmlFragmentStartTag {
 
         Ok(HtmlFragmentStartTag {
             lt,
-            _key: Some(attribute.value),
+            key: Some(attribute),
             gt,
         })
     }
 }
 
 impl HtmlFragmentStartTag {
-    pub fn to_spanned(&self) -> impl ToTokens {
+    pub(crate) fn to_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }
+    }
+
+    pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
+        if let Some(key) = &self.key {
+            let key_val = &key.value;
+            quote_spanned!(key.ident.span() => Some(#key_val.to_string()))
+        } else {
+            quote!(None)
+        }
     }
 }

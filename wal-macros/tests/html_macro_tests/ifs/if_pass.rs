@@ -32,7 +32,7 @@ fn if_false() {
             "hello"
         }
     };
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(html, VNode::List(VList::new_empty(None)));
 }
 
 fn if_true_else_if() {
@@ -65,7 +65,7 @@ fn if_false_else_if_false() {
             "hello2"
         }
     };
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(html, VNode::List(VList::new_empty(None)));
 }
 
 fn if_multiple_else_ifs() {
@@ -149,6 +149,7 @@ fn if_in_element() {
             String::from("div"),
             HashMap::new(),
             Vec::new(),
+            None,
             vec![VNode::Text(VText::new("hello"))],
         ))
     );

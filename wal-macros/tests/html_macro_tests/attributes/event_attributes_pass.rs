@@ -24,6 +24,7 @@ fn single_specialized_event_attribute() {
             vec![EventHandler::new(onclick(Callback::new(
                 |_event: web_sys::MouseEvent| {}
             )))],
+            None,
             Vec::new(),
         ))
     );
@@ -39,6 +40,7 @@ fn single_unspecialized_event_attribute() {
             vec![EventHandler::new(oncopy(Callback::new(
                 |_event: web_sys::Event| {}
             )))],
+            None,
             Vec::new(),
         ))
     );
@@ -60,6 +62,7 @@ fn multiple_event_attributes() {
                 EventHandler::new(onclick(Callback::new(|_event: web_sys::MouseEvent| {}))),
                 EventHandler::new(oncopy(Callback::new(|_event: web_sys::Event| {}))),
             ],
+            None,
             Vec::new(),
         ))
     );

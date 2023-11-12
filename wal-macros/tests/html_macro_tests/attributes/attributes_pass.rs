@@ -27,6 +27,7 @@ fn single_attribute() {
             "div",
             HashMap::from([("attr", "value")]),
             Vec::new(),
+            None,
             Vec::new(),
         ))
     );
@@ -38,8 +39,9 @@ fn single_key_attribute() {
         html,
         VNode::Element(new_velement_str(
             "div",
-            HashMap::from([("key", "value")]),
+            HashMap::new(),
             Vec::new(),
+            Some("value"),
             Vec::new(),
         ))
     );
@@ -53,6 +55,7 @@ fn multiple_attributes() {
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
             Vec::new(),
+            None,
             Vec::new(),
         ))
     );
@@ -66,6 +69,7 @@ fn multiple_attributes_self_closing() {
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
             Vec::new(),
+            None,
             Vec::new(),
         ))
     );
@@ -73,7 +77,10 @@ fn multiple_attributes_self_closing() {
 
 fn fragment_with_key_attribute() {
     let html = html! { <key="value"></> };
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(
+        html,
+        VNode::List(VList::new_empty(Some("value".to_string())))
+    );
 }
 
 fn single_expression_attribute() {
@@ -84,6 +91,7 @@ fn single_expression_attribute() {
             "div",
             HashMap::from([("attr", "3")]),
             Vec::new(),
+            None,
             Vec::new(),
         ))
     );
@@ -97,6 +105,7 @@ fn multiple_expression_and_literal_attributes() {
             "div",
             HashMap::from([("attr1", "3"), ("attr2", "val2"), ("attr3", "val3")]),
             Vec::new(),
+            None,
             Vec::new(),
         ))
     );
@@ -112,6 +121,7 @@ fn attributes_and_event_attributes() {
             vec![EventHandler::new(onclick(Callback::new(
                 |_event: web_sys::MouseEvent| {}
             )))],
+            None,
             Vec::new(),
         ))
     );

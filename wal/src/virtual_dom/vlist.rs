@@ -7,16 +7,20 @@ use super::VNode;
 
 #[derive(PartialEq, Debug)]
 pub struct VList {
+    _key: Option<String>, // TODO: add logic for key attribute
     pub nodes: Vec<VNode>,
 }
 
 impl VList {
-    pub fn new(nodes: Vec<VNode>) -> VList {
-        VList { nodes }
+    pub fn new(nodes: Vec<VNode>, key: Option<String>) -> VList {
+        VList { nodes, _key: key }
     }
 
-    pub fn new_empty() -> VList {
-        VList { nodes: Vec::new() }
+    pub fn new_empty(key: Option<String>) -> VList {
+        VList {
+            nodes: Vec::new(),
+            _key: key,
+        }
     }
 
     pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {

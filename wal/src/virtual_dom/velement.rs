@@ -11,6 +11,7 @@ pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
     pub event_handlers: Vec<EventHandler>,
+    _key: Option<String>, // TODO: add logic for key attribute
     pub children: Vec<VNode>,
 
     pub dom: Option<Element>,
@@ -25,12 +26,14 @@ impl VElement {
         tag_name: String,
         attr: HashMap<String, String>,
         event_handlers: Vec<EventHandler>,
+        key: Option<String>,
         children: Vec<VNode>,
     ) -> VElement {
         VElement {
             tag_name,
             attr,
             event_handlers,
+            _key: key,
             children,
             dom: None,
         }

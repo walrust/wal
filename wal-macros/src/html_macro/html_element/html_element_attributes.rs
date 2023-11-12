@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use quote::quote_spanned;
+use quote::{quote, quote_spanned};
 use syn::parse::Parse;
 
 use crate::html_macro::{
@@ -11,7 +11,7 @@ use crate::html_macro::{
 pub struct HtmlElementAttributes {
     attributes: HashMap<proc_macro2::Ident, HtmlAttributeValue>,
     events: HashMap<proc_macro2::Ident, syn::ExprBlock>,
-    key: Option<HtmlAttribute>,
+    pub key: Option<HtmlAttribute>,
 }
 
 impl Parse for HtmlElementAttributes {
@@ -104,24 +104,23 @@ impl HtmlElementAttributes {
     }
 
     pub(crate) fn get_attributes_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
-        let mut attributes: Vec<proc_macro2::TokenStream> = self
+        self
             .attributes
             .iter()
             .map(|(ident, value)| -> proc_macro2::TokenStream {
                 let ident_str = ident.to_string();
                 quote_spanned!(ident.span() => (::std::string::String::from(#ident_str), #value.to_string()))
             })
-            .collect();
+            .collect()
+    }
 
-        if let Some(key_attr) = &self.key {
-            let key_ident = &key_attr.ident;
-            let key_ident_str = key_ident.to_string();
-            let key_val = &key_attr.value;
-            attributes
-                .push(quote_spanned!(key_ident.span() => (::std::string::String::from(#key_ident_str), #key_val.to_string())));
+    pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
+        if let Some(key) = &self.key {
+            let key_val = &key.value;
+            quote_spanned!(key.ident.span() => Some(#key_val.to_string()))
+        } else {
+            quote!(None)
         }
-
-        attributes
     }
 
     pub(crate) fn get_event_handlers_token_stream(&self) -> Vec<proc_macro2::TokenStream> {

@@ -23,7 +23,7 @@ impl ToTokens for HtmlForest {
             [single_tree] => single_tree.to_tokens(tokens),
             trees => tokens.extend(quote! {
                 ::wal::virtual_dom::VNode::List(
-                    ::wal::virtual_dom::VList::new(vec![#(#trees),*])
+                    ::wal::virtual_dom::VList::new(vec![#(#trees),*], None)
                 )
             }),
         }

@@ -93,6 +93,7 @@ impl ToTokens for HtmlElement {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let name = &self.name.to_string();
         let attributes = self.attributes.get_attributes_token_stream();
+        let key = self.attributes.get_key_token_stream();
         let event_handlers = self.attributes.get_event_handlers_token_stream();
         let children = &self.children;
 
@@ -104,6 +105,7 @@ impl ToTokens for HtmlElement {
                         #(#attributes,)*
                     ]),
                     ::std::vec![#(#event_handlers,)*],
+                    #key,
                     ::std::vec![#(#children,)*],
                 ),
             )

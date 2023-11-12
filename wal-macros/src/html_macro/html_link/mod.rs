@@ -1,5 +1,5 @@
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote_spanned, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::parse::{Parse, ParseStream};
 
 use self::{html_link_end_tag::HtmlLinkEndTag, html_link_start_tag::HtmlLinkStartTag};
@@ -83,6 +83,7 @@ impl HtmlLink {
 impl ToTokens for HtmlLink {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let attributes = self.get_attributes_token_stream();
+        let key = self.get_key_token_stream();
         let children = &self.children;
 
         tokens.extend(quote_spanned! { self.name.span() =>
@@ -93,6 +94,7 @@ impl ToTokens for HtmlLink {
                         #(#attributes,)*
                     ]),
                     ::std::vec::Vec::new(),
+                    #key,
                     ::std::vec![#(#children,)*],
                 ),
             )
@@ -104,14 +106,6 @@ impl HtmlLink {
     fn get_attributes_token_stream(&self) -> Vec<TokenStream> {
         let mut attributes = Vec::new();
 
-        if let Some(key_attr) = &self.key {
-            let key_ident = &key_attr.ident;
-            let key_ident_str = key_ident.to_string();
-            let key_val = &key_attr.value;
-            attributes
-                .push(quote_spanned!(key_ident.span() => (::std::string::String::from(#key_ident_str), #key_val.to_string())));
-        }
-
         let to_ident = &self.to.ident;
         let to_val = &self.to.value;
         attributes
@@ -120,5 +114,14 @@ impl HtmlLink {
             .push(quote_spanned!(to_ident.span() => (::std::string::String::from("data_link"), #to_val.to_string())));
 
         attributes
+    }
+
+    fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
+        if let Some(key) = &self.key {
+            let key_val = &key.value;
+            quote_spanned!(key.ident.span() => Some(#key_val.to_string()))
+        } else {
+            quote!(None)
+        }
     }
 }

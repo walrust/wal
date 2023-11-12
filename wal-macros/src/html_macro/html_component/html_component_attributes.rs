@@ -1,7 +1,8 @@
-use quote::{quote, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
+    Type,
 };
 
 use crate::html_macro::{
@@ -11,7 +12,7 @@ use crate::html_macro::{
 
 pub struct HtmlComponentAttributes {
     pub props: Option<HtmlComponentAttribute>,
-    _key: Option<HtmlAttribute>,
+    key: Option<HtmlAttribute>,
 }
 
 impl Parse for HtmlComponentAttributes {
@@ -23,7 +24,7 @@ impl Parse for HtmlComponentAttributes {
             let attribute = input.parse::<HtmlComponentAttribute>()?;
             Self::process_attribute(&mut props, &mut key, attribute)?;
         }
-        Ok(HtmlComponentAttributes { props, _key: key })
+        Ok(HtmlComponentAttributes { props, key })
     }
 }
 
@@ -76,6 +77,34 @@ impl HtmlComponentAttributes {
         }
         *key = Some(attribute.into());
         Ok(())
+    }
+}
+
+impl HtmlComponentAttributes {
+    pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
+        if let Some(key) = &self.key {
+            let key_val = &key.value;
+            quote_spanned!(key.ident.span() => Some(#key_val.to_string()))
+        } else {
+            quote!(None)
+        }
+    }
+
+    pub(crate) fn get_props_token_stream(&self, component_type: &Type) -> proc_macro2::TokenStream {
+        let props_type = quote_spanned!(component_type.span() => <#component_type as ::wal::component::Component>::Properties);
+
+        self.props.as_ref().map_or_else(
+            || quote_spanned!(component_type.span() => <#props_type as ::std::default::Default>::default()),
+            |props| match &props.value {
+                HtmlComponentAttributeValue::Literal(lit) => quote_spanned!(props.span() => #lit),
+                HtmlComponentAttributeValue::StructExpression(expr_struct) => {
+                    quote_spanned!(props.span() => #expr_struct)
+                }
+                HtmlComponentAttributeValue::ExpressionBlock(expr_block) => {
+                    quote_spanned!(props.span() => #[allow(unused_braces)] #expr_block)
+                }
+            },
+        )
     }
 }
 
