@@ -1,7 +1,7 @@
 // #![allow(dead_code)]
 
 use nom::branch::alt;
-use nom::bytes::complete::{tag, take_till, take_till1, take_until, take_while1};
+use nom::bytes::complete::{tag, take_till, take_till1, take_until};
 use nom::character::complete::{multispace0, multispace1};
 use nom::error::{Error, ErrorKind, ParseError};
 use nom::multi::{separated_list0, separated_list1};
@@ -10,7 +10,6 @@ use nom::{combinator::map, sequence::pair, Err, IResult};
 
 use super::types::*;
 
-// TODO: Add tests (especialy for whitespaces between sections, instruction etc.)
 pub fn parse_stylesheet(i: &str) -> IResult<&str, Stylesheet> {
     map(separated_list0(multispace1, p_section), |sections| {
         Stylesheet::new(sections)
@@ -73,10 +72,31 @@ fn p_body(i: &str) -> IResult<&str, &str> {
 }
 
 fn p_body_section(i: &str) -> IResult<&str, Section> {
-    map(
-        separated_pair(p_instruction, multispace0, p_body),
-        |(instruction, body)| Section::WithBody { instruction, body },
-    )(i)
+    let (remainig_input, (instruction, body_str)) =
+        map(separated_pair(p_instruction, multispace0, p_body), |r| r)(i)?;
+
+    println!("BODY_STR: [{}]", body_str);
+    // parse body recursively if needed
+    if let Instruction::SpecialInstruction { command, .. } = instruction {
+        if needs_nested_parsing(command) {
+            let parsed_body = parse_stylesheet(body_str.trim())?.1;
+            return Ok((
+                remainig_input,
+                Section::WithBody {
+                    instruction,
+                    body: Body::ParsedBody(parsed_body),
+                },
+            ));
+        }
+    }
+    // if not return section with literal body
+    Ok((
+        remainig_input,
+        Section::WithBody {
+            instruction,
+            body: Body::LiteralBody(body_str),
+        },
+    ))
 }
 
 fn p_bodyless_section(i: &str) -> IResult<&str, Section> {
@@ -137,6 +157,11 @@ fn is_ident_terminator(c: char) -> bool {
 fn is_instruction_terminator(c: char) -> bool {
     let terminators = ";{}";
     terminators.contains(c)
+}
+
+fn needs_nested_parsing(command: &str) -> bool {
+    let commands_to_parse = vec!["media", "scope", "supports", "document"];
+    commands_to_parse.contains(&command)
 }
 
 #[cfg(test)]
@@ -242,7 +267,7 @@ mod tests {
             section,
             Section::WithBody {
                 instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
-                body: " color: green; "
+                body: Body::LiteralBody(" color: green; ")
             }
         )
     }
@@ -258,7 +283,10 @@ mod tests {
                     command: "media",
                     parameters: " (hover: hover) "
                 },
-                body: " .class { color: green; } "
+                body: Body::ParsedBody(Stylesheet::new(vec![Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
+                    body: Body::LiteralBody(" color: green; ")
+                }]))
             }
         )
     }
@@ -283,11 +311,10 @@ mod tests {
             section,
             Section::WithBody {
                 instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
-                body: " color: green; "
+                body: Body::LiteralBody(" color: green; "),
             }
         )
     }
-
     #[test]
     fn parses_basic_stylesheet() {
         let (rest, stylesheet) =
@@ -298,11 +325,11 @@ mod tests {
             Stylesheet::new(vec![
                 Section::WithBody {
                     instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
-                    body: " color: red; "
+                    body: Body::LiteralBody(" color: red; "),
                 },
                 Section::WithBody {
                     instruction: Instruction::ComplexSelector(vec![Selector::Class("class2")]),
-                    body: " color: green; "
+                    body: Body::LiteralBody(" color: green; "),
                 },
             ])
         )
@@ -321,11 +348,11 @@ mod tests {
                 }),
                 Section::WithBody {
                     instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
-                    body: " color: red; "
+                    body: Body::LiteralBody(" color: red; "),
                 },
                 Section::WithBody {
                     instruction: Instruction::ComplexSelector(vec![Selector::Id("id1")]),
-                    body: " color: green; "
+                    body: Body::LiteralBody(" color: green; "),
                 },
             ])
         )
@@ -343,15 +370,18 @@ mod tests {
                         command: "media",
                         parameters: " (hover: hover) "
                     },
-                    body: " .class1 { color: green; } "
+                    body: Body::ParsedBody(Stylesheet::new(vec![Section::WithBody {
+                        instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
+                        body: Body::LiteralBody(" color: green; ")
+                    }]))
                 },
                 Section::WithBody {
                     instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
-                    body: " color: red; "
+                    body: Body::LiteralBody(" color: red; "),
                 },
                 Section::WithBody {
                     instruction: Instruction::ComplexSelector(vec![Selector::Id("id1")]),
-                    body: " color: green; "
+                    body: Body::LiteralBody(" color: green; "),
                 },
             ])
         )
