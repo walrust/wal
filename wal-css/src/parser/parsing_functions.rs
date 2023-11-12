@@ -2,7 +2,7 @@
 
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_till, take_till1, take_until, take_while1};
-use nom::character::complete::multispace0;
+use nom::character::complete::{multispace0, multispace1};
 use nom::error::{Error, ErrorKind, ParseError};
 use nom::multi::{separated_list0, separated_list1};
 use nom::sequence::{delimited, separated_pair, tuple};
@@ -12,7 +12,7 @@ use super::types::*;
 
 // TODO: Add tests (especialy for whitespaces between sections, instruction etc.)
 pub fn parse_stylesheet(i: &str) -> IResult<&str, Stylesheet> {
-    map(separated_list0(multispace0, p_section), |sections| {
+    map(separated_list0(multispace1, p_section), |sections| {
         Stylesheet::new(sections)
     })(i)
 }
@@ -273,6 +273,87 @@ mod tests {
                 command: "namespace",
                 parameters: " svg url('http://www.w3.org/2000/svg')"
             })
+        )
+    }
+    #[test]
+    fn parses_section() {
+        let (rest, section) = p_section(".class { color: green; }").unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            section,
+            Section::WithBody {
+                instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
+                body: " color: green; "
+            }
+        )
+    }
+
+    #[test]
+    fn parses_basic_stylesheet() {
+        let (rest, stylesheet) =
+            parse_stylesheet(".class1 { color: red; } .class2 { color: green; }").unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            stylesheet,
+            Stylesheet::new(vec![
+                Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
+                    body: " color: red; "
+                },
+                Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Class("class2")]),
+                    body: " color: green; "
+                },
+            ])
+        )
+    }
+    #[test]
+    fn parses_stylesheet_with_mixed_instructions() {
+        let (rest, stylesheet) =
+            parse_stylesheet("@namespace svg url('http://www.w3.org/2000/svg'); .class1 { color: red; } #id1 { color: green; }").unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            stylesheet,
+            Stylesheet::new(vec![
+                Section::WithoutBody(Instruction::SpecialInstruction {
+                    command: "namespace",
+                    parameters: " svg url('http://www.w3.org/2000/svg')"
+                }),
+                Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
+                    body: " color: red; "
+                },
+                Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Id("id1")]),
+                    body: " color: green; "
+                },
+            ])
+        )
+    }
+    #[test]
+    fn parses_stylesheet_with_nested_instructions() {
+        let (rest, stylesheet) =
+            parse_stylesheet("@media (hover: hover) { .class1 { color: green; } } .class1 { color: red; } #id1 { color: green; }").unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            stylesheet,
+            Stylesheet::new(vec![
+                Section::WithBody {
+                    instruction: Instruction::SpecialInstruction {
+                        command: "media",
+                        parameters: " (hover: hover) "
+                    },
+                    body: " .class1 { color: green; } "
+                },
+                Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Class("class1")]),
+                    body: " color: red; "
+                },
+                Section::WithBody {
+                    instruction: Instruction::ComplexSelector(vec![Selector::Id("id1")]),
+                    body: " color: green; "
+                },
+            ])
         )
     }
 }

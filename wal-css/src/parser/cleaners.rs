@@ -9,6 +9,7 @@ thread_local! {
         Rc::new(RefCell::new(Regex::new(r"[ \t\r\n]+").unwrap()));
 }
 
+/// removes comments and insetrs space in their position
 pub fn remove_comments(input: &str) -> String {
     COMMENTS_REGEX.with(|rgx| {
         rgx.as_ref()
@@ -18,15 +19,17 @@ pub fn remove_comments(input: &str) -> String {
     })
 }
 
+/// removes leading and trailing whitespaces and colappses each inner whitespace into single space.
 pub fn collapse_whitespaces(input: &str) -> String {
     MULTIPLE_NEWLINES_REGEX.with(|rgx| {
         rgx.as_ref()
             .borrow_mut()
             .replace_all(input, " ")
-            .into_owned()
+            .trim()
+            .to_owned()
     })
 }
-
+/// prepares css string to be parsed by removing comments, collapsin inner whitespaces and removing leading and trailing whitespaces
 pub fn clear_css(input: &str) -> String {
     collapse_whitespaces(&remove_comments(input))
 }
@@ -36,25 +39,25 @@ mod tests {
     use super::*;
     #[test]
     fn collapses_multiple_spaces() {
-        assert_eq!(" abba ", collapse_whitespaces("  abba   "))
+        assert_eq!("ab ba", collapse_whitespaces("  ab  ba  "))
     }
     #[test]
     fn collapses_multiple_newlines() {
-        assert_eq!(" abba ", collapse_whitespaces("\n\nabba\n\n\n"))
+        assert_eq!("ab ba", collapse_whitespaces("\n\nab\n\nba\n\n\n"))
     }
     #[test]
     fn collapses_multiple_tabs() {
-        assert_eq!(" abba ", collapse_whitespaces("\t\tabba\t"))
+        assert_eq!("ab ba", collapse_whitespaces("\t\tab\t\tba\t"))
     }
     #[test]
     fn collapses_multiple_returns() {
-        assert_eq!(" abba ", collapse_whitespaces("\r\rabba\r"))
+        assert_eq!("ab ba", collapse_whitespaces("\r\rab\r\rba\r"))
     }
     #[test]
     fn collapses_mixed_whitespaces() {
         assert_eq!(
-            " abba ",
-            collapse_whitespaces(" \t \n\rabba \t    \n\n\r \r")
+            "ab ba",
+            collapse_whitespaces(" \t \n\rab \t    \n\n\rba \t    \n\n\r \r")
         )
     }
 
@@ -84,7 +87,7 @@ mod tests {
     #[test]
     fn clears_css_properly() {
         assert_eq!(
-            " .container { background: yellow; } ",
+            ".container { background: yellow; }",
             clear_css(
                 "
             /* this is a comment */
