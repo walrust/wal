@@ -1,10 +1,10 @@
 use gloo::console::log;
 use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
+    events::MouseEvent,
     virtual_dom::VNode,
 };
 use wal_macros::html;
-use web_sys::MouseEvent;
 
 enum FatherMessages {
     Clicked,

@@ -1,3 +1,26 @@
+macro_rules! define_events {
+    ($($event:ident),*) => {
+        $(
+            pub struct $event(web_sys::$event);
+
+            impl Deref for $event {
+                type Target = web_sys::$event;
+
+                fn deref(&self) -> &Self::Target {
+                    &self.0
+                }
+            }
+
+            impl $event {
+                #[allow(dead_code)]
+                fn new(event: web_sys::$event) -> Self {
+                    Self(event)
+                }
+            }
+        )*
+    };
+}
+
 macro_rules! event_creators {
     ($($handler_name:ident ($event_type:ty)),*) => {
         $(
@@ -11,10 +34,10 @@ macro_rules! event_creators {
                     self.event_type.clone()
                 }
 
-                fn create_callback(&self) -> Box<dyn FnMut(&Event)> {
+                fn create_callback(&self) -> Box<dyn FnMut(&web_sys::Event)> {
                     let callback = self.callback.clone();
-                    Box::new(move |event: &Event| {
-                        let event = event.clone().unchecked_into();
+                    Box::new(move |event: &web_sys::Event| {
+                        let event = <$event_type>::new(event.clone().unchecked_into());
                         callback.emit(event);
                     })
                 }

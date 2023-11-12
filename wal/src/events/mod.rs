@@ -1,20 +1,33 @@
-use std::{borrow::Cow, fmt::Debug, hash::Hash};
+use std::{borrow::Cow, fmt::Debug, hash::Hash, ops::Deref};
 
 use gloo::events::EventListener;
 use wasm_bindgen::JsCast;
-use web_sys::{
-    AnimationEvent, DragEvent, Element, Event, FocusEvent, InputEvent, KeyboardEvent, MouseEvent,
-    PointerEvent, ProgressEvent, SubmitEvent, TouchEvent, TransitionEvent, WheelEvent,
-};
+use web_sys::Element;
 
 use crate::{component::callback::Callback, virtual_dom::Dom};
 
 #[macro_use]
 mod macros;
 
+define_events!(
+    Event,
+    AnimationEvent,
+    DragEvent,
+    FocusEvent,
+    InputEvent,
+    KeyboardEvent,
+    MouseEvent,
+    PointerEvent,
+    ProgressEvent,
+    SubmitEvent,
+    TouchEvent,
+    TransitionEvent,
+    WheelEvent
+);
+
 pub trait EventCreator {
     fn get_event_type(&self) -> Cow<'static, str>;
-    fn create_callback(&self) -> Box<dyn FnMut(&Event)>;
+    fn create_callback(&self) -> Box<dyn FnMut(&web_sys::Event)>;
 }
 
 impl Debug for dyn EventCreator {
@@ -43,16 +56,15 @@ impl EventCreator for UnspecializedEventCreator {
         self.event_type.clone()
     }
 
-    fn create_callback(&self) -> Box<dyn FnMut(&Event)> {
+    fn create_callback(&self) -> Box<dyn FnMut(&web_sys::Event)> {
         let callback = self.callback.clone();
-        Box::new(move |event: &Event| {
-            let event = event.clone();
+        Box::new(move |event: &web_sys::Event| {
+            let event = Event(event.clone());
             callback.emit(event);
         })
     }
 }
 
-// TODO maybe insted of using web_sys events we can wrap them so that the user dont have to import web_sys
 event_creators! {
     AnimationEventCreator(AnimationEvent),
     DragEventCreator(DragEvent),
