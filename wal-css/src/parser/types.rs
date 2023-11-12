@@ -30,7 +30,7 @@ impl<'a> Instruction<'a> {
             Instruction::SpecialInstruction {
                 command,
                 parameters,
-            } => format!("{command}{parameters}").to_owned(),
+            } => format!("@{} {}", command.trim(), parameters.trim()).to_owned(),
         }
     }
 }
@@ -101,7 +101,7 @@ pub enum Body<'a> {
 impl<'a> Body<'a> {
     pub fn gen_css(&self, prefix: &str) -> String {
         match self {
-            Body::LiteralBody(body_str) => body_str.to_string(),
+            Body::LiteralBody(body_str) => body_str.trim().to_string(),
             Body::ParsedBody(stylesheet) => stylesheet.gen_css(prefix),
         }
     }
@@ -299,8 +299,55 @@ mod tests {
             parameters: " svg url('http://www.w3.org/2000/svg')",
         };
         let prefix = "test-";
-        let expected = "namespace svg url('http://www.w3.org/2000/svg')".to_owned();
+        let expected = "@namespace svg url('http://www.w3.org/2000/svg')".to_owned();
 
         assert_eq!(expected, instruction.gen_css(prefix))
+    }
+    #[test]
+    fn literal_body_gens_correct_css() {
+        let body = Body::LiteralBody(" color: green; ");
+        let prefix = "test-";
+        let expected = "color: green;".to_owned();
+
+        assert_eq!(expected, body.gen_css(prefix))
+    }
+    #[test]
+    fn parsed_body_gens_correct_css() {
+        let body = Body::ParsedBody(Stylesheet::new(vec![Section::WithBody {
+            instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
+            body: Body::LiteralBody(" color: green; "),
+        }]));
+        let prefix = "test-";
+        let expected = ".test-class { color: green; }".to_owned();
+
+        assert_eq!(expected, body.gen_css(prefix))
+    }
+    #[test]
+    fn section_without_body_gens_correct_css() {
+        let section = Section::WithoutBody(Instruction::SpecialInstruction {
+            command: "namespace",
+            parameters: " svg url('http://www.w3.org/2000/svg')",
+        });
+        let prefix = "test-";
+        let expected = "@namespace svg url('http://www.w3.org/2000/svg');".to_owned();
+
+        assert_eq!(expected, section.gen_css(prefix))
+    }
+    #[test]
+    fn section_with_body_gens_correct_css() {
+        let section = Section::WithBody {
+            instruction: Instruction::SpecialInstruction {
+                command: "media",
+                parameters: " (hover: hover) ",
+            },
+            body: Body::ParsedBody(Stylesheet::new(vec![Section::WithBody {
+                instruction: Instruction::ComplexSelector(vec![Selector::Class("class")]),
+                body: Body::LiteralBody(" color: green; "),
+            }])),
+        };
+        let prefix = "test-";
+        let expected = "@media (hover: hover) { .test-class { color: green; } }";
+
+        assert_eq!(expected, section.gen_css(prefix))
     }
 }
