@@ -112,14 +112,14 @@ fn multiple_expression_and_literal_attributes() {
 }
 
 fn attributes_and_event_attributes() {
-    let html = html! { <div attr1="val1" onclick={Callback::new(|_event: web_sys::MouseEvent| {})} attr2="val2"></div> };
+    let html = html! { <div attr1="val1" onclick={Callback::new(|_event: wal::events::MouseEvent| {})} attr2="val2"></div> };
     assert_eq!(
         html,
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
             vec![EventHandler::new(onclick(Callback::new(
-                |_event: web_sys::MouseEvent| {}
+                |_event: wal::events::MouseEvent| {}
             )))],
             None,
             Vec::new(),

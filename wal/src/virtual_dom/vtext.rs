@@ -78,7 +78,7 @@ impl VText {
                 let el = Dom::create_text_node(&self.text);
 
                 match &self.dom {
-                    Some(old_child) => Dom::replace_child(ancestor, &old_child, &el),
+                    Some(old_child) => Dom::replace_child(ancestor, old_child, &el),
                     None => Dom::append_child(ancestor, &el),
                 };
                 self.dom = Some(el);

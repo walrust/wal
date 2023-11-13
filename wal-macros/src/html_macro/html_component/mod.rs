@@ -32,7 +32,7 @@ impl Parse for HtmlComponent {
 impl ToTokens for HtmlComponent {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let ty = &self.ty;
-        let props = self.attributes.get_props_token_stream(&ty);
+        let props = self.attributes.get_props_token_stream(ty);
         let key = self.attributes.get_key_token_stream();
 
         tokens.extend(quote_spanned! { self.span() =>

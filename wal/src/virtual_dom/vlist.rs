@@ -64,7 +64,7 @@ impl VList {
         for e in self
             .nodes
             .iter_mut()
-            .zip_longest(last.map_or_else(|| vec![], |x| x.nodes.into_iter().collect()))
+            .zip_longest(last.map_or_else(Vec::new, |x| x.nodes.into_iter().collect()))
         {
             match e {
                 EitherOrBoth::Both(cur, old) => cur.patch(Some(old), ancestor),

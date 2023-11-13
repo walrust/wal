@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use once_cell::unsync::Lazy;
+use once_cell::sync::Lazy;
 use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 
@@ -91,7 +91,7 @@ impl From<HtmlComponentAttributeValue> for HtmlAttributeValue {
 }
 
 // Events from https://www.w3schools.com/tags/ref_eventattributes.asp
-const EVENTS: Lazy<HashSet<&str>> = Lazy::new(|| {
+static EVENTS: Lazy<HashSet<&'static str>> = Lazy::new(|| {
     [
         // Animation Events
         "onanimationcancel",

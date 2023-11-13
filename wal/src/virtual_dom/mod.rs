@@ -46,13 +46,13 @@ impl Dom {
             .expect("Couldnt create new element")
     }
 
-    pub fn create_text_node(data: &String) -> Text {
+    pub fn create_text_node(data: &str) -> Text {
         document().create_text_node(data)
     }
 
     pub fn remove_node(node: &Node) {
         let ancestor = node.parent_node().expect("Node does not have a parent");
-        Dom::remove_child(&ancestor, &node);
+        Dom::remove_child(&ancestor, node);
     }
 
     pub fn append_child(ancestor: &Node, child: &Node) -> Node {
