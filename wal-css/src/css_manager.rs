@@ -1,4 +1,3 @@
-use gloo::console::log;
 use std::{cell::RefCell, rc::Rc};
 use web_sys::{window, Document, Element};
 

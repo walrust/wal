@@ -10,9 +10,7 @@ use super::types::*;
 
 /// parses css string into Stylesheet object
 pub fn parse_stylesheet(i: &str) -> IResult<&str, Stylesheet> {
-    map(separated_list0(multispace1, p_section), |sections| {
-        Stylesheet::new(sections)
-    })(i)
+    map(separated_list0(multispace1, p_section), Stylesheet::new)(i)
 }
 
 fn p_id(i: &str) -> IResult<&str, Selector> {
