@@ -18,30 +18,37 @@ fn main() {
 
     assert_eq!(
         html,
-        VNode::List(VList::new(vec![
-            VNode::Element(new_velement_str(
-                "div",
-                HashMap::new(),
-                Vec::new(),
-                Vec::new()
-            )),
-            VNode::Element(new_velement_str(
-                "div",
-                HashMap::new(),
-                Vec::new(),
-                vec![VNode::Element(new_velement_str(
-                    "span",
+        VNode::List(VList::new(
+            vec![
+                VNode::Element(new_velement_str(
+                    "div",
                     HashMap::new(),
                     Vec::new(),
+                    None,
+                    Vec::new()
+                )),
+                VNode::Element(new_velement_str(
+                    "div",
+                    HashMap::new(),
                     Vec::new(),
-                ))],
-            )),
-            VNode::Element(new_velement_str(
-                "div",
-                HashMap::new(),
-                Vec::new(),
-                Vec::new()
-            )),
-        ]))
+                    None,
+                    vec![VNode::Element(new_velement_str(
+                        "span",
+                        HashMap::new(),
+                        Vec::new(),
+                        None,
+                        Vec::new(),
+                    ))],
+                )),
+                VNode::Element(new_velement_str(
+                    "div",
+                    HashMap::new(),
+                    Vec::new(),
+                    None,
+                    Vec::new()
+                )),
+            ],
+            None
+        ))
     )
 }

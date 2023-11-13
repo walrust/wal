@@ -2,12 +2,12 @@ use gloo::console::log;
 use std::thread_local;
 use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
+    events::MouseEvent,
     virtual_dom::VNode,
 };
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
 use wal_macros::html;
-use web_sys::MouseEvent;
 
 thread_local! {
     static CSS1: Css = css_stylesheet!("../styles/styles1.css");

@@ -23,22 +23,26 @@ fn main() {
             "div",
             HashMap::new(),
             Vec::new(),
+            None,
             vec![
                 VNode::Element(new_velement_str(
                     "div",
                     HashMap::new(),
                     Vec::new(),
+                    None,
                     vec![
                         VNode::Element(new_velement_str(
                             "input",
                             HashMap::new(),
                             Vec::new(),
+                            None,
                             Vec::new()
                         )),
                         VNode::Element(new_velement_str(
                             "div",
                             HashMap::new(),
                             Vec::new(),
+                            None,
                             Vec::new()
                         )),
                     ],
@@ -47,6 +51,7 @@ fn main() {
                     "div",
                     HashMap::new(),
                     Vec::new(),
+                    None,
                     Vec::new()
                 )),
             ],

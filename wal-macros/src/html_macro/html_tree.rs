@@ -1,13 +1,10 @@
 use quote::ToTokens;
-use syn::{
-    ext::IdentExt,
-    parse::{Parse, ParseStream},
-};
+use syn::parse::{Parse, ParseStream};
 
 use super::{
     html_component::HtmlComponent, html_element::HtmlElement,
     html_expression_block::HtmlExpressionBlock, html_for::HtmlFor, html_fragment::HtmlFragment,
-    html_if::HtmlIfExpression, html_literal::HtmlLiteral,
+    html_if::HtmlIfExpression, html_link::HtmlLink, html_literal::HtmlLiteral, LINK_TAG,
 };
 
 pub enum HtmlTree {
@@ -18,6 +15,7 @@ pub enum HtmlTree {
     Element(HtmlElement),
     Literal(HtmlLiteral),
     ExpressionBlock(HtmlExpressionBlock),
+    Link(HtmlLink),
 }
 
 impl Parse for HtmlTree {
@@ -49,7 +47,7 @@ impl HtmlTree {
             Self::Fragment(input.parse()?)
         } else if forked_input.peek(syn::token::PathSep) {
             Self::Component(input.parse()?)
-        } else if forked_input.peek(proc_macro2::Ident::peek_any) {
+        } else if forked_input.peek(syn::Ident) {
             Self::parse_where_after_lt_is_ident(input, forked_input)?
         } else {
             Self::Element(input.parse()?)
@@ -62,7 +60,7 @@ impl HtmlTree {
         input: ParseStream,
         forked_input: ParseStream,
     ) -> syn::Result<Self> {
-        let ident = proc_macro2::Ident::parse_any(forked_input)?.to_string();
+        let ident = forked_input.parse::<proc_macro2::Ident>()?.to_string();
 
         let html_tree = if forked_input.peek(syn::token::Eq) {
             Self::Fragment(input.parse()?)
@@ -70,8 +68,13 @@ impl HtmlTree {
             .chars()
             .next()
             .map_or(false, |c| c.is_ascii_uppercase())
-            || forked_input.peek(syn::token::PathSep)
         {
+            if ident == LINK_TAG {
+                Self::Link(input.parse()?)
+            } else {
+                Self::Component(input.parse()?)
+            }
+        } else if forked_input.peek(syn::token::PathSep) {
             Self::Component(input.parse()?)
         } else {
             Self::Element(input.parse()?)
@@ -91,6 +94,7 @@ impl ToTokens for HtmlTree {
             Self::Element(html_element) => html_element.to_tokens(tokens),
             Self::Literal(html_literal) => html_literal.to_tokens(tokens),
             Self::ExpressionBlock(html_expr_block) => html_expr_block.to_tokens(tokens),
+            Self::Link(html_link) => html_link.to_tokens(tokens),
         }
     }
 }

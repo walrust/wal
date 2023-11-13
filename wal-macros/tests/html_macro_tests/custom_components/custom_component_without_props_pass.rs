@@ -20,7 +20,8 @@ fn custom_component_props_i32() {
     assert_eq!(
         html,
         VNode::Component(VComponent::new::<CustomComponentPropsI32>(
-            <CustomComponentPropsI32 as Component>::Properties::default()
+            <CustomComponentPropsI32 as Component>::Properties::default(),
+            None
         ))
     );
 }
@@ -32,7 +33,8 @@ fn custom_component_props_struct_with_default() {
         VNode::Component(VComponent::new::<
             CustomComponentPropsStructWithDefaultAndHash,
         >(
-            <CustomComponentPropsStructWithDefaultAndHash as Component>::Properties::default()
+            <CustomComponentPropsStructWithDefaultAndHash as Component>::Properties::default(),
+            None
         ))
     );
 }
@@ -42,7 +44,8 @@ fn custom_component_props_i32_with_key() {
     assert_eq!(
         html,
         VNode::Component(VComponent::new::<CustomComponentPropsI32>(
-            <CustomComponentPropsI32 as Component>::Properties::default()
+            <CustomComponentPropsI32 as Component>::Properties::default(),
+            Some("key".to_string())
         ))
     );
 }
@@ -54,7 +57,8 @@ fn custom_component_props_struct_with_default_with_key() {
         VNode::Component(VComponent::new::<
             CustomComponentPropsStructWithDefaultAndHash,
         >(
-            <CustomComponentPropsStructWithDefaultAndHash as Component>::Properties::default()
+            <CustomComponentPropsStructWithDefaultAndHash as Component>::Properties::default(),
+            Some("key".to_string())
         ))
     );
 }

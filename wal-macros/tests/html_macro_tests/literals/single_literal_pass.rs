@@ -12,7 +12,7 @@ fn main() {
 
 fn empty() {
     let html = html! {};
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(html, VNode::List(VList::new_empty(None)));
 }
 
 fn empty_string() {

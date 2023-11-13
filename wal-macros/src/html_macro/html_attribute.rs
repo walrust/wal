@@ -1,11 +1,8 @@
 use std::collections::HashSet;
 
-use once_cell::unsync::Lazy;
+use once_cell::sync::Lazy;
 use quote::ToTokens;
-use syn::{
-    ext::IdentExt,
-    parse::{Parse, ParseStream},
-};
+use syn::parse::{Parse, ParseStream};
 
 use super::html_component::html_component_attributes::{
     HtmlComponentAttribute, HtmlComponentAttributeValue,
@@ -18,7 +15,7 @@ pub struct HtmlAttribute {
 
 impl Parse for HtmlAttribute {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let ident = proc_macro2::Ident::parse_any(&input)?;
+        let ident = input.parse()?;
         input.parse::<syn::token::Eq>()?;
         let value = input.parse()?;
 
@@ -28,7 +25,7 @@ impl Parse for HtmlAttribute {
 
 impl HtmlAttribute {
     pub fn peek(input: ParseStream) -> bool {
-        input.peek(proc_macro2::Ident::peek_any)
+        input.peek(syn::Ident)
     }
 
     pub fn is_event(&self) -> bool {
@@ -94,7 +91,7 @@ impl From<HtmlComponentAttributeValue> for HtmlAttributeValue {
 }
 
 // Events from https://www.w3schools.com/tags/ref_eventattributes.asp
-const EVENTS: Lazy<HashSet<&str>> = Lazy::new(|| {
+static EVENTS: Lazy<HashSet<&'static str>> = Lazy::new(|| {
     [
         // Animation Events
         "onanimationcancel",

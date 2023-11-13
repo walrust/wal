@@ -61,7 +61,7 @@ impl PartialEq for SchedulerMessage {
         match (self, other) {
             (Self::Update(s_msg), Self::Update(o_msg)) => {
                 Weak::ptr_eq(&s_msg.any_component_node, &o_msg.any_component_node)
-                    && &s_msg.message as *const dyn Any == &o_msg.message as *const dyn Any
+                    && std::ptr::eq(&s_msg.message, &o_msg.message)
             }
             (Self::Rerender(s_msg), Self::Rerender(o_msg)) => {
                 Weak::ptr_eq(&s_msg.any_component_node, &o_msg.any_component_node)
