@@ -15,12 +15,11 @@ impl Css {
             selector_map,
         }
     }
-    /// Gets the id of the stylesheet.
+
     pub fn get_id(&self) -> u8 {
         self.stylesheet_id
     }
 
-    /// Gets the modified css from the stylesheet itself.
     pub fn get_inner_css(&self) -> String {
         self.element.text_content().unwrap()
     }

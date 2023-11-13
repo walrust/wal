@@ -15,14 +15,12 @@ pub struct CssManager {
 #[allow(dead_code)]
 impl CssManager {
     pub fn new() -> Self {
-        log!("creating css manager");
         CssManager {
             document: window().unwrap().document().unwrap(),
         }
     }
 
     pub fn attach_css(&mut self, css: &str) -> Css {
-        log!("attaching css");
         // generate new id and prefix for the css stylesheet
         let id = ID_GENERATOR.with(|gen| gen.as_ref().borrow_mut().get_new_id());
         let prefix = generate_prefix(id);

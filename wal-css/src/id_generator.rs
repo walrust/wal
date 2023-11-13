@@ -22,7 +22,6 @@ impl Default for IdGenerator {
 
 #[cfg(test)]
 mod tests {
-    use web_sys::Element;
 
     use super::IdGenerator;
 
