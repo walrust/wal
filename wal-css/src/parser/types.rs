@@ -26,7 +26,7 @@ impl<'a> Instruction<'a> {
             Instruction::SpecialInstruction {
                 command,
                 parameters,
-            } => format!("@{} {}", command.trim(), parameters.trim()).to_owned(),
+            } => format!("@{} {}", command.trim(), parameters.trim()),
         }
     }
 }
@@ -47,8 +47,8 @@ impl<'a> Selector<'a> {
     }
     pub fn gen_css(&self, prefix: &str) -> String {
         match self {
-            Selector::Id(id) => format!("#{}{}", prefix, id).to_owned(),
-            Selector::Class(class) => format!(".{}{}", prefix, class).to_owned(),
+            Selector::Id(id) => format!("#{}{}", prefix, id),
+            Selector::Class(class) => format!(".{}{}", prefix, class),
             Selector::Element(element) => element.to_string(),
         }
     }
@@ -80,10 +80,9 @@ impl<'a> Section<'a> {
                 "{} {{ {} }}",
                 instruction.gen_css(prefix),
                 body.gen_css(prefix)
-            )
-            .to_owned(),
+            ),
             Section::WithoutBody(instruction) => {
-                format!("{};", instruction.gen_css(prefix)).to_owned()
+                format!("{};", instruction.gen_css(prefix))
             }
         }
     }
