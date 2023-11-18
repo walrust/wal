@@ -266,24 +266,46 @@ mod tests {
         });
     }
 
+    fn create_any_component_node<T: Component + 'static>(
+        props: T::Properties,
+    ) -> Rc<RefCell<AnyComponentNode>> {
+        let ancestor = get_body();
+        let component = T::new(props);
+        AnyComponentNode::new_root(component, ancestor)
+    }
+
+    fn create_update_message<T: Component>(
+        message: T::Message,
+        any_component_node: Rc<RefCell<AnyComponentNode>>,
+    ) -> SchedulerMessage {
+        let weak_component_node = Rc::downgrade(&any_component_node);
+        SchedulerMessage::Update(UpdateMessage {
+            message: Box::new(message),
+            any_component_node: weak_component_node,
+        })
+    }
+
+    fn create_rerender_message(
+        any_component_node: Rc<RefCell<AnyComponentNode>>,
+        depth: u32,
+    ) -> SchedulerMessage {
+        let weak_component_node = Rc::downgrade(&any_component_node);
+        SchedulerMessage::Rerender(RerenderMessage {
+            any_component_node: weak_component_node,
+            depth,
+        })
+    }
+
     // Tests for message eq
 
     #[wasm_bindgen_test]
     fn update_messages_from_the_same_component_and_the_same_message_should_be_equal() {
         // Arrange
-        let component = TestComponent;
-        let ancestor = get_body();
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
+        let component_node = create_any_component_node::<TestComponent>(());
         let message = 0;
-        let update_message1 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(message),
-            any_component_node: weak_component_node.clone(),
-        });
-        let update_message2 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(message),
-            any_component_node: weak_component_node,
-        });
+        let update_message1 =
+            create_update_message::<TestComponent>(message, component_node.clone());
+        let update_message2 = create_update_message::<TestComponent>(message, component_node);
 
         // Act & Assert
         assert_eq!(update_message1, update_message2);
@@ -292,18 +314,9 @@ mod tests {
     #[wasm_bindgen_test]
     fn update_messages_from_the_same_component_but_with_different_message_should_not_be_equal() {
         // Arrange
-        let component = TestComponent;
-        let ancestor = get_body();
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let update_message1 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(0),
-            any_component_node: weak_component_node.clone(),
-        });
-        let update_message2 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(1),
-            any_component_node: weak_component_node,
-        });
+        let component_node = create_any_component_node::<TestComponent>(());
+        let update_message1 = create_update_message::<TestComponent>(0, component_node.clone());
+        let update_message2 = create_update_message::<TestComponent>(1, component_node);
 
         // Act & Assert
         assert_ne!(update_message1, update_message2);
@@ -312,24 +325,13 @@ mod tests {
     #[wasm_bindgen_test]
     fn update_messages_from_different_component_type_should_not_be_equal() {
         // Arrange
-        let ancestor = get_body();
         let message = 0;
 
-        let component1 = TestComponent;
-        let component_node1 = AnyComponentNode::new_root(component1, ancestor.clone());
-        let weak_component_node1 = Rc::downgrade(&component_node1);
-        let update_message1 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(message),
-            any_component_node: weak_component_node1,
-        });
+        let component_node1 = create_any_component_node::<TestComponent>(());
+        let update_message1 = create_update_message::<TestComponent>(message, component_node1);
 
-        let component2 = TestComponent2;
-        let component_node2 = AnyComponentNode::new_root(component2, ancestor);
-        let weak_component_node2 = Rc::downgrade(&component_node2);
-        let update_message2 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(message),
-            any_component_node: weak_component_node2,
-        });
+        let component_node2 = create_any_component_node::<TestComponent2>(());
+        let update_message2 = create_update_message::<TestComponent2>(message, component_node2);
 
         // Act & Assert
         assert_ne!(update_message1, update_message2);
@@ -339,45 +341,26 @@ mod tests {
     fn update_messages_from_the_same_component_type_but_different_instance_and_the_same_message_should_not_be_equal(
     ) {
         // Arrange
-        let ancestor = get_body();
         let message = 0;
 
-        let component1 = TestComponent;
-        let component_node1 = AnyComponentNode::new_root(component1, ancestor.clone());
-        let weak_component_node1 = Rc::downgrade(&component_node1);
-        let update_message1 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(message),
-            any_component_node: weak_component_node1,
-        });
+        let component_node1 = create_any_component_node::<TestComponent>(());
+        let update_message1 = create_update_message::<TestComponent>(message, component_node1);
 
-        let component2 = TestComponent;
-        let component_node2 = AnyComponentNode::new_root(component2, ancestor);
-        let weak_component_node2 = Rc::downgrade(&component_node2);
-        let update_message2 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(message),
-            any_component_node: weak_component_node2,
-        });
+        let component_node2 = create_any_component_node::<TestComponent>(());
+        let update_message2 = create_update_message::<TestComponent>(message, component_node2);
 
         // Act & Assert
         assert_ne!(update_message1, update_message2);
     }
 
     #[wasm_bindgen_test]
-    fn rerender_message_from_the_same_component_should_be_equal() {
+    fn rerender_message_from_the_same_component_and_the_same_depth_should_be_equal() {
         // Arrange
         let depth = 0;
-        let component = TestComponent;
-        let ancestor = get_body();
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let rerender_message1 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth,
-        });
-        let rerender_message2 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node,
-            depth,
-        });
+
+        let component_node = create_any_component_node::<TestComponent>(());
+        let rerender_message1 = create_rerender_message(component_node.clone(), depth);
+        let rerender_message2 = create_rerender_message(component_node, depth);
 
         // Act & Assert
         assert_eq!(rerender_message1, rerender_message2);
@@ -386,18 +369,9 @@ mod tests {
     #[wasm_bindgen_test]
     fn rerender_message_from_the_same_component_with_different_depth_should_not_be_equal() {
         // Arrange
-        let component = TestComponent;
-        let ancestor = get_body();
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let rerender_message1 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth: 0,
-        });
-        let rerender_message2 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node,
-            depth: 1,
-        });
+        let component_node = create_any_component_node::<TestComponent>(());
+        let rerender_message1 = create_rerender_message(component_node.clone(), 0);
+        let rerender_message2 = create_rerender_message(component_node, 1);
 
         // Act & Assert
         assert_ne!(rerender_message1, rerender_message2);
@@ -407,23 +381,12 @@ mod tests {
     fn rerender_message_from_the_same_component_type_but_different_instance_should_not_be_equal() {
         // Arrange
         let depth = 0;
-        let ancestor = get_body();
 
-        let component1 = TestComponent;
-        let component_node1 = AnyComponentNode::new_root(component1, ancestor.clone());
-        let weak_component_node1 = Rc::downgrade(&component_node1);
-        let rerender_message1 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node1.clone(),
-            depth,
-        });
+        let component_node1 = create_any_component_node::<TestComponent>(());
+        let rerender_message1 = create_rerender_message(component_node1, depth);
 
-        let component2 = TestComponent;
-        let component_node2 = AnyComponentNode::new_root(component2, ancestor);
-        let weak_component_node2 = Rc::downgrade(&component_node2);
-        let rerender_message2 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node2.clone(),
-            depth,
-        });
+        let component_node2 = create_any_component_node::<TestComponent>(());
+        let rerender_message2 = create_rerender_message(component_node2, depth);
 
         // Act & Assert
         assert_ne!(rerender_message1, rerender_message2);
@@ -433,23 +396,12 @@ mod tests {
     fn rerender_message_from_different_components_should_not_be_equal() {
         // Arrange
         let depth = 0;
-        let ancestor = get_body();
 
-        let component1 = TestComponent;
-        let component_node1 = AnyComponentNode::new_root(component1, ancestor.clone());
-        let weak_component_node1 = Rc::downgrade(&component_node1);
-        let rerender_message1 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node1.clone(),
-            depth,
-        });
+        let component_node1 = create_any_component_node::<TestComponent>(());
+        let rerender_message1 = create_rerender_message(component_node1, depth);
 
-        let component2 = TestComponent2;
-        let component_node2 = AnyComponentNode::new_root(component2, ancestor);
-        let weak_component_node2 = Rc::downgrade(&component_node2);
-        let rerender_message2 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node2.clone(),
-            depth,
-        });
+        let component_node2 = create_any_component_node::<TestComponent2>(());
+        let rerender_message2 = create_rerender_message(component_node2, depth);
 
         // Act & Assert
         assert_ne!(rerender_message1, rerender_message2);
@@ -458,18 +410,9 @@ mod tests {
     #[wasm_bindgen_test]
     fn rerender_message_and_update_message_should_not_be_equal() {
         // Arrange
-        let ancestor = get_body();
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let rerender_message = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth: 0,
-        });
-        let update_message = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(0),
-            any_component_node: weak_component_node,
-        });
+        let component_node = create_any_component_node::<TestComponent>(());
+        let update_message = create_update_message::<TestComponent>(0, component_node.clone());
+        let rerender_message = create_rerender_message(component_node, 0);
 
         // Act & Assert
         assert_ne!(rerender_message, update_message);
@@ -480,43 +423,16 @@ mod tests {
     #[wasm_bindgen_test]
     fn update_message_should_be_greater_than_rerender_message() {
         // Arrange
-        let ancestor = get_body();
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let rerender_message = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth: 0,
-        });
-        let update_message = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(0),
-            any_component_node: weak_component_node,
-        });
+        let component_node = create_any_component_node::<TestComponent>(());
+        let update_message = create_update_message::<TestComponent>(0, component_node.clone());
+        let rerender_message = create_rerender_message(component_node, 0);
 
         // Act & Assert
         assert_eq!(
             update_message.cmp(&rerender_message),
             std::cmp::Ordering::Greater
         );
-    }
 
-    #[wasm_bindgen_test]
-    fn rerender_message_should_be_less_than_rerender_message() {
-        // Arrange
-        let ancestor = get_body();
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let rerender_message = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth: 0,
-        });
-        let update_message = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(0),
-            any_component_node: weak_component_node,
-        });
-
-        // Act & Assert
         assert_eq!(
             rerender_message.cmp(&update_message),
             std::cmp::Ordering::Less
@@ -526,22 +442,18 @@ mod tests {
     #[wasm_bindgen_test]
     fn update_message_should_be_equal_update_message() {
         // Arrange
-        let ancestor = get_body();
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let update_message1 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(0),
-            any_component_node: weak_component_node.clone(),
-        });
-        let update_message2 = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(1),
-            any_component_node: weak_component_node,
-        });
+        let component_node = create_any_component_node::<TestComponent>(());
+        let update_message1 = create_update_message::<TestComponent>(0, component_node.clone());
+        let update_message2 = create_update_message::<TestComponent>(1, component_node);
 
         // Act & Assert
         assert_eq!(
             update_message1.cmp(&update_message2),
+            std::cmp::Ordering::Equal
+        );
+
+        assert_eq!(
+            update_message2.cmp(&update_message1),
             std::cmp::Ordering::Equal
         );
     }
@@ -550,44 +462,16 @@ mod tests {
     fn rerender_message_with_smaller_depth_should_be_greater_than_rerender_message_with_bigger_depth(
     ) {
         // Arrange
-        let ancestor = get_body();
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let rerender_message1 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth: 0,
-        });
-        let rerender_message2 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node,
-            depth: 1,
-        });
+        let component_node = create_any_component_node::<TestComponent>(());
+        let rerender_message1 = create_rerender_message(component_node.clone(), 0);
+        let rerender_message2 = create_rerender_message(component_node, 1);
 
         // Act & Assert
         assert_eq!(
             rerender_message1.cmp(&rerender_message2),
             std::cmp::Ordering::Greater
         );
-    }
 
-    #[wasm_bindgen_test]
-    fn rerender_message_with_bigger_depth_should_be_less_than_rerender_message_with_smaller_depth()
-    {
-        // Arrange
-        let ancestor = get_body();
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let rerender_message1 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth: 0,
-        });
-        let rerender_message2 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node,
-            depth: 1,
-        });
-
-        // Act & Assert
         assert_eq!(
             rerender_message2.cmp(&rerender_message1),
             std::cmp::Ordering::Less
@@ -597,21 +481,17 @@ mod tests {
     #[wasm_bindgen_test]
     fn rerender_messages_with_the_same_depth_should_be_equal() {
         // Arrange
-        let ancestor = get_body();
         let depth = 0;
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-        let rerender_message1 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth,
-        });
-        let rerender_message2 = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node,
-            depth,
-        });
+        let component_node = create_any_component_node::<TestComponent>(());
+        let rerender_message1 = create_rerender_message(component_node.clone(), depth);
+        let rerender_message2 = create_rerender_message(component_node, depth);
 
         // Act & Assert
+        assert_eq!(
+            rerender_message1.cmp(&rerender_message2),
+            std::cmp::Ordering::Equal
+        );
+
         assert_eq!(
             rerender_message2.cmp(&rerender_message1),
             std::cmp::Ordering::Equal
@@ -625,20 +505,10 @@ mod tests {
     ) {
         // Arrange
         clear_scheduler();
-        let ancestor = get_body();
-        let component = UpdateReturnsTrueComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-
-        let update_message = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(()),
-            any_component_node: weak_component_node.clone(),
-        });
-
-        let expected_rerender_message = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth: 0,
-        });
+        let component_node = create_any_component_node::<UpdateReturnsTrueComponent>(());
+        let update_message =
+            create_update_message::<UpdateReturnsTrueComponent>((), component_node.clone());
+        let expected_rerender_message = create_rerender_message(component_node.clone(), 0);
 
         // Act
         update_message.handle();
@@ -647,6 +517,7 @@ mod tests {
         SCHEDULER_INSTANCE.with(|scheduler| {
             let scheduler = scheduler.borrow();
             assert_eq!(scheduler.messages.len(), 1);
+            assert!(scheduler.is_handle_messages_scheduled);
             let rerender_message = scheduler.messages.iter().next().unwrap();
             assert_eq!(rerender_message, &expected_rerender_message);
         });
@@ -657,15 +528,9 @@ mod tests {
     ) {
         // Arrange
         clear_scheduler();
-        let ancestor = get_body();
-        let component = UpdateReturnsFalseComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-
-        let update_message = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(()),
-            any_component_node: weak_component_node.clone(),
-        });
+        let component_node = create_any_component_node::<UpdateReturnsFalseComponent>(());
+        let update_message =
+            create_update_message::<UpdateReturnsFalseComponent>((), component_node);
 
         // Act
         update_message.handle();
@@ -674,6 +539,7 @@ mod tests {
         SCHEDULER_INSTANCE.with(|scheduler| {
             let scheduler = scheduler.borrow();
             assert_eq!(scheduler.messages.len(), 0);
+            assert!(!scheduler.is_handle_messages_scheduled);
         });
     }
 
@@ -682,15 +548,9 @@ mod tests {
     ) {
         // Arrange
         clear_scheduler();
-        let ancestor = get_body();
-        let component = UpdateReturnsTrueComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
-        let weak_component_node = Rc::downgrade(&component_node);
-
-        let update_message = SchedulerMessage::Update(UpdateMessage {
-            message: Box::new(()),
-            any_component_node: weak_component_node.clone(),
-        });
+        let component_node = create_any_component_node::<UpdateReturnsTrueComponent>(());
+        let update_message =
+            create_update_message::<UpdateReturnsTrueComponent>((), component_node.clone());
 
         // Act
         drop(component_node);
@@ -700,6 +560,7 @@ mod tests {
         SCHEDULER_INSTANCE.with(|scheduler| {
             let scheduler = scheduler.borrow();
             assert_eq!(scheduler.messages.len(), 0);
+            assert!(!scheduler.is_handle_messages_scheduled);
         });
     }
 
@@ -725,9 +586,7 @@ mod tests {
     fn add_update_message_should_add_update_message_to_schedulers_queue() {
         // Arrange
         clear_scheduler();
-        let ancestor = get_body();
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
+        let component_node = create_any_component_node::<TestComponent>(());
         let weak_component_node = Rc::downgrade(&component_node);
         let message = Box::new(0);
 
@@ -754,9 +613,7 @@ mod tests {
         // Arrange
         clear_scheduler();
         let depth = 0;
-        let ancestor = get_body();
-        let component = TestComponent;
-        let component_node = AnyComponentNode::new_root(component, ancestor);
+        let component_node = create_any_component_node::<TestComponent>(());
         let weak_component_node = Rc::downgrade(&component_node);
 
         let expected_rerender_message = SchedulerMessage::Rerender(RerenderMessage {
