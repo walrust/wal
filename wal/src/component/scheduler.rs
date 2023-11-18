@@ -68,7 +68,7 @@ impl PartialEq for SchedulerMessage {
             }
             (Self::Rerender(s_msg), Self::Rerender(o_msg)) => {
                 Weak::ptr_eq(&s_msg.any_component_node, &o_msg.any_component_node)
-                // && s_msg.depth == o_msg.depth // TODO add test for it
+                    && s_msg.depth == o_msg.depth
             }
             _ => false,
         }
@@ -384,7 +384,7 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    fn rerender_message_from_the_same_component_with_different_depth_should_be_equal() {
+    fn rerender_message_from_the_same_component_with_different_depth_should_not_be_equal() {
         // Arrange
         let component = TestComponent;
         let ancestor = get_body();
@@ -400,7 +400,7 @@ mod tests {
         });
 
         // Act & Assert
-        assert_eq!(rerender_message1, rerender_message2);
+        assert_ne!(rerender_message1, rerender_message2);
     }
 
     #[wasm_bindgen_test]
