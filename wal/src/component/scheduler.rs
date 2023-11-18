@@ -276,9 +276,9 @@ mod tests {
 
     fn create_update_message<T: Component>(
         message: T::Message,
-        any_component_node: Rc<RefCell<AnyComponentNode>>,
+        any_component_node: &Rc<RefCell<AnyComponentNode>>,
     ) -> SchedulerMessage {
-        let weak_component_node = Rc::downgrade(&any_component_node);
+        let weak_component_node = Rc::downgrade(any_component_node);
         SchedulerMessage::Update(UpdateMessage {
             message: Box::new(message),
             any_component_node: weak_component_node,
@@ -286,10 +286,10 @@ mod tests {
     }
 
     fn create_rerender_message(
-        any_component_node: Rc<RefCell<AnyComponentNode>>,
+        any_component_node: &Rc<RefCell<AnyComponentNode>>,
         depth: u32,
     ) -> SchedulerMessage {
-        let weak_component_node = Rc::downgrade(&any_component_node);
+        let weak_component_node = Rc::downgrade(any_component_node);
         SchedulerMessage::Rerender(RerenderMessage {
             any_component_node: weak_component_node,
             depth,
@@ -303,9 +303,8 @@ mod tests {
         // Arrange
         let component_node = create_any_component_node::<TestComponent>(());
         let message = 0;
-        let update_message1 =
-            create_update_message::<TestComponent>(message, component_node.clone());
-        let update_message2 = create_update_message::<TestComponent>(message, component_node);
+        let update_message1 = create_update_message::<TestComponent>(message, &component_node);
+        let update_message2 = create_update_message::<TestComponent>(message, &component_node);
 
         // Act & Assert
         assert_eq!(update_message1, update_message2);
@@ -315,8 +314,8 @@ mod tests {
     fn update_messages_from_the_same_component_but_with_different_message_should_not_be_equal() {
         // Arrange
         let component_node = create_any_component_node::<TestComponent>(());
-        let update_message1 = create_update_message::<TestComponent>(0, component_node.clone());
-        let update_message2 = create_update_message::<TestComponent>(1, component_node);
+        let update_message1 = create_update_message::<TestComponent>(0, &component_node);
+        let update_message2 = create_update_message::<TestComponent>(1, &component_node);
 
         // Act & Assert
         assert_ne!(update_message1, update_message2);
@@ -328,10 +327,10 @@ mod tests {
         let message = 0;
 
         let component_node1 = create_any_component_node::<TestComponent>(());
-        let update_message1 = create_update_message::<TestComponent>(message, component_node1);
+        let update_message1 = create_update_message::<TestComponent>(message, &component_node1);
 
         let component_node2 = create_any_component_node::<TestComponent2>(());
-        let update_message2 = create_update_message::<TestComponent2>(message, component_node2);
+        let update_message2 = create_update_message::<TestComponent2>(message, &component_node2);
 
         // Act & Assert
         assert_ne!(update_message1, update_message2);
@@ -344,10 +343,10 @@ mod tests {
         let message = 0;
 
         let component_node1 = create_any_component_node::<TestComponent>(());
-        let update_message1 = create_update_message::<TestComponent>(message, component_node1);
+        let update_message1 = create_update_message::<TestComponent>(message, &component_node1);
 
         let component_node2 = create_any_component_node::<TestComponent>(());
-        let update_message2 = create_update_message::<TestComponent>(message, component_node2);
+        let update_message2 = create_update_message::<TestComponent>(message, &component_node2);
 
         // Act & Assert
         assert_ne!(update_message1, update_message2);
@@ -359,8 +358,8 @@ mod tests {
         let depth = 0;
 
         let component_node = create_any_component_node::<TestComponent>(());
-        let rerender_message1 = create_rerender_message(component_node.clone(), depth);
-        let rerender_message2 = create_rerender_message(component_node, depth);
+        let rerender_message1 = create_rerender_message(&component_node, depth);
+        let rerender_message2 = create_rerender_message(&component_node, depth);
 
         // Act & Assert
         assert_eq!(rerender_message1, rerender_message2);
@@ -370,8 +369,8 @@ mod tests {
     fn rerender_message_from_the_same_component_with_different_depth_should_not_be_equal() {
         // Arrange
         let component_node = create_any_component_node::<TestComponent>(());
-        let rerender_message1 = create_rerender_message(component_node.clone(), 0);
-        let rerender_message2 = create_rerender_message(component_node, 1);
+        let rerender_message1 = create_rerender_message(&component_node, 0);
+        let rerender_message2 = create_rerender_message(&component_node, 1);
 
         // Act & Assert
         assert_ne!(rerender_message1, rerender_message2);
@@ -383,10 +382,10 @@ mod tests {
         let depth = 0;
 
         let component_node1 = create_any_component_node::<TestComponent>(());
-        let rerender_message1 = create_rerender_message(component_node1, depth);
+        let rerender_message1 = create_rerender_message(&component_node1, depth);
 
         let component_node2 = create_any_component_node::<TestComponent>(());
-        let rerender_message2 = create_rerender_message(component_node2, depth);
+        let rerender_message2 = create_rerender_message(&component_node2, depth);
 
         // Act & Assert
         assert_ne!(rerender_message1, rerender_message2);
@@ -398,10 +397,10 @@ mod tests {
         let depth = 0;
 
         let component_node1 = create_any_component_node::<TestComponent>(());
-        let rerender_message1 = create_rerender_message(component_node1, depth);
+        let rerender_message1 = create_rerender_message(&component_node1, depth);
 
         let component_node2 = create_any_component_node::<TestComponent2>(());
-        let rerender_message2 = create_rerender_message(component_node2, depth);
+        let rerender_message2 = create_rerender_message(&component_node2, depth);
 
         // Act & Assert
         assert_ne!(rerender_message1, rerender_message2);
@@ -411,8 +410,8 @@ mod tests {
     fn rerender_message_and_update_message_should_not_be_equal() {
         // Arrange
         let component_node = create_any_component_node::<TestComponent>(());
-        let update_message = create_update_message::<TestComponent>(0, component_node.clone());
-        let rerender_message = create_rerender_message(component_node, 0);
+        let update_message = create_update_message::<TestComponent>(0, &component_node);
+        let rerender_message = create_rerender_message(&component_node, 0);
 
         // Act & Assert
         assert_ne!(rerender_message, update_message);
@@ -424,8 +423,8 @@ mod tests {
     fn update_message_should_be_greater_than_rerender_message() {
         // Arrange
         let component_node = create_any_component_node::<TestComponent>(());
-        let update_message = create_update_message::<TestComponent>(0, component_node.clone());
-        let rerender_message = create_rerender_message(component_node, 0);
+        let update_message = create_update_message::<TestComponent>(0, &component_node);
+        let rerender_message = create_rerender_message(&component_node, 0);
 
         // Act & Assert
         assert_eq!(
@@ -443,8 +442,8 @@ mod tests {
     fn update_message_should_be_equal_update_message() {
         // Arrange
         let component_node = create_any_component_node::<TestComponent>(());
-        let update_message1 = create_update_message::<TestComponent>(0, component_node.clone());
-        let update_message2 = create_update_message::<TestComponent>(1, component_node);
+        let update_message1 = create_update_message::<TestComponent>(0, &component_node);
+        let update_message2 = create_update_message::<TestComponent>(1, &component_node);
 
         // Act & Assert
         assert_eq!(
@@ -463,8 +462,8 @@ mod tests {
     ) {
         // Arrange
         let component_node = create_any_component_node::<TestComponent>(());
-        let rerender_message1 = create_rerender_message(component_node.clone(), 0);
-        let rerender_message2 = create_rerender_message(component_node, 1);
+        let rerender_message1 = create_rerender_message(&component_node, 0);
+        let rerender_message2 = create_rerender_message(&component_node, 1);
 
         // Act & Assert
         assert_eq!(
@@ -483,8 +482,8 @@ mod tests {
         // Arrange
         let depth = 0;
         let component_node = create_any_component_node::<TestComponent>(());
-        let rerender_message1 = create_rerender_message(component_node.clone(), depth);
-        let rerender_message2 = create_rerender_message(component_node, depth);
+        let rerender_message1 = create_rerender_message(&component_node, depth);
+        let rerender_message2 = create_rerender_message(&component_node, depth);
 
         // Act & Assert
         assert_eq!(
@@ -507,8 +506,8 @@ mod tests {
         clear_scheduler();
         let component_node = create_any_component_node::<UpdateReturnsTrueComponent>(());
         let update_message =
-            create_update_message::<UpdateReturnsTrueComponent>((), component_node.clone());
-        let expected_rerender_message = create_rerender_message(component_node.clone(), 0);
+            create_update_message::<UpdateReturnsTrueComponent>((), &component_node);
+        let expected_rerender_message = create_rerender_message(&component_node, 0);
 
         // Act
         update_message.handle();
@@ -530,7 +529,7 @@ mod tests {
         clear_scheduler();
         let component_node = create_any_component_node::<UpdateReturnsFalseComponent>(());
         let update_message =
-            create_update_message::<UpdateReturnsFalseComponent>((), component_node);
+            create_update_message::<UpdateReturnsFalseComponent>((), &component_node);
 
         // Act
         update_message.handle();
@@ -550,7 +549,7 @@ mod tests {
         clear_scheduler();
         let component_node = create_any_component_node::<UpdateReturnsTrueComponent>(());
         let update_message =
-            create_update_message::<UpdateReturnsTrueComponent>((), component_node.clone());
+            create_update_message::<UpdateReturnsTrueComponent>((), &component_node);
 
         // Act
         drop(component_node);
@@ -587,16 +586,14 @@ mod tests {
         // Arrange
         clear_scheduler();
         let component_node = create_any_component_node::<TestComponent>(());
+        let message = 0;
+        let expected_update_message =
+            create_update_message::<TestComponent>(message, &component_node);
+        let message_boxed = Box::new(message);
         let weak_component_node = Rc::downgrade(&component_node);
-        let message = Box::new(0);
-
-        let expected_update_message = SchedulerMessage::Update(UpdateMessage {
-            message: message.clone(),
-            any_component_node: weak_component_node.clone(),
-        });
 
         // Act
-        Scheduler::add_update_message(message, weak_component_node);
+        Scheduler::add_update_message(message_boxed, weak_component_node);
 
         // Assert
         SCHEDULER_INSTANCE.with(|scheduler| {
@@ -614,12 +611,8 @@ mod tests {
         clear_scheduler();
         let depth = 0;
         let component_node = create_any_component_node::<TestComponent>(());
+        let expected_rerender_message = create_rerender_message(&component_node, depth);
         let weak_component_node = Rc::downgrade(&component_node);
-
-        let expected_rerender_message = SchedulerMessage::Rerender(RerenderMessage {
-            any_component_node: weak_component_node.clone(),
-            depth,
-        });
 
         // Act
         Scheduler::add_rerender_message(weak_component_node, depth);
