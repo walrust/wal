@@ -68,6 +68,7 @@ impl PartialEq for SchedulerMessage {
             }
             (Self::Rerender(s_msg), Self::Rerender(o_msg)) => {
                 Weak::ptr_eq(&s_msg.any_component_node, &o_msg.any_component_node)
+                // && s_msg.depth == o_msg.depth // TODO add test for it
             }
             _ => false,
         }
@@ -209,6 +210,44 @@ mod tests {
         }
     }
 
+    struct UpdateReturnsTrueComponent;
+
+    impl Component for UpdateReturnsTrueComponent {
+        type Message = ();
+        type Properties = ();
+
+        fn new(_props: Self::Properties) -> Self {
+            UpdateReturnsTrueComponent
+        }
+
+        fn view(&self, _behavior: &mut impl crate::component::behavior::Behavior<Self>) -> VNode {
+            VNode::List(VList::new_empty(None))
+        }
+
+        fn update(&mut self, _message: Self::Message) -> bool {
+            true
+        }
+    }
+
+    struct UpdateReturnsFalseComponent;
+
+    impl Component for UpdateReturnsFalseComponent {
+        type Message = ();
+        type Properties = ();
+
+        fn new(_props: Self::Properties) -> Self {
+            UpdateReturnsFalseComponent
+        }
+
+        fn view(&self, _behavior: &mut impl crate::component::behavior::Behavior<Self>) -> VNode {
+            VNode::List(VList::new_empty(None))
+        }
+
+        fn update(&mut self, _message: Self::Message) -> bool {
+            false
+        }
+    }
+
     fn get_body() -> web_sys::Node {
         web_sys::window()
             .unwrap()
@@ -217,6 +256,14 @@ mod tests {
             .body()
             .unwrap()
             .into()
+    }
+
+    fn clear_scheduler() {
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            let mut scheduler = scheduler.borrow_mut();
+            scheduler.messages.clear();
+            scheduler.is_handle_messages_scheduled = false;
+        });
     }
 
     // Tests for message eq
@@ -569,5 +616,164 @@ mod tests {
             rerender_message2.cmp(&rerender_message1),
             std::cmp::Ordering::Equal
         );
+    }
+
+    // Tests update message handle
+
+    #[wasm_bindgen_test]
+    fn handle_update_message_when_update_returns_true_should_add_rerender_message_to_schedulers_queue(
+    ) {
+        // Arrange
+        clear_scheduler();
+        let ancestor = get_body();
+        let component = UpdateReturnsTrueComponent;
+        let component_node = AnyComponentNode::new_root(component, ancestor);
+        let weak_component_node = Rc::downgrade(&component_node);
+
+        let update_message = SchedulerMessage::Update(UpdateMessage {
+            message: Box::new(()),
+            any_component_node: weak_component_node.clone(),
+        });
+
+        let expected_rerender_message = SchedulerMessage::Rerender(RerenderMessage {
+            any_component_node: weak_component_node.clone(),
+            depth: 0,
+        });
+
+        // Act
+        update_message.handle();
+
+        // Assert
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            let scheduler = scheduler.borrow();
+            assert_eq!(scheduler.messages.len(), 1);
+            let rerender_message = scheduler.messages.iter().next().unwrap();
+            assert_eq!(rerender_message, &expected_rerender_message);
+        });
+    }
+
+    #[wasm_bindgen_test]
+    fn handle_update_message_when_update_returns_false_should_not_add_rerender_message_to_schedulers_queue(
+    ) {
+        // Arrange
+        clear_scheduler();
+        let ancestor = get_body();
+        let component = UpdateReturnsFalseComponent;
+        let component_node = AnyComponentNode::new_root(component, ancestor);
+        let weak_component_node = Rc::downgrade(&component_node);
+
+        let update_message = SchedulerMessage::Update(UpdateMessage {
+            message: Box::new(()),
+            any_component_node: weak_component_node.clone(),
+        });
+
+        // Act
+        update_message.handle();
+
+        // Assert
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            let scheduler = scheduler.borrow();
+            assert_eq!(scheduler.messages.len(), 0);
+        });
+    }
+
+    #[wasm_bindgen_test]
+    fn handle_update_message_with_outdated_weak_reference_should_not_add_rerender_message_to_schedulers_queue(
+    ) {
+        // Arrange
+        clear_scheduler();
+        let ancestor = get_body();
+        let component = UpdateReturnsTrueComponent;
+        let component_node = AnyComponentNode::new_root(component, ancestor);
+        let weak_component_node = Rc::downgrade(&component_node);
+
+        let update_message = SchedulerMessage::Update(UpdateMessage {
+            message: Box::new(()),
+            any_component_node: weak_component_node.clone(),
+        });
+
+        // Act
+        drop(component_node);
+        update_message.handle();
+
+        // Assert
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            let scheduler = scheduler.borrow();
+            assert_eq!(scheduler.messages.len(), 0);
+        });
+    }
+
+    // Tests schedule_handle_messages
+
+    #[wasm_bindgen_test]
+    fn schedule_handle_messages_should_schedule_handle_messages() {
+        // Act
+        clear_scheduler();
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            scheduler.borrow_mut().schedule_handle_messages();
+        });
+
+        // Assert
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            assert!(scheduler.borrow().is_handle_messages_scheduled);
+        });
+    }
+
+    // Tests add messages
+
+    #[wasm_bindgen_test]
+    fn add_update_message_should_add_update_message_to_schedulers_queue() {
+        // Arrange
+        clear_scheduler();
+        let ancestor = get_body();
+        let component = TestComponent;
+        let component_node = AnyComponentNode::new_root(component, ancestor);
+        let weak_component_node = Rc::downgrade(&component_node);
+        let message = Box::new(0);
+
+        let expected_update_message = SchedulerMessage::Update(UpdateMessage {
+            message: message.clone(),
+            any_component_node: weak_component_node.clone(),
+        });
+
+        // Act
+        Scheduler::add_update_message(message, weak_component_node);
+
+        // Assert
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            let scheduler = scheduler.borrow();
+            assert_eq!(scheduler.messages.len(), 1);
+            assert!(scheduler.is_handle_messages_scheduled);
+            let update_message = scheduler.messages.iter().next().unwrap();
+            assert_eq!(update_message, &expected_update_message);
+        });
+    }
+
+    #[wasm_bindgen_test]
+    fn add_rerender_message_should_add_rerender_message_to_schedulers_queue() {
+        // Arrange
+        clear_scheduler();
+        let depth = 0;
+        let ancestor = get_body();
+        let component = TestComponent;
+        let component_node = AnyComponentNode::new_root(component, ancestor);
+        let weak_component_node = Rc::downgrade(&component_node);
+
+        let expected_rerender_message = SchedulerMessage::Rerender(RerenderMessage {
+            any_component_node: weak_component_node.clone(),
+            depth,
+        });
+
+        // Act
+        Scheduler::add_rerender_message(weak_component_node, depth);
+
+        // Assert
+        SCHEDULER_INSTANCE.with(|scheduler| {
+            let scheduler = scheduler.borrow();
+            assert_eq!(scheduler.messages.len(), 1);
+            assert!(scheduler.is_handle_messages_scheduled);
+            let rerender_message = scheduler.messages.iter().next().unwrap();
+            assert_eq!(rerender_message, &expected_rerender_message);
+        });
     }
 }
