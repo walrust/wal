@@ -1,42 +1,33 @@
 pub mod builder;
 
 use std::{
-    any::Any,
     cell::RefCell,
     collections::HashMap,
-    rc::{Rc, Weak},
+    rc::Rc,
 };
 
 use gloo::utils::{body, history, window};
 use wal::{
-    component::{node::AnyComponentNode, Component},
+    component::node::AnyComponentNode,
     virtual_dom::dom,
 };
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{Element, Event, EventTarget};
 
 pub struct PageRenderer {
-    props: Box<dyn Any>,
-    generator: Box<dyn Fn(Box<dyn Any>) -> Rc<RefCell<AnyComponentNode>>>,
+    generator: Box<dyn Fn() -> Rc<RefCell<AnyComponentNode>>>,
 }
 
 impl PageRenderer {
-    pub fn new<C>(
-        generator: impl Fn(Box<dyn Any>) -> Rc<RefCell<AnyComponentNode>> + 'static,
-        props: C::Properties,
-    ) -> PageRenderer
-    where
-        C: Component + 'static,
+    pub fn new(generator: impl Fn() -> Rc<RefCell<AnyComponentNode>> + 'static) -> PageRenderer
     {
         PageRenderer {
             generator: Box::new(generator),
-            props: Box::new(props),
         }
     }
 
     pub fn render(&self) -> Rc<RefCell<AnyComponentNode>> {
-        todo!()
-        // (*self.generator)(self.props)
+        (*self.generator)()
     }
 }
 
@@ -62,14 +53,10 @@ impl Router {
     }
 
     pub(crate) fn new(pages: HashMap<&'static str, PageRenderer>) -> Router {
-        let mut pages = pages;
-        let cur_path = "/".to_string();
-        let page = pages.get_mut(cur_path.as_str()).unwrap().render();
-        page.borrow_mut().patch(None, &dom::get_root_element());
         Router {
             pages,
-            cur_path,
-            cur_page: Some(page),
+            cur_path: "/404".to_string(),
+            cur_page: None,
         }
     }
 
@@ -88,26 +75,28 @@ impl Router {
             let mut router = router.borrow_mut();
             *router = self;
         });
+
+        Self::navigate_to(window().location().pathname().unwrap().as_str());
     }
 }
 
 impl Router {
     fn route() {
         ROUTER.with(|router| {
-            let mut router = router.borrow_mut();
             let pathname = window().location().pathname().unwrap();
+            let mut router = router.borrow_mut();
             if pathname.eq(&router.cur_path) {
                 return;
             }
 
-            let page_renderer = router.pages.get_mut(pathname.as_str()).unwrap();
+            let page_renderer = router.pages.get_mut(pathname.as_str()).unwrap();          
             let new_page = page_renderer.render();
-            let old_page = router.cur_page.take().unwrap();
+            let old_page = router.cur_page.take();
 
             new_page.borrow_mut().view();
             new_page
                 .borrow_mut()
-                .patch(Some(old_page), &dom::get_root_element());
+                .patch(old_page, &dom::get_root_element());
 
             router.cur_page = Some(new_page);
             router.cur_path = pathname;
@@ -126,6 +115,13 @@ impl Router {
     }
 
     fn navigate_to(url: &str) {
+        let mut url = url;
+        ROUTER.with(|router| {
+            if !router.borrow().pages.contains_key(url) {
+                url = "/";
+            }
+        });
+
         history()
             .push_state_with_url(&JsValue::null(), "", Some(url))
             .unwrap();

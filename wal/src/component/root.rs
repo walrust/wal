@@ -2,7 +2,7 @@ use crate::virtual_dom::VNode;
 
 use super::{behavior::Behavior, Component};
 
-pub trait RootComponent: Sized{
+pub trait RootComponent: Sized {
     type Message: 'static;
     fn new_root() -> Self;
     fn view(&self, behavior: &mut impl Behavior<Self>) -> VNode;
@@ -30,30 +30,42 @@ impl<T: RootComponent> Component for T {
 mod tests {
     use wasm_bindgen_test::wasm_bindgen_test;
 
-    use crate::{virtual_dom::{VNode, VText, dom}, component::{behavior::Behavior, Component, node::AnyComponentNode}};
+    use crate::{
+        component::{
+            behavior::{AnyComponentBehavior, Behavior},
+            Component,
+        },
+        virtual_dom::{VNode, VText},
+    };
 
     use super::RootComponent;
 
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
     struct RootComp(i32);
-    enum RootMessage { Add, Substract, Nothing }
+    enum RootMessage {
+        Add,
+        Substract,
+        Nothing,
+    }
     impl RootComponent for RootComp {
-        type Message=RootMessage;
-        fn new_root() -> Self { RootComp(0x859) }
-        fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode { 
+        type Message = RootMessage;
+        fn new_root() -> Self {
+            RootComp(0x859)
+        }
+        fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
             VText::new("RootComp").into()
         }
-        fn update(&mut self, message: Self::Message) -> bool { 
+        fn update(&mut self, message: Self::Message) -> bool {
             match message {
                 RootMessage::Add => {
                     self.0 += 1;
                     true
-                },
+                }
                 RootMessage::Substract => {
                     self.0 -= 1;
                     true
-                },
+                }
                 RootMessage::Nothing => false,
             }
         }
@@ -63,7 +75,7 @@ mod tests {
     fn root_component_new() {
         let root1: RootComp = RootComponent::new_root();
         let root2: RootComp = Component::new(());
-        
+
         assert_eq!(root1.0, root2.0);
     }
 
@@ -71,7 +83,7 @@ mod tests {
     fn root_component_update() {
         let mut root1: RootComp = RootComp::new_root();
         let mut root2: RootComp = Component::new(());
-        
+
         let add1 = RootComponent::update(&mut root1, RootMessage::Add);
         let add2 = Component::update(&mut root2, RootMessage::Add);
         assert_eq!(add1, add2);
@@ -88,21 +100,16 @@ mod tests {
         assert_eq!(root1.0, root2.0);
     }
 
-
     #[wasm_bindgen_test]
     fn root_component_view() {
-        let root1: RootComp = RootComp::new_root();
-        let root2: RootComp = Component::new(());
-        let any_root1 = AnyComponentNode::new_root(root1, dom::get_root_element());
-        let any_root2 = AnyComponentNode::new_root(root2, dom::get_root_element());
+        let mut root1: RootComp = RootComp::new_root();
+        let mut root2: RootComp = Component::new(());
+        let mut behavior1 = AnyComponentBehavior::new();
+        let mut behavior2 = AnyComponentBehavior::new();
 
-        let mut borrowed1 = any_root1.borrow_mut();
-        let mut borrowed2 = any_root2.borrow_mut();
-        borrowed1.view();
-        borrowed2.view();
+        let vdom1 = RootComponent::view(&mut root1, &mut behavior1);
+        let vdom2 = Component::view(&mut root2, &mut behavior2);
 
-        assert_eq!(borrowed1.vdom.eq(&borrowed2.vdom), true);
+        assert_eq!(vdom1.eq(&vdom2), true);
     }
-
-
 }

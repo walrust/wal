@@ -1,6 +1,6 @@
-use std::{any::Any, collections::HashMap, marker::PhantomData};
+use std::{collections::HashMap, marker::PhantomData};
 
-use wal::component::{node::AnyComponentNode, Component};
+use wal::component::{node::AnyComponentNode, root::RootComponent};
 
 use super::{PageRenderer, Router};
 
@@ -21,17 +21,16 @@ impl RouterBuilder<Invalid> {
 }
 
 impl<T> RouterBuilder<T> {
-    pub fn add_page<C>(self, path: &'static str, props: C::Properties) -> RouterBuilder<Valid>
+    pub fn add_page<C>(self, path: &'static str) -> RouterBuilder<Valid>
     where
-        C: Component + 'static,
+        C: RootComponent + 'static,
     {
-        let generator = Box::new(|props: Box<dyn Any>| {
-            let props = props.downcast::<C::Properties>().unwrap();
-            AnyComponentNode::new(C::new(*props), wal::virtual_dom::dom::get_root_element())
+        let generator = Box::new(|| {
+            AnyComponentNode::new(C::new_root(), wal::virtual_dom::dom::get_root_element())
         });
 
         let mut pages = self.pages;
-        pages.insert(path, PageRenderer::new::<C>(generator, props));
+        pages.insert(path, PageRenderer::new(generator));
 
         RouterBuilder {
             pages,

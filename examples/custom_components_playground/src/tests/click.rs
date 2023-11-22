@@ -1,7 +1,7 @@
 use gloo::console::log;
 use std::thread_local;
 use wal::{
-    component::{behavior::Behavior, callback::Callback, Component},
+    component::{behavior::Behavior, callback::Callback, Component, root::RootComponent},
     events::MouseEvent,
     virtual_dom::VNode,
 };
@@ -22,11 +22,10 @@ struct FatherProperties;
 
 struct FatherComponent(i32);
 
-impl Component for FatherComponent {
+impl RootComponent for FatherComponent {
     type Message = FatherMessages;
-    type Properties = FatherProperties;
 
-    fn new(_props: Self::Properties) -> Self {
+    fn new_root() -> Self {
         Self(0)
     }
 
@@ -90,7 +89,7 @@ impl Component for ChildComponent {
 
 pub fn start() {
     RouterBuilder::new()
-        .add_page::<FatherComponent>("/", FatherProperties)
+        .add_page::<FatherComponent>("/")
         .build()
         .start();
 }

@@ -1,6 +1,6 @@
 use wal::{
     self,
-    component::{behavior::Behavior, callback::Callback, Component},
+    component::{behavior::Behavior, callback::Callback, root::RootComponent},
     events::MouseEvent,
     utils::debug,
 };
@@ -8,11 +8,10 @@ use wal_macros::html;
 use wal_routing::prelude::RouterBuilder;
 
 struct NavigationComp;
-impl Component for NavigationComp {
+impl RootComponent for NavigationComp {
     type Message = ();
-    type Properties = ();
 
-    fn new(_props: Self::Properties) -> Self {
+    fn new_root() -> Self {
         NavigationComp
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
@@ -31,12 +30,9 @@ impl Component for NavigationComp {
 }
 
 struct RootComp;
-#[derive(Hash)]
-struct RootProp;
-impl Component for RootComp {
+impl RootComponent for RootComp {
     type Message = ();
-    type Properties = RootProp;
-    fn new(_props: Self::Properties) -> Self {
+    fn new_root() -> Self {
         RootComp
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
@@ -56,12 +52,9 @@ impl Component for RootComp {
 }
 
 struct AltComp;
-#[derive(Hash)]
-struct AltProp;
-impl Component for AltComp {
+impl RootComponent for AltComp {
     type Message = ();
-    type Properties = AltProp;
-    fn new(_props: Self::Properties) -> Self {
+    fn new_root() -> Self {
         AltComp
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
@@ -81,12 +74,9 @@ impl Component for AltComp {
 }
 
 struct AnotherComp;
-#[derive(Hash)]
-struct AnotherProp;
-impl Component for AnotherComp {
+impl RootComponent for AnotherComp {
     type Message = ();
-    type Properties = AnotherProp;
-    fn new(_props: Self::Properties) -> Self {
+    fn new_root() -> Self {
         AnotherComp
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
@@ -106,11 +96,10 @@ impl Component for AnotherComp {
 }
 
 fn main() {
-    // wal::app::start(RootComp);
     RouterBuilder::new()
-        .add_page::<RootComp>("/", RootProp {})
-        .add_page::<AltComp>("/alt", AltProp {})
-        .add_page::<AnotherComp>("/another", AnotherProp {})
+        .add_page::<RootComp>("/")
+        .add_page::<AltComp>("/alt")
+        .add_page::<AnotherComp>("/another")
         .build()
         .start();
 }

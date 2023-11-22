@@ -1,6 +1,6 @@
 use gloo::timers::callback::Timeout;
 use wal::{
-    component::{callback::Callback, Component, behavior::Behavior},
+    component::{callback::Callback, Component, behavior::Behavior, root::RootComponent},
     virtual_dom::VNode, utils::debug,
 };
 use wal_macros::html;
@@ -14,12 +14,11 @@ enum FatherMessages {
 struct FatherProperties(i32);
 
 struct FatherComponent(i32);
-impl Component for FatherComponent {
+impl RootComponent for FatherComponent {
     type Message = FatherMessages;
-    type Properties = FatherProperties;
 
-    fn new(props: Self::Properties) -> Self {
-        Self(props.0)
+    fn new_root() -> Self {
+        Self(1)
     }
 
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
@@ -86,7 +85,7 @@ impl Drop for ChildComponent {
 #[allow(dead_code)]
 pub fn start() {
     RouterBuilder::new()
-        .add_page::<FatherComponent>("/", FatherProperties(1))
+        .add_page::<FatherComponent>("/")
         .build()
         .start();
 }
