@@ -37,3 +37,41 @@ impl Index<&str> for Css {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use super::Css;
+    use wasm_bindgen_test::*;
+    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+
+    fn get_document() -> web_sys::Document {
+        web_sys::window().unwrap().document().unwrap()
+    }
+
+    #[wasm_bindgen_test]
+    fn indexing_operator_yields_result_if_entry_present() {
+        let mut selector_map = HashMap::new();
+        selector_map.insert("class1".to_owned(), "_1-class1".to_owned());
+
+        let element = get_document().create_element("style").unwrap();
+
+        let css = Css::new(1, element, selector_map);
+
+        assert_eq!(css["class1"], "_1-class1");
+    }
+
+    #[wasm_bindgen_test]
+    #[should_panic]
+    fn indexing_operator_panicst_if_entry_not_present() {
+        let mut selector_map = HashMap::new();
+        selector_map.insert("class1".to_owned(), "_1-class1".to_owned());
+
+        let element = get_document().create_element("style").unwrap();
+
+        let css = Css::new(1, element, selector_map);
+
+        let _x = &css["clas_not_included"];
+    }
+}
