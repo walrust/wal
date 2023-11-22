@@ -1,5 +1,7 @@
-use wal::virtual_dom::{VNode, VText};
+use wal::virtual_dom::{VList, VNode, VText};
 use wal_macros::html;
+
+include!("../utils/wrap_in_list.rs");
 
 fn main() {
     let html = html! {
@@ -9,5 +11,5 @@ fn main() {
         else if let Some(val) = Some("hello4") { val }
         else { "hello5" }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello4")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello4"))));
 }

@@ -15,30 +15,32 @@ fn main() {
 }
 
 fn single_specialized_event_attribute() {
-    let html = html! { <div onclick={Callback::new(|_event: web_sys::MouseEvent| {})}></div> };
+    let html = html! { <div onclick={Callback::new(|_event: wal::events::MouseEvent| {})}></div> };
     assert_eq!(
         html,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
             vec![EventHandler::new(onclick(Callback::new(
-                |_event: web_sys::MouseEvent| {}
+                |_event: wal::events::MouseEvent| {}
             )))],
+            None,
             Vec::new(),
         ))
     );
 }
 
 fn single_unspecialized_event_attribute() {
-    let html = html! { <div oncopy={Callback::new(|_event: web_sys::Event| {})}></div> };
+    let html = html! { <div oncopy={Callback::new(|_event: wal::events::Event| {})}></div> };
     assert_eq!(
         html,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
             vec![EventHandler::new(oncopy(Callback::new(
-                |_event: web_sys::Event| {}
+                |_event: wal::events::Event| {}
             )))],
+            None,
             Vec::new(),
         ))
     );
@@ -47,8 +49,8 @@ fn single_unspecialized_event_attribute() {
 fn multiple_event_attributes() {
     let html = html! {
         <div
-            onclick={Callback::new(|_event: web_sys::MouseEvent| {})}
-            oncopy={Callback::new(|_event: web_sys::Event| {})}>
+            onclick={Callback::new(|_event: wal::events::MouseEvent| {})}
+            oncopy={Callback::new(|_event: wal::events::Event| {})}>
         </div>
     };
     assert_eq!(
@@ -57,9 +59,10 @@ fn multiple_event_attributes() {
             "div",
             HashMap::new(),
             vec![
-                EventHandler::new(onclick(Callback::new(|_event: web_sys::MouseEvent| {}))),
-                EventHandler::new(oncopy(Callback::new(|_event: web_sys::Event| {}))),
+                EventHandler::new(onclick(Callback::new(|_event: wal::events::MouseEvent| {}))),
+                EventHandler::new(oncopy(Callback::new(|_event: wal::events::Event| {}))),
             ],
+            None,
             Vec::new(),
         ))
     );

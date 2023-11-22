@@ -25,13 +25,14 @@ pub struct VComponent {
     props: AnyProps,
     hash: PropertiesHash,
     generator: ComponentNodeGenerator,
+    _key: Option<String>, // TODO: add logic for key attribute
 
     // Sth stinks here
     pub comp: Option<Rc<RefCell<AnyComponentNode>>>,
 }
 
 impl VComponent {
-    pub fn new<C>(props: C::Properties) -> VComponent
+    pub fn new<C>(props: C::Properties, key: Option<String>) -> VComponent
     where
         C: Component + 'static,
     {
@@ -41,6 +42,7 @@ impl VComponent {
             props: Some(Box::new(props)),
             generator,
             hash,
+            _key: key,
             comp: None,
         }
     }

@@ -13,19 +13,19 @@ error: Expected a literal or an expression block
 error: expected `=`
  --> tests/html_macro_tests/attributes/event_attributes_fail.rs:7:26
   |
-7 |     html! { <div onclick {Callback::new(|_event: web_sys::MouseEvent)| {}}></div> };
+7 |     html! { <div onclick {Callback::new(|_event: wal::events::MouseEvent)| {}}></div> };
   |                          ^
 
 error: Duplicate event attribute `onclick`
   --> tests/html_macro_tests/attributes/event_attributes_fail.rs:11:13
    |
-11 |             onclick={Callback::new(|_event: web_sys::MouseEvent| {})}>
+11 |             onclick={Callback::new(|_event: wal::events::MouseEvent| {})}>
    |             ^^^^^^^
 
 error: Expected a literal or an expression block
   --> tests/html_macro_tests/attributes/event_attributes_fail.rs:14:27
    |
-14 |     html! { <div onclick= ondblclick={Callback::new(|_event: web_sys::MouseEvent| {})}></div> };
+14 |     html! { <div onclick= ondblclick={Callback::new(|_event: wal::events::MouseEvent| {})}></div> };
    |                           ^^^^^^^^^^
 
 error: Expected an expression block for event attribute `onclick`
@@ -43,8 +43,8 @@ error: Expected a non-empty expression block
 error[E0308]: mismatched types
   --> tests/html_macro_tests/attributes/event_attributes_fail.rs:15:27
    |
-15 |     html! { <div onclick={Callback::new(|_event: web_sys::Event| {})}></div> };
-   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Callback<MouseEvent>`, found `Callback<Event>`
+15 |     html! { <div onclick={Callback::new(|_event: wal::events::Event| {})}></div> };
+   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Callback<MouseEvent>`, found `Callback<Event>`
    |
    = note: expected struct `Callback<MouseEvent>`
               found struct `Callback<Event>`
@@ -52,8 +52,8 @@ error[E0308]: mismatched types
 error[E0308]: mismatched types
   --> tests/html_macro_tests/attributes/event_attributes_fail.rs:16:27
    |
-16 |     html! { <div onclick={Callback::new(|_event: web_sys::DragEvent| {})}></div> };
-   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Callback<MouseEvent>`, found `Callback<DragEvent>`
+16 |     html! { <div onclick={Callback::new(|_event: wal::events::DragEvent| {})}></div> };
+   |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Callback<MouseEvent>`, found `Callback<DragEvent>`
    |
    = note: expected struct `Callback<MouseEvent>`
               found struct `Callback<DragEvent>`

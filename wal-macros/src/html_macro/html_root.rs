@@ -39,7 +39,7 @@ impl ToTokens for HtmlRoot {
         match self {
             Self::Empty => tokens.extend(quote! {
                 ::wal::virtual_dom::VNode::List (
-                    ::wal::virtual_dom::VList::new_empty()
+                    ::wal::virtual_dom::VList::new_empty(None)
                 )
             }),
             Self::Expression(expr) => tokens

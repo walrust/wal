@@ -49,7 +49,7 @@ impl Parse for HtmlElement {
             ));
         }
 
-        let children = parse_children(&start_tag, input)?;
+        let children = Self::parse_children(&start_tag, input)?;
         input.parse::<HtmlElementEndTag>()?;
 
         Ok(HtmlElement {
@@ -60,37 +60,40 @@ impl Parse for HtmlElement {
     }
 }
 
-fn parse_children(
-    start_tag: &html_element_start_tag::HtmlElementStartTag,
-    input: ParseStream,
-) -> syn::Result<Vec<HtmlTree>> {
-    let mut children = Vec::new();
+impl HtmlElement {
+    fn parse_children(
+        start_tag: &HtmlElementStartTag,
+        input: ParseStream,
+    ) -> syn::Result<Vec<HtmlTree>> {
+        let mut children = Vec::new();
 
-    loop {
-        if input.is_empty() {
-            return Err(syn::Error::new_spanned(
+        loop {
+            if input.is_empty() {
+                return Err(syn::Error::new_spanned(
                 start_tag.to_spanned(),
                 format!(
                     "This start tag does not have a corresponding end tag. (hint: try adding `</{}>`)",
                     start_tag.name
                 ),
             ));
+            }
+
+            if HtmlElementEndTag::peek(&start_tag.name, input) {
+                break;
+            }
+
+            children.push(input.parse()?);
         }
 
-        if html_element_end_tag::HtmlElementEndTag::peek(&start_tag.name, input) {
-            break;
-        }
-
-        children.push(input.parse()?);
+        Ok(children)
     }
-
-    Ok(children)
 }
 
 impl ToTokens for HtmlElement {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let name = &self.name.to_string();
         let attributes = self.attributes.get_attributes_token_stream();
+        let key = self.attributes.get_key_token_stream();
         let event_handlers = self.attributes.get_event_handlers_token_stream();
         let children = &self.children;
 
@@ -102,6 +105,7 @@ impl ToTokens for HtmlElement {
                         #(#attributes,)*
                     ]),
                     ::std::vec![#(#event_handlers,)*],
+                    #key,
                     ::std::vec![#(#children,)*],
                 ),
             )

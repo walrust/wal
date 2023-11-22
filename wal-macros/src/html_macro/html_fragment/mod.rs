@@ -51,9 +51,15 @@ impl Parse for HtmlFragment {
 impl ToTokens for HtmlFragment {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let children = &self.children;
+        let key = self.start_tag.get_key_token_stream();
 
         tokens.extend(quote_spanned! {self.span() =>
-            ::wal::virtual_dom::VNode::from_iter::<::std::vec::Vec<::wal::virtual_dom::VNode>>(vec![#(#children),*])
+            ::wal::virtual_dom::VNode::List(
+                ::wal::virtual_dom::VList::new(
+                    ::std::vec![#(#children),*],
+                    #key
+                )
+            )
         });
     }
 }

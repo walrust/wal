@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use wal::virtual_dom::{VElement, VList, VNode, VText};
 use wal_macros::html;
 
+include!("../utils/wrap_in_list.rs");
+
 fn main() {
     if_true();
     if_false();
@@ -23,7 +25,7 @@ fn if_true() {
             "hello"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello"))));
 }
 
 fn if_false() {
@@ -32,7 +34,7 @@ fn if_false() {
             "hello"
         }
     };
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(html, VNode::List(VList::new_empty(None)));
 }
 
 fn if_true_else_if() {
@@ -43,7 +45,7 @@ fn if_true_else_if() {
             "hello2"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello"))));
 }
 
 fn if_false_else_if_true() {
@@ -54,7 +56,7 @@ fn if_false_else_if_true() {
             "hello2"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello2")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello2"))));
 }
 
 fn if_false_else_if_false() {
@@ -65,7 +67,7 @@ fn if_false_else_if_false() {
             "hello2"
         }
     };
-    assert_eq!(html, VNode::List(VList::new_empty()));
+    assert_eq!(html, VNode::List(VList::new_empty(None)));
 }
 
 fn if_multiple_else_ifs() {
@@ -80,7 +82,7 @@ fn if_multiple_else_ifs() {
             "hello4"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello3")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello3"))));
 }
 
 fn if_true_else() {
@@ -91,7 +93,7 @@ fn if_true_else() {
             "hello2"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello"))));
 }
 
 fn if_false_else() {
@@ -102,7 +104,7 @@ fn if_false_else() {
             "hello2"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello2")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello2"))));
 }
 
 fn if_multiple_else_ifs_else() {
@@ -117,7 +119,7 @@ fn if_multiple_else_ifs_else() {
             "hello4"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello3")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello3"))));
 }
 
 fn if_false_multiple_else_ifs_false_else() {
@@ -132,7 +134,7 @@ fn if_false_multiple_else_ifs_false_else() {
             "hello4"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello4")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello4"))));
 }
 
 fn if_in_element() {
@@ -149,7 +151,8 @@ fn if_in_element() {
             String::from("div"),
             HashMap::new(),
             Vec::new(),
-            vec![VNode::Text(VText::new("hello"))],
+            None,
+            vec![wrap_in_list(VNode::Text(VText::new("hello")))],
         ))
     );
 }
@@ -163,5 +166,5 @@ fn if_with_complex_condition() {
             "hello2"
         }
     };
-    assert_eq!(html, VNode::Text(VText::new("hello2")));
+    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello2"))));
 }

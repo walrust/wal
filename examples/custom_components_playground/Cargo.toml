@@ -9,9 +9,6 @@ edition = "2021"
 wasm-bindgen = "0.2.87"
 wal = { path = "../../wal" }
 wal-macros = { path = "../../wal-macros" }
+wal-css = { path = "../../wal-css" }
 wal-routing = { path = "../../wal-routing" }
 gloo = { version = "0.10.0", features = ["utils"] }
-
-[dependencies.web-sys]
-version = "0.3.64"
-features = ["MouseEvent"]
