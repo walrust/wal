@@ -1,16 +1,9 @@
 pub mod builder;
 
-use std::{
-    cell::RefCell,
-    collections::HashMap,
-    rc::Rc,
-};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use gloo::utils::{body, history, window};
-use wal::{
-    component::node::AnyComponentNode,
-    virtual_dom::dom,
-};
+use wal::{component::node::AnyComponentNode, virtual_dom::dom};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{Element, Event, EventTarget};
 
@@ -19,8 +12,7 @@ pub struct PageRenderer {
 }
 
 impl PageRenderer {
-    pub fn new(generator: impl Fn() -> Rc<RefCell<AnyComponentNode>> + 'static) -> PageRenderer
-    {
+    pub fn new(generator: impl Fn() -> Rc<RefCell<AnyComponentNode>> + 'static) -> PageRenderer {
         PageRenderer {
             generator: Box::new(generator),
         }
@@ -39,6 +31,7 @@ const WAL_ROUTING_ATTR: &'static str = "data_link";
 
 pub struct Router {
     pages: HashMap<&'static str, PageRenderer>,
+    error_path: &'static str,
     cur_path: String,
     cur_page: Option<Rc<RefCell<AnyComponentNode>>>,
 }
@@ -47,15 +40,20 @@ impl Router {
     pub(crate) fn mock() -> Router {
         Router {
             pages: [].into(),
+            error_path: "undefined",
             cur_path: "undefined".to_string(),
             cur_page: None,
         }
     }
 
-    pub(crate) fn new(pages: HashMap<&'static str, PageRenderer>) -> Router {
+    pub(crate) fn new(
+        pages: HashMap<&'static str, PageRenderer>,
+        error_path: &'static str,
+    ) -> Router {
         Router {
             pages,
-            cur_path: "/404".to_string(),
+            error_path,
+            cur_path: "undefined".to_string(),
             cur_page: None,
         }
     }
@@ -89,7 +87,7 @@ impl Router {
                 return;
             }
 
-            let page_renderer = router.pages.get_mut(pathname.as_str()).unwrap();          
+            let page_renderer = router.pages.get_mut(pathname.as_str()).unwrap();
             let new_page = page_renderer.render();
             let old_page = router.cur_page.take();
 
@@ -118,7 +116,7 @@ impl Router {
         let mut url = url;
         ROUTER.with(|router| {
             if !router.borrow().pages.contains_key(url) {
-                url = "/";
+                url = router.borrow().error_path;
             }
         });
 
@@ -132,5 +130,107 @@ impl Router {
         target
             .add_event_listener_with_callback(type_, listener.as_ref().unchecked_ref())
             .unwrap();
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use wal::{component::{root::RootComponent, behavior::Behavior}, virtual_dom::{VText, VNode}};
+    use wasm_bindgen_test::wasm_bindgen_test;
+
+    use super::{Router, builder::RouterBuilder, ROUTER};
+    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+
+    #[wasm_bindgen_test]
+    fn mock() {
+        let mock = Router::mock();
+
+        assert_eq!(mock.pages.len(), 0);
+        assert_eq!(mock.error_path, "undefined");
+        assert_eq!(mock.cur_path, "undefined".to_string());
+        assert!(mock.cur_page.is_none());
+    }
+
+    struct Root;
+    impl RootComponent for Root {
+        type Message = ();
+        fn new_root() -> Self {
+            Root
+        }
+        fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
+            VText::new("RootComponent so cool").into()
+        }
+        fn update(&mut self, _message: Self::Message) -> bool {
+            false
+        }
+    }
+
+    #[wasm_bindgen_test]
+    fn new_router() {
+        let router = RouterBuilder::new()
+            .add_page::<Root>("/")
+            .build();
+
+        assert!(router.pages.contains_key("/"));
+        assert_eq!(router.pages.len(), 1);
+        assert_eq!(router.error_path, "/");
+        assert_eq!(router.cur_path, "undefined");
+        assert!(router.cur_page.is_none());
+    }
+
+    #[wasm_bindgen_test]
+    fn start() {
+        let router = RouterBuilder::new()
+            .add_page::<Root>("/")
+            .build();
+        let router2 = RouterBuilder::new()
+            .add_page::<Root>("/")
+            .build();
+
+        router.start();
+
+        ROUTER.with(move |router| {
+            let router = router.borrow();
+            assert!(router.pages.keys().eq(router2.pages.keys()));
+            assert_eq!(router.error_path, router2.error_path);
+            assert_eq!(router.cur_path, "/");
+            assert!(router.cur_page.is_some());
+        });
+    }
+
+    struct Root2;
+    impl RootComponent for Root2 {
+        type Message = ();
+        fn new_root() -> Self {
+            Root2
+        }
+        fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
+            VText::new("RootComponent so cool").into()
+        }
+        fn update(&mut self, _message: Self::Message) -> bool {
+            false
+        }
+    }
+
+    #[wasm_bindgen_test]
+    fn navigate_to() {
+        let router = RouterBuilder::new()
+            .add_page::<Root>("/")
+            .add_page::<Root>("/2")
+            .build();
+
+        router.start();
+
+        Router::navigate_to("url");
+        ROUTER.with(move |router| {
+            let router = router.borrow();
+            assert_eq!(router.cur_path, "/");
+        });
+        Router::navigate_to("/2");
+        ROUTER.with(move |router| {
+            let router = router.borrow();
+            assert_eq!(router.cur_path, "/2");
+        });
     }
 }
