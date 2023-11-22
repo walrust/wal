@@ -8,6 +8,7 @@ pub mod behavior;
 pub mod callback;
 pub mod node;
 pub mod scheduler;
+pub mod root;
 
 pub trait Component: Sized {
     type Message: 'static;
