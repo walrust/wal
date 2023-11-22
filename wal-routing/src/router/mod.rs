@@ -1,92 +1,81 @@
 pub mod builder;
 
-use std::{rc::{Rc, Weak}, cell::RefCell, collections::HashMap};
+use std::{
+    any::Any,
+    cell::RefCell,
+    collections::HashMap,
+    rc::{Rc, Weak},
+};
 
-use gloo::utils::{window, history, body};
-use wal::{component::node::AnyComponentNode, virtual_dom::dom};
-use web_sys::{EventTarget, Element, Event};
-use wasm_bindgen::{prelude:: Closure, JsCast, JsValue};
+use gloo::utils::{body, history, window};
+use wal::{
+    component::{node::AnyComponentNode, Component},
+    virtual_dom::dom,
+};
+use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
+use web_sys::{Element, Event, EventTarget};
 
-// Consider using this enum in whole thing, maybe not rly threadsafe but we are singlethreaded still
-// pub enum Lazy<T> {
-//     NotRendered(Box<dyn FnOnce() -> T>),
-//     Rendered(T),
-// }
-
-// impl<T> Lazy<T> {
-//     pub fn render(&mut self) {
-//         match self {
-//             Lazy::NotRendered(gen) => {
-//                 let gen = std::mem::replace(
-//                     gen,
-//                     Box::new(|| { panic!("This function should never be called") })
-//                 );
-//                 let t = gen();
-//                 *self = Lazy::Rendered(t);
-//             },
-//             Lazy::Rendered(_) => {},
-//         }
-
-//     }
-// }
-
-pub struct LazyPage {
-    generator: Option<Box<dyn FnOnce() -> Rc<RefCell<AnyComponentNode>>>>,
-    page: Option<Rc<RefCell<AnyComponentNode>>>,
+pub struct PageRenderer {
+    props: Box<dyn Any>,
+    generator: Box<dyn Fn(Box<dyn Any>) -> Rc<RefCell<AnyComponentNode>>>,
 }
 
-impl LazyPage {
-    pub fn new(generator: Box<dyn FnOnce() -> Rc<RefCell<AnyComponentNode>>>) -> LazyPage {
-        LazyPage { 
-            generator: Some(generator), 
-            page: None,
+impl PageRenderer {
+    pub fn new<C>(
+        generator: impl Fn(Box<dyn Any>) -> Rc<RefCell<AnyComponentNode>> + 'static,
+        props: C::Properties,
+    ) -> PageRenderer
+    where
+        C: Component + 'static,
+    {
+        PageRenderer {
+            generator: Box::new(generator),
+            props: Box::new(props),
         }
     }
 
-    pub fn page(&mut self) -> Weak<RefCell<AnyComponentNode>> {
-        match &self.page {
-            Some(rc) => Rc::downgrade(rc),
-            None => {
-                let x = (self.generator.take().unwrap())();
-                self.page = Some(x.clone());
-                Rc::downgrade(&x)
-            },
-        }
+    pub fn render(&self) -> Rc<RefCell<AnyComponentNode>> {
+        todo!()
+        // (*self.generator)(self.props)
     }
 }
 
-thread_local!{
+thread_local! {
     pub static ROUTER: RefCell<Router> = RefCell::new(Router::mock());
 }
 
 const WAL_ROUTING_ATTR: &'static str = "data_link";
 
 pub struct Router {
-    pages: HashMap<&'static str, LazyPage>,
+    pages: HashMap<&'static str, PageRenderer>,
     cur_path: String,
-    cur_page: Weak<RefCell<AnyComponentNode>>,
+    cur_page: Option<Rc<RefCell<AnyComponentNode>>>,
 }
 
 impl Router {
     pub(crate) fn mock() -> Router {
-        Router { pages: [].into(), cur_path: "undefined".to_string(), cur_page: Weak::new() } 
+        Router {
+            pages: [].into(),
+            cur_path: "undefined".to_string(),
+            cur_page: None,
+        }
     }
 
-    pub(crate) fn new(pages: HashMap<&'static str, LazyPage>) -> Router {
+    pub(crate) fn new(pages: HashMap<&'static str, PageRenderer>) -> Router {
         let mut pages = pages;
         let cur_path = "/".to_string();
-        let cur_page = pages.get_mut(cur_path.as_str()).unwrap().page();
-        cur_page.upgrade().unwrap().borrow_mut().patch(None, &dom::get_root_element());
+        let page = pages.get_mut(cur_path.as_str()).unwrap().render();
+        page.borrow_mut().patch(None, &dom::get_root_element());
         Router {
             pages,
             cur_path,
-            cur_page,
+            cur_page: Some(page),
         }
     }
 
     pub fn start(self) {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-        
+
         let click = Closure::<dyn Fn(Event)>::new(Self::click);
         Self::add_event_listener(body().into(), "click", &click);
         click.forget();
@@ -104,28 +93,32 @@ impl Router {
 
 impl Router {
     fn route() {
-    ROUTER.with(|router| {
-        let mut router = router.borrow_mut();
-        let pathname = window().location().pathname().unwrap();
-        if pathname.eq(&router.cur_path) { return; }
+        ROUTER.with(|router| {
+            let mut router = router.borrow_mut();
+            let pathname = window().location().pathname().unwrap();
+            if pathname.eq(&router.cur_path) {
+                return;
+            }
 
-        let lazy_page = router.pages.get_mut(pathname.as_str()).unwrap();
-        let new_weak_page = lazy_page.page();
-        let new_page = new_weak_page.upgrade().unwrap();
-            
-        let old_page = router.cur_page.upgrade().unwrap();
+            let page_renderer = router.pages.get_mut(pathname.as_str()).unwrap();
+            let new_page = page_renderer.render();
+            let old_page = router.cur_page.take().unwrap();
 
-        new_page.borrow_mut().view();
-        new_page.borrow_mut().patch(Some(old_page), &dom::get_root_element());
+            new_page.borrow_mut().view();
+            new_page
+                .borrow_mut()
+                .patch(Some(old_page), &dom::get_root_element());
 
-        router.cur_page = new_weak_page;
-        router.cur_path = pathname;
-    });
+            router.cur_page = Some(new_page);
+            router.cur_path = pathname;
+        });
     }
 
     fn click(e: Event) {
         let target = e.target().unwrap().unchecked_into::<Element>();
-        let matches = target.matches(&("[".to_owned() + WAL_ROUTING_ATTR + "]")).unwrap();
+        let matches = target
+            .matches(&("[".to_owned() + WAL_ROUTING_ATTR + "]"))
+            .unwrap();
         if matches {
             e.prevent_default();
             Self::navigate_to(target.get_attribute("href").unwrap().as_str());
@@ -133,18 +126,15 @@ impl Router {
     }
 
     fn navigate_to(url: &str) {
-        history().push_state_with_url(&JsValue::null(), "", Some(url)).unwrap();
+        history()
+            .push_state_with_url(&JsValue::null(), "", Some(url))
+            .unwrap();
         Self::route();
     }
 
-
-    fn add_event_listener<T: ?Sized>(target: EventTarget, type_: &str, listener: &Closure<T>) 
-    {
+    fn add_event_listener<T: ?Sized>(target: EventTarget, type_: &str, listener: &Closure<T>) {
         target
-            .add_event_listener_with_callback(
-                type_, 
-                listener.as_ref().unchecked_ref()
-            )
+            .add_event_listener_with_callback(type_, listener.as_ref().unchecked_ref())
             .unwrap();
     }
 }

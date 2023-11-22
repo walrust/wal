@@ -15,7 +15,7 @@ pub mod dom {
 
     use gloo::events::EventListener;
     use gloo::utils::{body, document};
-    use web_sys::{Element, Node, Text, Event};
+    use web_sys::{Element, Event, Node, Text};
 
     use crate::utils::debug;
 

@@ -1,14 +1,20 @@
-use wal_routing::prelude::RouterBuilder;
-use wal::{self, component::{Component, behavior::Behavior, callback::Callback}, utils::debug};
+use wal::{
+    self,
+    component::{behavior::Behavior, callback::Callback, Component},
+    events::MouseEvent,
+    utils::debug,
+};
 use wal_macros::html;
-use web_sys::MouseEvent;
+use wal_routing::prelude::RouterBuilder;
 
 struct NavigationComp;
 impl Component for NavigationComp {
-    type Message=();
-    type Properties=();
+    type Message = ();
+    type Properties = ();
 
-    fn new(_props: Self::Properties) -> Self { NavigationComp }
+    fn new(_props: Self::Properties) -> Self {
+        NavigationComp
+    }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
         // idea: <route href="/elo">"Homepage"</route> should be treated as <a href="/elo" data_link>"Homepage"</a>
         html! {
@@ -19,16 +25,20 @@ impl Component for NavigationComp {
             </nav>
         }
     }
-    fn update(&mut self, _message: Self::Message) -> bool { todo!() }
+    fn update(&mut self, _message: Self::Message) -> bool {
+        todo!()
+    }
 }
 
 struct RootComp;
 #[derive(Hash)]
 struct RootProp;
 impl Component for RootComp {
-    type Message=();
-    type Properties=RootProp;
-    fn new(_props: Self::Properties) -> Self { RootComp }
+    type Message = ();
+    type Properties = RootProp;
+    fn new(_props: Self::Properties) -> Self {
+        RootComp
+    }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
         let call = Callback::new(|_event: MouseEvent| {
             debug::alert("Homepage");
@@ -40,16 +50,20 @@ impl Component for RootComp {
             </div>
         }
     }
-    fn update(&mut self, _message: Self::Message) -> bool { true }
+    fn update(&mut self, _message: Self::Message) -> bool {
+        true
+    }
 }
 
 struct AltComp;
 #[derive(Hash)]
 struct AltProp;
 impl Component for AltComp {
-    type Message=();
-    type Properties=AltProp;
-    fn new(_props: Self::Properties) -> Self { AltComp }
+    type Message = ();
+    type Properties = AltProp;
+    fn new(_props: Self::Properties) -> Self {
+        AltComp
+    }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
         let call = Callback::new(|_event: MouseEvent| {
             debug::alert("Alt");
@@ -61,16 +75,20 @@ impl Component for AltComp {
             </div>
         }
     }
-    fn update(&mut self, _message: Self::Message) -> bool { true }
+    fn update(&mut self, _message: Self::Message) -> bool {
+        true
+    }
 }
 
 struct AnotherComp;
 #[derive(Hash)]
 struct AnotherProp;
 impl Component for AnotherComp {
-    type Message=();
-    type Properties=AnotherProp;
-    fn new(_props: Self::Properties) -> Self { AnotherComp }
+    type Message = ();
+    type Properties = AnotherProp;
+    fn new(_props: Self::Properties) -> Self {
+        AnotherComp
+    }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
         let call = Callback::new(|_event: MouseEvent| {
             debug::alert("Another");
@@ -82,15 +100,17 @@ impl Component for AnotherComp {
             </div>
         }
     }
-    fn update(&mut self, _message: Self::Message) -> bool { true }
+    fn update(&mut self, _message: Self::Message) -> bool {
+        true
+    }
 }
 
 fn main() {
     // wal::app::start(RootComp);
     RouterBuilder::new()
-        .add_page::<RootComp>("/", RootProp{})
-        .add_page::<AltComp>("/alt", AltProp{})
-        .add_page::<AnotherComp>("/another", AnotherProp{})
+        .add_page::<RootComp>("/", RootProp {})
+        .add_page::<AltComp>("/alt", AltProp {})
+        .add_page::<AnotherComp>("/another", AnotherProp {})
         .build()
         .start();
 }

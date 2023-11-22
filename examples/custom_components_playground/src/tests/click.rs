@@ -1,4 +1,3 @@
-use wal_routing::prelude::RouterBuilder;
 use gloo::console::log;
 use std::thread_local;
 use wal::{
@@ -9,6 +8,7 @@ use wal::{
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
 use wal_macros::html;
+use wal_routing::prelude::RouterBuilder;
 
 thread_local! {
     static CSS1: Css = css_stylesheet!("../styles/styles1.css");
