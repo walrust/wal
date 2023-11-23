@@ -65,3 +65,100 @@ impl<T: Into<VNode>> FromIterator<T> for VNode {
         Self::List(VList::new(iter.into_iter().map(Into::into).collect(), None))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        component::{behavior::Behavior, Component},
+        virtual_dom::{VComponent, VElement, VList, VText},
+    };
+    use wasm_bindgen_test::wasm_bindgen_test;
+
+    use super::VNode;
+    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+
+    #[wasm_bindgen_test]
+    fn from_to_string() {
+        let target = String::from("tmp");
+        assert_eq!(
+            VNode::Text(VText {
+                text: "tmp".to_string(),
+                dom: None
+            }),
+            target.into()
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn from_vec_string() {
+        let target = vec![String::from("tmp")];
+        assert_eq!(
+            VNode::List(VList::new(vec![VText::new("tmp").into()], None)),
+            VNode::from_iter(target)
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn from_vec_elements() {
+        let target = vec![VElement::new(
+            "div".to_string(),
+            [].into(),
+            [].into(),
+            None,
+            [].into(),
+        )];
+        assert_eq!(
+            VNode::List(VList::new(
+                vec![VNode::Element(VElement::new(
+                    "div".to_string(),
+                    [].into(),
+                    [].into(),
+                    None,
+                    [].into()
+                ))],
+                None
+            )),
+            VNode::from_iter(target)
+        );
+    }
+
+    #[wasm_bindgen_test]
+    fn from_vec_lists() {
+        let target = vec![VList::new(vec![], None)];
+        assert_eq!(
+            VNode::List(VList::new(
+                vec![VNode::List(VList::new(vec![], None,))],
+                None
+            )),
+            VNode::from_iter(target)
+        );
+    }
+
+    struct Comp;
+    impl Component for Comp {
+        type Message = ();
+        type Properties = ();
+
+        fn new(_props: Self::Properties) -> Self {
+            Comp
+        }
+        fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
+            VText::new("Test").into()
+        }
+        fn update(&mut self, _message: Self::Message) -> bool {
+            false
+        }
+    }
+
+    #[wasm_bindgen_test]
+    fn from_vec_comp() {
+        let target = vec![VComponent::new::<Comp>((), None)];
+        assert_eq!(
+            VNode::List(VList::new(
+                vec![VNode::Component(VComponent::new::<Comp>((), None))],
+                None
+            )),
+            VNode::from_iter(target)
+        );
+    }
+}

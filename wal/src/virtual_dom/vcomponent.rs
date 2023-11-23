@@ -144,7 +144,7 @@ impl PartialEq for VComponent {
         self.hash == other.hash
             && match (&self.props, &other.props) {
                 (Some(self_props), Some(other_props)) => {
-                    self_props.type_id() == other_props.type_id()
+                    (*(*self_props)).type_id() == (*(*other_props)).type_id()
                 }
                 (None, None) => true,
                 _ => false,

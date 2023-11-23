@@ -11,7 +11,7 @@ pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
     pub event_handlers: Vec<EventHandler>,
-    _key: Option<String>, // TODO: add logic for key attribute
+    pub _key: Option<String>, // TODO: add logic for key attribute
     pub children: Vec<VNode>,
 
     pub dom: Option<Element>,

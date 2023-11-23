@@ -19,7 +19,7 @@ pub mod dom {
 
     use crate::utils::debug;
 
-    pub const ROOT_ELEMENT_ID: &'static str = "walrust-root";
+    pub const ROOT_ELEMENT_ID: &str = "walrust-root";
 
     pub fn get_root_element() -> Node {
         Node::from(

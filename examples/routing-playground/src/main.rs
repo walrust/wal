@@ -30,6 +30,7 @@ impl RootComponent for NavigationComp {
 }
 
 struct RootComp;
+#[allow(clippy::unused_unit)]
 impl RootComponent for RootComp {
     type Message = ();
     fn new_root() -> Self {
@@ -52,6 +53,7 @@ impl RootComponent for RootComp {
 }
 
 struct AltComp;
+#[allow(clippy::unused_unit)]
 impl RootComponent for AltComp {
     type Message = ();
     fn new_root() -> Self {
@@ -74,6 +76,7 @@ impl RootComponent for AltComp {
 }
 
 struct AnotherComp;
+#[allow(clippy::unused_unit)]
 impl RootComponent for AnotherComp {
     type Message = ();
     fn new_root() -> Self {

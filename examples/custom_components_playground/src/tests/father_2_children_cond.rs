@@ -1,7 +1,8 @@
 use gloo::timers::callback::Timeout;
 use wal::{
-    component::{callback::Callback, Component, behavior::Behavior, root::RootComponent},
-    virtual_dom::VNode, utils::debug,
+    component::{behavior::Behavior, callback::Callback, root::RootComponent, Component},
+    utils::debug,
+    virtual_dom::VNode,
 };
 use wal_macros::html;
 use wal_routing::prelude::RouterBuilder;
@@ -30,7 +31,7 @@ impl RootComponent for FatherComponent {
                     <ChildComponent props = {ChildProperties(self.0, callback.clone())} />
                 } else {
                     <ChildComponent props = {ChildProperties(self.0, callback.clone())} />
-                    <ChildComponent props = {ChildProperties(self.0 * -1, callback.clone())} />
+                    <ChildComponent props = {ChildProperties(-self.0, callback.clone())} />
                 }
             </div>
         }

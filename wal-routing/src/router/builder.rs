@@ -2,7 +2,7 @@ use super::{PageRenderer, Router};
 use std::{collections::HashMap, marker::PhantomData};
 use wal::component::{node::AnyComponentNode, root::RootComponent};
 
-const ERROR_PATH: &'static str = "/404";
+const ERROR_PATH: &str = "/404";
 
 pub struct Invalid;
 pub struct Valid;
@@ -33,6 +33,12 @@ impl RouterBuilder<Invalid> {
         };
 
         tmp.add_page::<C>(path)
+    }
+}
+
+impl Default for RouterBuilder<Invalid> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -146,6 +152,14 @@ mod tests {
         assert!(valid.pages.contains_key("/2"));
         assert_eq!(valid.pages.len(), 2);
         assert_eq!(valid.error_path, "/");
+
+        let router = valid.build();
+        assert!(router.pages.contains_key("/"));
+        assert!(router.pages.contains_key("/2"));
+        assert_eq!(router.pages.len(), 2);
+        assert_eq!(router.error_path, "/");
+        assert_eq!(router.cur_path, "undefined".to_string());
+        assert!(router.cur_page.is_none());
     }
 
     #[wasm_bindgen_test]
@@ -162,5 +176,4 @@ mod tests {
         assert_eq!(valid.cur_path, "undefined".to_string());
         assert!(valid.cur_page.is_none());
     }
-
 }

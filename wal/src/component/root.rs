@@ -102,14 +102,14 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn root_component_view() {
-        let mut root1: RootComp = RootComp::new_root();
-        let mut root2: RootComp = Component::new(());
+        let root1: RootComp = RootComp::new_root();
+        let root2: RootComp = Component::new(());
         let mut behavior1 = AnyComponentBehavior::new();
         let mut behavior2 = AnyComponentBehavior::new();
 
-        let vdom1 = RootComponent::view(&mut root1, &mut behavior1);
-        let vdom2 = Component::view(&mut root2, &mut behavior2);
+        let vdom1 = RootComponent::view(&root1, &mut behavior1);
+        let vdom2 = Component::view(&root2, &mut behavior2);
 
-        assert_eq!(vdom1.eq(&vdom2), true);
+        assert!(vdom1.eq(&vdom2));
     }
 }

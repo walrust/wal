@@ -27,7 +27,7 @@ thread_local! {
     pub static ROUTER: RefCell<Router> = RefCell::new(Router::mock());
 }
 
-const WAL_ROUTING_ATTR: &'static str = "data_link";
+const WAL_ROUTING_ATTR: &str = "data_link";
 
 pub struct Router {
     pages: HashMap<&'static str, PageRenderer>,
@@ -133,13 +133,15 @@ impl Router {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use wal::{component::{root::RootComponent, behavior::Behavior}, virtual_dom::{VText, VNode}};
+    use wal::{
+        component::{behavior::Behavior, root::RootComponent},
+        virtual_dom::{VNode, VText},
+    };
     use wasm_bindgen_test::wasm_bindgen_test;
 
-    use super::{Router, builder::RouterBuilder, ROUTER};
+    use super::{builder::RouterBuilder, Router, ROUTER};
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
     #[wasm_bindgen_test]
@@ -168,9 +170,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn new_router() {
-        let router = RouterBuilder::new()
-            .add_page::<Root>("/")
-            .build();
+        let router = RouterBuilder::new().add_page::<Root>("/").build();
 
         assert!(router.pages.contains_key("/"));
         assert_eq!(router.pages.len(), 1);
@@ -181,12 +181,8 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn start() {
-        let router = RouterBuilder::new()
-            .add_page::<Root>("/")
-            .build();
-        let router2 = RouterBuilder::new()
-            .add_page::<Root>("/")
-            .build();
+        let router = RouterBuilder::new().add_page::<Root>("/").build();
+        let router2 = RouterBuilder::new().add_page::<Root>("/").build();
 
         router.start();
 
