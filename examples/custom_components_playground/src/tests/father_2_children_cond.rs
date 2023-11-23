@@ -1,7 +1,6 @@
 use gloo::timers::callback::Timeout;
 use wal::{
     component::{behavior::Behavior, callback::Callback, root::RootComponent, Component},
-    utils::debug,
     virtual_dom::VNode,
 };
 use wal_macros::html;
