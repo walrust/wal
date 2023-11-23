@@ -24,25 +24,28 @@ impl PageRenderer {
 }
 
 thread_local! {
-    pub static ROUTER: RefCell<Router> = RefCell::new(Router::mock());
+    pub static ROUTER: RefCell<Router> = RefCell::new(Router::empty());
 }
 
 const WAL_ROUTING_ATTR: &str = "data_link";
 
+struct CurrentPage {
+    pub path: String,
+    pub page: Rc<RefCell<AnyComponentNode>>,
+}
+
 pub struct Router {
     pages: HashMap<&'static str, PageRenderer>,
-    error_path: &'static str,
-    cur_path: String,
-    cur_page: Option<Rc<RefCell<AnyComponentNode>>>,
+    error_path: Option<&'static str>,
+    current: Option<CurrentPage>,
 }
 
 impl Router {
-    pub(crate) fn mock() -> Router {
+    pub(crate) fn empty() -> Router {
         Router {
             pages: [].into(),
-            error_path: "undefined",
-            cur_path: "undefined".to_string(),
-            cur_page: None,
+            error_path: None,
+            current: None,
         }
     }
 
@@ -52,9 +55,8 @@ impl Router {
     ) -> Router {
         Router {
             pages,
-            error_path,
-            cur_path: "undefined".to_string(),
-            cur_page: None,
+            error_path: Some(error_path),
+            current: None,
         }
     }
 
@@ -76,28 +78,32 @@ impl Router {
 
         Self::navigate_to(window().location().pathname().unwrap().as_str());
     }
-}
 
-impl Router {
     fn route() {
         ROUTER.with(|router| {
-            let pathname = window().location().pathname().unwrap();
             let mut router = router.borrow_mut();
-            if pathname.eq(&router.cur_path) {
-                return;
+            let pathname = window().location().pathname().unwrap();
+
+            if let Some(old_current) = &router.current {
+                if pathname.eq(&old_current.path) {
+                    return;
+                }
             }
 
+            let old_current = router.current.take();
             let page_renderer = router.pages.get_mut(pathname.as_str()).unwrap();
             let new_page = page_renderer.render();
-            let old_page = router.cur_page.take();
+            let old_page = old_current.map(|x| x.page);
 
             new_page.borrow_mut().view();
             new_page
                 .borrow_mut()
                 .patch(old_page, &dom::get_root_element());
 
-            router.cur_page = Some(new_page);
-            router.cur_path = pathname;
+            router.current = Some(CurrentPage {
+                path: pathname,
+                page: new_page,
+            });
         });
     }
 
@@ -116,7 +122,7 @@ impl Router {
         let mut url = url;
         ROUTER.with(|router| {
             if !router.borrow().pages.contains_key(url) {
-                url = router.borrow().error_path;
+                url = router.borrow().error_path.unwrap();
             }
         });
 
@@ -145,13 +151,12 @@ mod tests {
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
     #[wasm_bindgen_test]
-    fn mock() {
-        let mock = Router::mock();
+    fn empty() {
+        let empty = Router::empty();
 
-        assert_eq!(mock.pages.len(), 0);
-        assert_eq!(mock.error_path, "undefined");
-        assert_eq!(mock.cur_path, "undefined".to_string());
-        assert!(mock.cur_page.is_none());
+        assert_eq!(empty.pages.len(), 0);
+        assert!(empty.error_path.is_none());
+        assert!(empty.current.is_none());
     }
 
     struct Root;
@@ -170,19 +175,18 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn new_router() {
-        let router = RouterBuilder::new().add_page::<Root>("/").build();
+        let router = RouterBuilder::default().add_page::<Root>("/").build();
 
         assert!(router.pages.contains_key("/"));
         assert_eq!(router.pages.len(), 1);
-        assert_eq!(router.error_path, "/");
-        assert_eq!(router.cur_path, "undefined");
-        assert!(router.cur_page.is_none());
+        assert_eq!(router.error_path, Some("/"));
+        assert!(router.current.is_none());
     }
 
     #[wasm_bindgen_test]
     fn start() {
-        let router = RouterBuilder::new().add_page::<Root>("/").build();
-        let router2 = RouterBuilder::new().add_page::<Root>("/").build();
+        let router = RouterBuilder::default().add_page::<Root>("/").build();
+        let router2 = RouterBuilder::default().add_page::<Root>("/").build();
 
         router.start();
 
@@ -190,8 +194,10 @@ mod tests {
             let router = router.borrow();
             assert!(router.pages.keys().eq(router2.pages.keys()));
             assert_eq!(router.error_path, router2.error_path);
-            assert_eq!(router.cur_path, "/");
-            assert!(router.cur_page.is_some());
+            assert!(router.current.is_some());
+            if let Some(cur) = &router.current {
+                assert_eq!(cur.path, "/");
+            }
         });
     }
 
@@ -211,7 +217,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn navigate_to() {
-        let router = RouterBuilder::new()
+        let router = RouterBuilder::default()
             .add_page::<Root>("/")
             .add_page::<Root>("/2")
             .build();
@@ -221,12 +227,18 @@ mod tests {
         Router::navigate_to("url");
         ROUTER.with(move |router| {
             let router = router.borrow();
-            assert_eq!(router.cur_path, "/");
+            assert!(router.current.is_some());
+            if let Some(cur) = &router.current {
+                assert_eq!(cur.path, "/");
+            }
         });
         Router::navigate_to("/2");
         ROUTER.with(move |router| {
             let router = router.borrow();
-            assert_eq!(router.cur_path, "/2");
+            assert!(router.current.is_some());
+            if let Some(cur) = &router.current {
+                assert_eq!(cur.path, "/2");
+            }
         });
     }
 }

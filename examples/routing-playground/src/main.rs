@@ -99,7 +99,7 @@ impl RootComponent for AnotherComp {
 }
 
 fn main() {
-    RouterBuilder::new()
+    RouterBuilder::default()
         .add_page::<RootComp>("/")
         .add_page::<AltComp>("/alt")
         .add_page::<AnotherComp>("/another")

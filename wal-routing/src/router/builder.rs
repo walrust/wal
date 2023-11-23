@@ -14,7 +14,7 @@ pub struct RouterBuilder<T> {
 }
 
 impl RouterBuilder<Invalid> {
-    pub fn new() -> RouterBuilder<Invalid> {
+    fn new() -> RouterBuilder<Invalid> {
         RouterBuilder {
             pages: HashMap::new(),
             error_path: ERROR_PATH,
@@ -157,9 +157,8 @@ mod tests {
         assert!(router.pages.contains_key("/"));
         assert!(router.pages.contains_key("/2"));
         assert_eq!(router.pages.len(), 2);
-        assert_eq!(router.error_path, "/");
-        assert_eq!(router.cur_path, "undefined".to_string());
-        assert!(router.cur_page.is_none());
+        assert_eq!(router.error_path, Some("/"));
+        assert!(router.current.is_none());
     }
 
     #[wasm_bindgen_test]
@@ -172,8 +171,7 @@ mod tests {
         assert_eq!(valid.pages.len(), 2);
         assert!(valid.pages.contains_key("/"));
         assert!(valid.pages.contains_key("/2"));
-        assert_eq!(valid.error_path, "/");
-        assert_eq!(valid.cur_path, "undefined".to_string());
-        assert!(valid.cur_page.is_none());
+        assert_eq!(valid.error_path, Some("/"));
+        assert!(valid.current.is_none());
     }
 }

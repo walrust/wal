@@ -1,7 +1,7 @@
 use gloo::console::log;
 use std::thread_local;
 use wal::{
-    component::{behavior::Behavior, callback::Callback, Component, root::RootComponent},
+    component::{behavior::Behavior, callback::Callback, root::RootComponent, Component},
     events::MouseEvent,
     virtual_dom::VNode,
 };
@@ -88,7 +88,7 @@ impl Component for ChildComponent {
 }
 
 pub fn start() {
-    RouterBuilder::new()
+    RouterBuilder::default()
         .add_page::<FatherComponent>("/")
         .build()
         .start();

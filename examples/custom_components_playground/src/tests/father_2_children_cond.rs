@@ -67,8 +67,7 @@ impl Component for ChildComponent {
 
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         html! {
-            <div counter_child="0">
-            </div>
+            <div counter_child="0"></div>
         }
     }
 
@@ -77,15 +76,9 @@ impl Component for ChildComponent {
     }
 }
 
-impl Drop for ChildComponent {
-    fn drop(&mut self) {
-        debug::warn("TO DELETE, ChildComponent is dropped");
-    }
-}
-
 #[allow(dead_code)]
 pub fn start() {
-    RouterBuilder::new()
+    RouterBuilder::default()
         .add_page::<FatherComponent>("/")
         .build()
         .start();
