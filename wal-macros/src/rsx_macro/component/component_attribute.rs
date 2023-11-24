@@ -1,9 +1,10 @@
 use syn::parse::{Parse, ParseStream};
 
-use crate::rsx_macro::{
-    attributes::{normal_attribute::NormalAttribute, props_attribute::PropsAttribute},
-    KEY_ATTR, PROPS_ATTR,
+use crate::rsx_macro::attributes::{
+    normal_attribute::NormalAttribute, props_attribute::PropsAttribute, KEY_ATTR,
 };
+
+const PROPS_ATTR: &str = "props";
 
 pub enum ComponentAttribute {
     Props(PropsAttribute),

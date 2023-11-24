@@ -9,6 +9,9 @@ use super::{attributes::normal_attribute::NormalAttribute, tree::Tree};
 mod link_end_tag;
 mod link_start_tag;
 
+pub const LINK_TAG: &str = "Link";
+const TO_ATTR: &str = "to";
+
 pub struct Link {
     name: Ident,
     to: NormalAttribute,

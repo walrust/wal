@@ -1,7 +1,9 @@
 use quote::{quote, ToTokens};
 use syn::parse::Parse;
 
-use crate::rsx_macro::{attributes::normal_attribute::NormalAttribute, KEY_ATTR, TO_ATTR};
+use crate::rsx_macro::attributes::{normal_attribute::NormalAttribute, KEY_ATTR};
+
+use super::TO_ATTR;
 
 pub struct LinkStartTag {
     lt: syn::token::Lt,

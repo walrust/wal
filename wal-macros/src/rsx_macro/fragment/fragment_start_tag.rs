@@ -1,7 +1,7 @@
 use quote::{quote, quote_spanned, ToTokens};
 use syn::parse::Parse;
 
-use crate::rsx_macro::{attributes::normal_attribute::NormalAttribute, KEY_ATTR};
+use crate::rsx_macro::attributes::{normal_attribute::NormalAttribute, KEY_ATTR};
 
 pub struct FragmentStartTag {
     lt: syn::token::Lt,

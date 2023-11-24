@@ -20,22 +20,7 @@ impl NormalAttribute {
     pub fn peek(input: ParseStream) -> bool {
         input.peek(syn::Ident)
     }
-
-    // pub fn to_spanned(&self) -> impl ToTokens {
-    //     let ident = &self.ident;
-    //     let value = &self.value;
-    //     quote! { #ident #value }
-    // }
 }
-
-// impl From<ComponentAttribute> for NormalAttribute {
-//     fn from(attribute: ComponentAttribute) -> Self {
-//         NormalAttribute {
-//             ident: attribute.ident,
-//             value: attribute.value.into(),
-//         }
-//     }
-// }
 
 pub enum NormalAttributeValue {
     Literal(syn::Lit),

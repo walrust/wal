@@ -1,7 +1,7 @@
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 
-use crate::rsx_macro::LINK_TAG;
+use super::LINK_TAG;
 
 pub struct LinkEndTag {
     lt: syn::token::Lt,

@@ -3,8 +3,11 @@ use syn::parse::{Parse, ParseStream};
 use crate::rsx_macro::attributes::{
     event_attribute::{EventAttribute, IsEvent},
     normal_attribute::NormalAttribute,
-    wal_class_attribute::WalClassAttribute,
+    wal_class_attribute::WalClassAttribute, KEY_ATTR,
 };
+
+const CLASS_ATTR: &str = "class";
+const WAL_CLASS_ATTR: &str = "wal_class";
 
 pub enum ElementAttribute {
     Normal(NormalAttribute),
@@ -19,11 +22,11 @@ impl Parse for ElementAttribute {
         let forked_input = input.fork();
         let ident: proc_macro2::Ident = forked_input.parse()?;
 
-        if ident == crate::rsx_macro::KEY_ATTR {
+        if ident == KEY_ATTR {
             Ok(ElementAttribute::Key(input.parse()?))
-        } else if ident == crate::rsx_macro::CLASS_ATTR {
+        } else if ident == CLASS_ATTR {
             Ok(ElementAttribute::Class(input.parse()?))
-        } else if ident == crate::rsx_macro::WAL_CLASS_ATTR {
+        } else if ident == WAL_CLASS_ATTR {
             Ok(ElementAttribute::WalClass(input.parse()?))
         } else if ident.is_event() {
             Ok(ElementAttribute::Event(input.parse()?))
