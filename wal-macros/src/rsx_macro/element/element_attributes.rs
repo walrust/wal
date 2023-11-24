@@ -9,7 +9,7 @@ use crate::rsx_macro::attributes::{
     wal_class_attribute::WalClassAttribute,
 };
 
-use super::element_attribute::ElementAttribute;
+use super::element_attribute::{ElementAttribute, CLASS_ATTR};
 
 pub struct ElementAttributes {
     normal: HashMap<proc_macro2::Ident, NormalAttributeValue>,
@@ -147,14 +147,48 @@ impl ElementAttributes {
     }
 
     pub(crate) fn get_attributes_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
-        self
+        let mut atttributes_token_stream: Vec<proc_macro2::TokenStream> = self
             .normal
             .iter()
             .map(|(ident, value)| -> proc_macro2::TokenStream {
                 let ident_str = ident.to_string();
                 quote_spanned!(ident.span() => (::std::string::String::from(#ident_str), #value.to_string()))
             })
-            .collect()
+            .collect();
+
+        if let Some(class_attribute_token_stream) = self.get_class_attribute_token_stream() {
+            atttributes_token_stream.push(class_attribute_token_stream);
+        }
+
+        atttributes_token_stream
+    }
+
+    fn get_class_attribute_token_stream(&self) -> Option<proc_macro2::TokenStream> {
+        match (&self._class, &self._wal_class) {
+            (Some(class), Some(wal_class)) => {
+                let class_value = &class.value;
+                let wal_class_value = wal_class.get_space_separated_values();
+                Some(quote_spanned!(class.ident.span() => (
+                    ::std::string::String::from(#CLASS_ATTR),
+                    ::std::format!("{} {}", #class_value, #wal_class_value)
+                )))
+            }
+            (Some(class), None) => {
+                let value = &class.value;
+                Some(quote_spanned!(class.ident.span() => (
+                    ::std::string::String::from(#CLASS_ATTR),
+                    #value.to_string()
+                )))
+            }
+            (None, Some(wal_class)) => {
+                let value = wal_class.get_space_separated_values();
+                Some(quote_spanned!(wal_class.ident.span() => (
+                    ::std::string::String::from(#CLASS_ATTR),
+                    #value
+                )))
+            }
+            (None, None) => None,
+        }
     }
 
     pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {

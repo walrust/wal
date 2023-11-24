@@ -3,10 +3,11 @@ use syn::parse::{Parse, ParseStream};
 use crate::rsx_macro::attributes::{
     event_attribute::{EventAttribute, IsEvent},
     normal_attribute::NormalAttribute,
-    wal_class_attribute::WalClassAttribute, KEY_ATTR,
+    wal_class_attribute::WalClassAttribute,
+    KEY_ATTR,
 };
 
-const CLASS_ATTR: &str = "class";
+pub const CLASS_ATTR: &str = "class";
 const WAL_CLASS_ATTR: &str = "wal_class";
 
 pub enum ElementAttribute {

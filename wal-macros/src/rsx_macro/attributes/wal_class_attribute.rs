@@ -21,3 +21,14 @@ impl ToTokens for WalClassAttribute {
         self.value.to_tokens(tokens)
     }
 }
+
+impl WalClassAttribute {
+    pub fn get_space_separated_values(&self) -> String {
+        self.value
+            .elems
+            .iter()
+            .map(|elem| elem.into_token_stream().to_string())
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+}
