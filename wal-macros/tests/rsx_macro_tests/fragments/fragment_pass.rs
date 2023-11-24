@@ -1,0 +1,99 @@
+use std::collections::HashMap;
+use wal::{
+    events::EventHandler,
+    virtual_dom::{VElement, VList, VNode},
+};
+use wal_macros::rsx;
+
+include!("../utils/new_velement_str.rs");
+
+fn main() {
+    empty();
+    with_single_element();
+    with_multiple_elements();
+    inside_element();
+    with_key_attribute();
+}
+
+fn empty() {
+    let html = rsx! { <></> };
+    assert_eq!(html, VNode::List(VList::new_empty(None)));
+}
+
+fn with_single_element() {
+    let html = rsx! {
+        <>
+            <div></div>
+        </>
+    };
+    assert_eq!(
+        html,
+        VNode::List(VList::new(
+            vec![VNode::Element(new_velement_str(
+                "div",
+                HashMap::new(),
+                Vec::new(),
+                None,
+                Vec::new()
+            ))],
+            None
+        ),)
+    );
+}
+
+fn with_multiple_elements() {
+    let html = rsx! {
+        <>
+            <div></div>
+            <div></div>
+        </>
+    };
+    assert_eq!(
+        html,
+        VNode::List(VList::new(
+            vec![
+                VNode::Element(new_velement_str(
+                    "div",
+                    HashMap::new(),
+                    Vec::new(),
+                    None,
+                    Vec::new()
+                )),
+                VNode::Element(new_velement_str(
+                    "div",
+                    HashMap::new(),
+                    Vec::new(),
+                    None,
+                    Vec::new()
+                ),),
+            ],
+            None
+        ))
+    );
+}
+
+fn inside_element() {
+    let html = rsx! {
+        <div>
+            <></>
+        </div>
+    };
+    assert_eq!(
+        html,
+        VNode::Element(new_velement_str(
+            "div",
+            HashMap::new(),
+            Vec::new(),
+            None,
+            vec![VNode::List(VList::new_empty(None))],
+        ))
+    );
+}
+
+fn with_key_attribute() {
+    let html = rsx! { <key="value"></> };
+    assert_eq!(
+        html,
+        VNode::List(VList::new_empty(Some("value".to_string())))
+    );
+}

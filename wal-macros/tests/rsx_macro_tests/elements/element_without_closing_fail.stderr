@@ -1,0 +1,23 @@
+error: This start tag does not have a corresponding end tag. (hint: try adding `</div>`)
+ --> tests/rsx_macro_tests/elements/element_without_closing_fail.rs:4:13
+  |
+4 |     rsx! { <div> };
+  |             ^^^^^
+
+error: This start tag does not have a corresponding end tag. (hint: try adding `</div>`)
+ --> tests/rsx_macro_tests/elements/element_without_closing_fail.rs:5:13
+  |
+5 |     rsx! { <div> "Hello world!" };
+  |             ^^^^^
+
+error: This start tag does not have a corresponding end tag. (hint: try adding `</div>`)
+ --> tests/rsx_macro_tests/elements/element_without_closing_fail.rs:6:13
+  |
+6 |     rsx! { <div> { String::from("Hello world") } };
+  |             ^^^^^
+
+error: This start tag does not have a corresponding end tag. (hint: try adding `</div>`)
+ --> tests/rsx_macro_tests/elements/element_without_closing_fail.rs:7:13
+  |
+7 |     rsx! { <div><div></div> };
+  |             ^^^^^

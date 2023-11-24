@@ -1,0 +1,29 @@
+error: This closing tag does not have a corresponding opening tag. (hint: try adding `<div>`)
+ --> tests/rsx_macro_tests/elements/element_without_opening_fail.rs:4:13
+  |
+4 |     rsx! { </div> };
+  |             ^^^^^^
+
+error: This closing tag does not have a corresponding opening tag. (hint: try adding `<span>`)
+ --> tests/rsx_macro_tests/elements/element_without_opening_fail.rs:5:13
+  |
+5 |     rsx! { </span> };
+  |             ^^^^^^^
+
+error: This closing fragment does not have a corresponding opening fragment. (hint: try adding `<>`)
+ --> tests/rsx_macro_tests/elements/element_without_opening_fail.rs:6:13
+  |
+6 |     rsx! { </> };
+  |             ^^^
+
+error: This closing tag does not have a corresponding opening tag. (hint: try adding `<span>`)
+ --> tests/rsx_macro_tests/elements/element_without_opening_fail.rs:7:18
+  |
+7 |     rsx! { <div></span> };
+  |                  ^^^^^^^
+
+error: This closing tag does not have a corresponding opening tag. (hint: try adding `<div>`)
+ --> tests/rsx_macro_tests/elements/element_without_opening_fail.rs:8:24
+  |
+8 |     rsx! { <div><span></div></span></div> };
+  |                        ^^^^^^

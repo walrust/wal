@@ -1,0 +1,83 @@
+error: Unsupported attribute `attr`. Custom components supports only `props` and `key` attributes
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:10:38
+   |
+10 |     rsx! { <CustomComponentPropsI32 attr = 5 /> };
+   |                                      ^^^^
+
+error: Unsupported attribute `attr`. Custom components supports only `props` and `key` attributes
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:11:48
+   |
+11 |     rsx! { <CustomComponentPropsI32 props = 1 attr = 5 /> };
+   |                                                ^^^^
+
+error: Unsupported attribute `attr`. Custom components supports only `props` and `key` attributes
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:12:50
+   |
+12 |     rsx! { <CustomComponentPropsI32 key = "key" attr = 5 /> };
+   |                                                  ^^^^
+
+error: Unsupported attribute `attr`. Custom components supports only `props` and `key` attributes
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:13:48
+   |
+13 |     rsx! { <CustomComponentPropsI32 props = 1 attr = 5 key="key" /> };
+   |                                                ^^^^
+
+error: Duplicate attribute `props`
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:14:48
+   |
+14 |     rsx! { <CustomComponentPropsI32 props = 0 props = 1 /> };
+   |                                                ^^^^^
+
+error: Duplicate attribute `props`
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:15:60
+   |
+15 |     rsx! { <CustomComponentPropsI32 props = 0 key = "key" props = 1 /> };
+   |                                                            ^^^^^
+
+error: Duplicate attribute `key`
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:16:51
+   |
+16 |     rsx! { <CustomComponentPropsI32 key = "key1" key = "key2" /> };
+   |                                                   ^^^
+
+error: Duplicate attribute `key`
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:17:61
+   |
+17 |     rsx! { <CustomComponentPropsI32 key = "key1" props = 0 key = "key2" /> };
+   |                                                             ^^^
+
+error: expected `=`
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:18:44
+   |
+18 |     rsx! { <CustomComponentPropsI32 props /> };
+   |                                            ^
+
+error: Expected a literal, a struct literal expression or an expression block
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:19:46
+   |
+19 |     rsx! { <CustomComponentPropsI32 props = /> };
+   |                                              ^
+
+error: Expected a literal, a struct literal expression or an expression block
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:20:46
+   |
+20 |     rsx! { <CustomComponentPropsI32 props = key = "key" /> };
+   |                                              ^^^
+
+error: expected `=`
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:21:42
+   |
+21 |     rsx! { <CustomComponentPropsI32 key /> };
+   |                                          ^
+
+error: Expected a literal or an expression block
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:22:44
+   |
+22 |     rsx! { <CustomComponentPropsI32 key = /> };
+   |                                            ^
+
+error: Expected a literal or an expression block
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:23:44
+   |
+23 |     rsx! { <CustomComponentPropsI32 key = props = 1 /> };
+   |                                            ^^^^^
