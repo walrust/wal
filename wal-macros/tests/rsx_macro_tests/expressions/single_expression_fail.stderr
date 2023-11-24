@@ -1,14 +1,14 @@
 error[E0425]: cannot find value `invalid_reference` in this scope
- --> tests/rsx_macro_tests/expressions/single_expression_fail.rs:7:13
+ --> tests/rsx_macro_tests/expressions/single_expression_fail.rs:7:12
   |
 7 |     rsx! { invalid_reference };
-  |             ^^^^^^^^^^^^^^^^^ not found in this scope
+  |            ^^^^^^^^^^^^^^^^^ not found in this scope
 
 error[E0277]: `()` doesn't implement `std::fmt::Display`
- --> tests/rsx_macro_tests/expressions/single_expression_fail.rs:6:13
+ --> tests/rsx_macro_tests/expressions/single_expression_fail.rs:6:12
   |
 6 |     rsx! { () };
-  |             ^^ `()` cannot be formatted with the default formatter
+  |            ^^ `()` cannot be formatted with the default formatter
   |
   = help: the trait `std::fmt::Display` is not implemented for `()`
   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
@@ -22,10 +22,10 @@ error[E0277]: `()` doesn't implement `std::fmt::Display`
   = note: required for `VNode` to implement `From<()>`
 
 error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
- --> tests/rsx_macro_tests/expressions/single_expression_fail.rs:8:13
+ --> tests/rsx_macro_tests/expressions/single_expression_fail.rs:8:12
   |
 8 |     rsx! { NonDisplayStruct };
-  |             ^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+  |            ^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
   |
   = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
@@ -39,13 +39,13 @@ error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
   = note: required for `VNode` to implement `From<NonDisplayStruct>`
 
 error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
-  --> tests/rsx_macro_tests/expressions/single_expression_fail.rs:10:13
+  --> tests/rsx_macro_tests/expressions/single_expression_fail.rs:10:12
    |
 10 |     rsx! { node() };
-   |             ----^^
-   |             |
-   |             `NonDisplayStruct` cannot be formatted with the default formatter
-   |             required by a bound introduced by this call
+   |            ----^^
+   |            |
+   |            `NonDisplayStruct` cannot be formatted with the default formatter
+   |            required by a bound introduced by this call
    |
    = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead

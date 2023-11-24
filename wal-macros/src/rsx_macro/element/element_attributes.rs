@@ -15,8 +15,8 @@ pub struct ElementAttributes {
     normal: HashMap<proc_macro2::Ident, NormalAttributeValue>,
     events: HashMap<proc_macro2::Ident, syn::ExprBlock>,
     pub key: Option<NormalAttribute>,
-    class: Option<NormalAttribute>,
-    wal_class: Option<WalClassAttribute>,
+    _class: Option<NormalAttribute>,
+    _wal_class: Option<WalClassAttribute>,
 }
 
 impl Parse for ElementAttributes {
@@ -43,8 +43,8 @@ impl Parse for ElementAttributes {
             normal,
             events,
             key,
-            class,
-            wal_class,
+            _class: class,
+            _wal_class: wal_class,
         })
     }
 }

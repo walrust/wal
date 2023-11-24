@@ -1,41 +1,41 @@
 error: Invalid syntax encountered
- --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:6:18
+ --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:6:17
   |
 6 |     rsx! { <div>()</div> };
-  |                  ^
+  |                 ^
 
 error: Expected expressions within braces, found an empty block
- --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:7:18
+ --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:7:17
   |
 7 |     rsx! { <div>{ }</div> };
-  |                  ^^^
+  |                 ^^^
 
 error: Invalid syntax encountered
- --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:9:19
+ --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:9:18
   |
 9 |     rsx! { <div> String::from("Hello world!") </div> };
-  |                   ^^^^^^
+  |                  ^^^^^^
 
 error: Invalid syntax encountered
-  --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:11:19
+  --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:11:18
    |
 11 |     rsx! { <div> val </div> };
-   |                   ^^^
+   |                  ^^^
 
 error[E0425]: cannot find value `invalid_reference` in this scope
- --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:8:21
+ --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:8:20
   |
 8 |     rsx! { <div> { invalid_reference } </div> };
-  |                     ^^^^^^^^^^^^^^^^^ not found in this scope
+  |                    ^^^^^^^^^^^^^^^^^ not found in this scope
 
 error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
-  --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:13:19
+  --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:13:18
    |
 13 |     rsx! { <div> { t } </div> };
-   |                   ^^-^^
-   |                   | |
-   |                   | this tail expression is of type `NonDisplayStruct`
-   |                   `NonDisplayStruct` cannot be formatted with the default formatter
+   |                  ^^-^^
+   |                  | |
+   |                  | this tail expression is of type `NonDisplayStruct`
+   |                  `NonDisplayStruct` cannot be formatted with the default formatter
    |
    = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
@@ -49,13 +49,13 @@ error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
    = note: required for `VNode` to implement `From<NonDisplayStruct>`
 
 error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
-  --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:14:19
+  --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:14:18
    |
 14 |     rsx! { <div> { NonDisplayStruct } </div> };
-   |                   ^^----------------^^
-   |                   | |
-   |                   | this tail expression is of type `NonDisplayStruct`
-   |                   `NonDisplayStruct` cannot be formatted with the default formatter
+   |                  ^^----------------^^
+   |                  | |
+   |                  | this tail expression is of type `NonDisplayStruct`
+   |                  `NonDisplayStruct` cannot be formatted with the default formatter
    |
    = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
@@ -69,13 +69,13 @@ error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
    = note: required for `VNode` to implement `From<NonDisplayStruct>`
 
 error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
-  --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:16:19
+  --> tests/rsx_macro_tests/elements/element_with_single_expression_fail.rs:16:18
    |
 16 |     rsx! { <div> { node() } </div> };
-   |                   ^^------^^
-   |                   | |
-   |                   | this tail expression is of type `NonDisplayStruct`
-   |                   `NonDisplayStruct` cannot be formatted with the default formatter
+   |                  ^^------^^
+   |                  | |
+   |                  | this tail expression is of type `NonDisplayStruct`
+   |                  `NonDisplayStruct` cannot be formatted with the default formatter
    |
    = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead

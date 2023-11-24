@@ -1,59 +1,59 @@
 error: `Link` requires `to` attribute
- --> tests/rsx_macro_tests/links/link_should_fail.rs:4:14
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:4:13
   |
 4 |     rsx! { <Link /> };
-  |              ^^^^
+  |             ^^^^
 
 error: `Link` requires `to` attribute
- --> tests/rsx_macro_tests/links/link_should_fail.rs:5:14
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:5:13
   |
 5 |     rsx! { <Link></Link> };
-  |              ^^^^
+  |             ^^^^
 
 error: expected `=`
- --> tests/rsx_macro_tests/links/link_should_fail.rs:6:22
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:6:21
   |
 6 |     rsx! { <Link to /> };
-  |                      ^
+  |                     ^
 
 error: Expected a literal or an expression block
- --> tests/rsx_macro_tests/links/link_should_fail.rs:7:23
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:7:22
   |
 7 |     rsx! { <Link to= /> };
-  |                       ^
+  |                      ^
 
 error: Unsupported attribute `unsupported_attr`. `Link` supports only `key` and `to` attributes
- --> tests/rsx_macro_tests/links/link_should_fail.rs:8:19
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:8:18
   |
 8 |     rsx! { <Link unsupported_attr="value" /> };
-  |                   ^^^^^^^^^^^^^^^^
+  |                  ^^^^^^^^^^^^^^^^
 
 error: Unsupported attribute `unsupported_attr`. `Link` supports only `key` and `to` attributes
- --> tests/rsx_macro_tests/links/link_should_fail.rs:9:30
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:9:29
   |
 9 |     rsx! { <Link to="value" unsupported_attr="value" /> };
-  |                              ^^^^^^^^^^^^^^^^
+  |                             ^^^^^^^^^^^^^^^^
 
 error: `Link` requires `to` attribute
-  --> tests/rsx_macro_tests/links/link_should_fail.rs:10:14
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:10:13
    |
 10 |     rsx! { <Link key="value" /> };
-   |              ^^^^
+   |             ^^^^
 
 error: This closing tag does not have a corresponding opening tag. (hint: try adding `<Link>`)
-  --> tests/rsx_macro_tests/links/link_should_fail.rs:11:13
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:11:12
    |
 11 |     rsx! { </Link> };
-   |             ^^^^^^^
+   |            ^^^^^^^
 
 error: `Link` requires `to` attribute
-  --> tests/rsx_macro_tests/links/link_should_fail.rs:12:14
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:12:13
    |
 12 |     rsx! { <Link> };
-   |              ^^^^
+   |             ^^^^
 
 error: This start tag does not have a corresponding end tag. (hint: try adding `</Link>`)
-  --> tests/rsx_macro_tests/links/link_should_fail.rs:13:13
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:13:12
    |
 13 |     rsx! { <Link to="value"> };
-   |             ^^^^^^^^^^^^^^^^^
+   |            ^^^^^^^^^^^^^^^^^

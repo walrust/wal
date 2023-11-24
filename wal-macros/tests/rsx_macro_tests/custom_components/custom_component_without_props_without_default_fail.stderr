@@ -1,8 +1,8 @@
 error[E0277]: the trait bound `PropsWithoutDefault: Default` is not satisfied
-  --> tests/rsx_macro_tests/custom_components/custom_component_without_props_without_default_fail.rs:10:14
+  --> tests/rsx_macro_tests/custom_components/custom_component_without_props_without_default_fail.rs:10:13
    |
 10 |     rsx! { <CustomComponentPropsStructWithoutDefault /> };
-   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `PropsWithoutDefault`
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `PropsWithoutDefault`
    |
 help: consider annotating `PropsWithoutDefault` with `#[derive(Default)]`
   --> tests/rsx_macro_tests/custom_components/../utils/custom_components/custom_component_props_struct_without_default.rs
@@ -12,10 +12,10 @@ help: consider annotating `PropsWithoutDefault` with `#[derive(Default)]`
    |
 
 error[E0277]: the trait bound `PropsWithoutDefault: Default` is not satisfied
-  --> tests/rsx_macro_tests/custom_components/custom_component_without_props_without_default_fail.rs:11:14
+  --> tests/rsx_macro_tests/custom_components/custom_component_without_props_without_default_fail.rs:11:13
    |
 11 |     rsx! { <CustomComponentPropsStructWithoutDefault key="key" />};
-   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `PropsWithoutDefault`
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Default` is not implemented for `PropsWithoutDefault`
    |
 help: consider annotating `PropsWithoutDefault` with `#[derive(Default)]`
   --> tests/rsx_macro_tests/custom_components/../utils/custom_components/custom_component_props_struct_without_default.rs

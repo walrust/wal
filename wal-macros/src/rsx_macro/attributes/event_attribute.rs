@@ -16,7 +16,13 @@ impl Parse for EventAttribute {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let ident = input.parse()?;
         input.parse::<syn::token::Eq>()?;
-        let value = input.parse()?;
+        let value = input.parse::<syn::ExprBlock>()?;
+        if value.block.stmts.is_empty() {
+            return Err(syn::Error::new_spanned(
+                &value,
+                "Expected a non-empty expression block",
+            ));
+        }
 
         Ok(EventAttribute { ident, value })
     }
