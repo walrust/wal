@@ -23,12 +23,11 @@ impl ToTokens for WalClassAttribute {
 }
 
 impl WalClassAttribute {
-    pub fn get_space_separated_values(&self) -> String {
+    pub fn get_values_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
         self.value
             .elems
             .iter()
-            .map(|elem| elem.into_token_stream().to_string())
-            .collect::<Vec<_>>()
-            .join(" ")
+            .map(|elem| elem.into_token_stream())
+            .collect()
     }
 }

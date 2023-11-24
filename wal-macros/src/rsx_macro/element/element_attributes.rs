@@ -15,8 +15,8 @@ pub struct ElementAttributes {
     normal: HashMap<proc_macro2::Ident, NormalAttributeValue>,
     events: HashMap<proc_macro2::Ident, syn::ExprBlock>,
     pub key: Option<NormalAttribute>,
-    _class: Option<NormalAttribute>,
-    _wal_class: Option<WalClassAttribute>,
+    class: Option<NormalAttribute>,
+    wal_class: Option<WalClassAttribute>,
 }
 
 impl Parse for ElementAttributes {
@@ -43,8 +43,8 @@ impl Parse for ElementAttributes {
             normal,
             events,
             key,
-            _class: class,
-            _wal_class: wal_class,
+            class,
+            wal_class,
         })
     }
 }
@@ -164,13 +164,13 @@ impl ElementAttributes {
     }
 
     fn get_class_attribute_token_stream(&self) -> Option<proc_macro2::TokenStream> {
-        match (&self._class, &self._wal_class) {
+        match (&self.class, &self.wal_class) {
             (Some(class), Some(wal_class)) => {
                 let class_value = &class.value;
-                let wal_class_value = wal_class.get_space_separated_values();
+                let wal_class_value = wal_class.get_values_token_stream();
                 Some(quote_spanned!(class.ident.span() => (
                     ::std::string::String::from(#CLASS_ATTR),
-                    ::std::format!("{} {}", #class_value, #wal_class_value)
+                    ::std::format!("{} {}", #class_value, ::std::vec![#(#wal_class_value.to_string()),*].join(" "))
                 )))
             }
             (Some(class), None) => {
@@ -181,10 +181,10 @@ impl ElementAttributes {
                 )))
             }
             (None, Some(wal_class)) => {
-                let value = wal_class.get_space_separated_values();
+                let values = wal_class.get_values_token_stream();
                 Some(quote_spanned!(wal_class.ident.span() => (
                     ::std::string::String::from(#CLASS_ATTR),
-                    #value
+                    ::std::vec![#(#values.to_string()),*].join(" ")
                 )))
             }
             (None, None) => None,
