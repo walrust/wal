@@ -37,29 +37,4 @@ impl ComponentAttribute {
     pub fn peek(input: ParseStream) -> bool {
         input.peek(syn::Ident)
     }
-
-    // pub fn span(&self) -> proc_macro2::Span {
-    //     self.to_spanned().span()
-    // }
-
-    // fn to_spanned(&self) -> Box<dyn ToTokens> {
-    //     match self {
-    //         ComponentAttribute::Props(props) => Box::new(props.to_spanned()),
-    //         ComponentAttribute::Key(key) => Box::new(key.to_spanned()),
-    //     }
-    // }
 }
-
-// impl ToTokens for HtmlComponentAttributeValue {
-//     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-//         match self {
-//             HtmlComponentAttributeValue::Literal(lit) => lit.to_tokens(tokens),
-//             HtmlComponentAttributeValue::StructExpression(expr_struct) => {
-//                 expr_struct.to_tokens(tokens)
-//             }
-//             HtmlComponentAttributeValue::ExpressionBlock(expr_block) => {
-//                 expr_block.to_tokens(tokens)
-//             }
-//         }
-//     }
-// }

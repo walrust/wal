@@ -16,9 +16,9 @@ fn main() {
 }
 
 fn custom_component_props_i32() {
-    let html = rsx! { <CustomComponentPropsI32 /> };
+    let rsx = rsx! { <CustomComponentPropsI32 /> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Component(VComponent::new::<CustomComponentPropsI32>(
             <CustomComponentPropsI32 as Component>::Properties::default(),
             None
@@ -27,9 +27,9 @@ fn custom_component_props_i32() {
 }
 
 fn custom_component_props_struct_with_default() {
-    let html = rsx! { <CustomComponentPropsStructWithDefaultAndHash /> };
+    let rsx = rsx! { <CustomComponentPropsStructWithDefaultAndHash /> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Component(VComponent::new::<
             CustomComponentPropsStructWithDefaultAndHash,
         >(
@@ -40,9 +40,9 @@ fn custom_component_props_struct_with_default() {
 }
 
 fn custom_component_props_i32_with_key() {
-    let html = rsx! { <CustomComponentPropsI32 key="key" /> };
+    let rsx = rsx! { <CustomComponentPropsI32 key="key" /> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Component(VComponent::new::<CustomComponentPropsI32>(
             <CustomComponentPropsI32 as Component>::Properties::default(),
             Some("key".to_string())
@@ -51,9 +51,9 @@ fn custom_component_props_i32_with_key() {
 }
 
 fn custom_component_props_struct_with_default_with_key() {
-    let html = rsx! { <CustomComponentPropsStructWithDefaultAndHash key="key" /> };
+    let rsx = rsx! { <CustomComponentPropsStructWithDefaultAndHash key="key" /> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Component(VComponent::new::<
             CustomComponentPropsStructWithDefaultAndHash,
         >(

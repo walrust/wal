@@ -20,9 +20,9 @@ fn main() {
 }
 
 fn single_attribute() {
-    let html = rsx! { <div attr="value"></div> };
+    let rsx = rsx! { <div attr="value"></div> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr", "value")]),
@@ -34,9 +34,9 @@ fn single_attribute() {
 }
 
 fn single_key_attribute() {
-    let html = rsx! { <div key="value"></div> };
+    let rsx = rsx! { <div key="value"></div> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
@@ -48,9 +48,9 @@ fn single_key_attribute() {
 }
 
 fn multiple_attributes() {
-    let html = rsx! { <div attr1="val1" attr2="val2"></div> };
+    let rsx = rsx! { <div attr1="val1" attr2="val2"></div> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
@@ -62,9 +62,9 @@ fn multiple_attributes() {
 }
 
 fn multiple_attributes_self_closing() {
-    let html = rsx! { <div attr1="val1" attr2="val2"/> };
+    let rsx = rsx! { <div attr1="val1" attr2="val2"/> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
@@ -76,17 +76,17 @@ fn multiple_attributes_self_closing() {
 }
 
 fn fragment_with_key_attribute() {
-    let html = rsx! { <key="value"></> };
+    let rsx = rsx! { <key="value"></> };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new_empty(Some("value".to_string())))
     );
 }
 
 fn single_expression_attribute() {
-    let html = rsx! { <div attr={1 + 2}></div> };
+    let rsx = rsx! { <div attr={1 + 2}></div> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr", "3")]),
@@ -98,9 +98,9 @@ fn single_expression_attribute() {
 }
 
 fn multiple_expression_and_literal_attributes() {
-    let html = rsx! { <div attr1={1 + 2} attr2="val2" attr3={"val3"}></div> };
+    let rsx = rsx! { <div attr1={1 + 2} attr2="val2" attr3={"val3"}></div> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "3"), ("attr2", "val2"), ("attr3", "val3")]),
@@ -112,9 +112,9 @@ fn multiple_expression_and_literal_attributes() {
 }
 
 fn attributes_and_event_attributes() {
-    let html = rsx! { <div attr1="val1" onclick={Callback::new(|_event: wal::events::MouseEvent| {})} attr2="val2"></div> };
+    let rsx = rsx! { <div attr1="val1" onclick={Callback::new(|_event: wal::events::MouseEvent| {})} attr2="val2"></div> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),

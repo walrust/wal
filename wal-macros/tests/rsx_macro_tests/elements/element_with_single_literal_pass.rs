@@ -11,28 +11,28 @@ fn main() {
 }
 
 fn element_with_empty_string() {
-    let html = rsx! { <div> "" </div> };
-    assert_eq!(html, get_div_with(""));
+    let rsx = rsx! { <div> "" </div> };
+    assert_eq!(rsx, get_div_with(""));
 }
 
 fn element_with_string() {
-    let html = rsx! { <div> "Hello world!" </div> };
-    assert_eq!(html, get_div_with("Hello world!"));
+    let rsx = rsx! { <div> "Hello world!" </div> };
+    assert_eq!(rsx, get_div_with("Hello world!"));
 }
 
 fn element_with_char() {
-    let html = rsx! { <div> 'a' </div> };
-    assert_eq!(html, get_div_with('a'));
+    let rsx = rsx! { <div> 'a' </div> };
+    assert_eq!(rsx, get_div_with('a'));
 }
 
 fn element_with_integer() {
-    let html = rsx! { <div> 15 </div> };
-    assert_eq!(html, get_div_with(15));
+    let rsx = rsx! { <div> 15 </div> };
+    assert_eq!(rsx, get_div_with(15));
 }
 
 fn element_with_float() {
-    let html = rsx! { <div> 15.5 </div> };
-    assert_eq!(html, get_div_with(15.5));
+    let rsx = rsx! { <div> 15.5 </div> };
+    assert_eq!(rsx, get_div_with(15.5));
 }
 
 fn get_div_with<T: ToString>(t: T) -> VNode {

@@ -3,13 +3,13 @@ use wal::virtual_dom::{VElement, VList, VNode};
 use wal_macros::rsx;
 
 fn main() {
-    let html = rsx! {
+    let rsx = rsx! {
         <div></div>
         <span/>
         <input/>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 get_velement("div"),

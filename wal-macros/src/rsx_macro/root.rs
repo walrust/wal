@@ -44,8 +44,8 @@ impl ToTokens for Root {
             }),
             Self::Expression(expr) => tokens
                 .extend(quote_spanned! { expr.span() => ::wal::virtual_dom::VNode::from(#expr) }),
-            Self::For(html_for) => html_for.to_tokens(tokens),
-            Self::Forest(html_forest) => html_forest.to_tokens(tokens),
+            Self::For(rsx_for) => rsx_for.to_tokens(tokens),
+            Self::Forest(forest) => forest.to_tokens(tokens),
         };
     }
 }

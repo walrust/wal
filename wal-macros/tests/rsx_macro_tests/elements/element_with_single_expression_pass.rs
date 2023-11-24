@@ -9,35 +9,35 @@ fn main() {
     element_with_referance_expression();
     element_with_struct_expression();
     element_with_function_returning_value();
-    element_with_function_returning_html();
+    element_with_function_returning_rsx();
 }
 
 fn element_with_isolated_expression() {
-    let html = rsx! { <div> { String::from("Hello world!") } </div> };
-    assert_eq!(html, get_div_with("Hello world!"));
+    let rsx = rsx! { <div> { String::from("Hello world!") } </div> };
+    assert_eq!(rsx, get_div_with("Hello world!"));
 }
 
 fn element_with_referance_expression() {
     let val = "Hello world!";
-    let html = rsx! { <div> { val } </div> };
-    assert_eq!(html, get_div_with("Hello world!"));
+    let rsx = rsx! { <div> { val } </div> };
+    assert_eq!(rsx, get_div_with("Hello world!"));
 }
 
 fn element_with_struct_expression() {
-    let html = rsx! { <div> { DisplayStruct } </div> };
-    assert_eq!(html, get_div_with(DisplayStruct));
+    let rsx = rsx! { <div> { DisplayStruct } </div> };
+    assert_eq!(rsx, get_div_with(DisplayStruct));
 }
 
 fn element_with_function_returning_value() {
     let node = || 5;
-    let html = rsx! { <div> { node() } </div> };
-    assert_eq!(html, get_div_with(5));
+    let rsx = rsx! { <div> { node() } </div> };
+    assert_eq!(rsx, get_div_with(5));
 }
 
-fn element_with_function_returning_html() {
+fn element_with_function_returning_rsx() {
     let node = || rsx! { "Hello world!" };
-    let html = rsx! { <div> { node() } </div> };
-    assert_eq!(html, get_div_with("Hello world!"));
+    let rsx = rsx! { <div> { node() } </div> };
+    assert_eq!(rsx, get_div_with("Hello world!"));
 }
 
 fn get_div_with<T: ToString>(t: T) -> VNode {

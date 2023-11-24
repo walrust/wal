@@ -7,13 +7,13 @@ pub struct Forest(Vec<Tree>);
 
 impl Parse for Forest {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut html_forest = Vec::new();
+        let mut forest = Vec::new();
 
         while !input.is_empty() {
-            html_forest.push(input.parse()?);
+            forest.push(input.parse()?);
         }
 
-        Ok(Forest(html_forest))
+        Ok(Forest(forest))
     }
 }
 

@@ -14,39 +14,39 @@ fn main() {
 }
 
 fn if_with_empty() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
         }
     };
-    assert_eq!(html, VNode::List(VList::new_empty(None)));
+    assert_eq!(rsx, VNode::List(VList::new_empty(None)));
 }
 
 fn if_with_literal() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
             "hello"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello"))));
 }
 
 fn if_with_expression() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
             1 + 1
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("2"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("2"))));
 }
 
 fn if_with_for() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
             for 0..3
         }
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 VNode::Text(VText::new("0")),
@@ -59,13 +59,13 @@ fn if_with_for() {
 }
 
 fn if_with_single_element_forest() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
             <div></div>
         }
     };
     assert_eq!(
-        html,
+        rsx,
         wrap_in_list(VNode::Element(VElement::new(
             "div".to_string(),
             HashMap::new(),
@@ -77,14 +77,14 @@ fn if_with_single_element_forest() {
 }
 
 fn if_with_multiple_element_forest() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
             <div></div>
             <div></div>
         }
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 VNode::Element(VElement::new(

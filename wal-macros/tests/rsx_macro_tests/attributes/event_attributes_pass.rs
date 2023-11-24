@@ -15,9 +15,9 @@ fn main() {
 }
 
 fn single_specialized_event_attribute() {
-    let html = rsx! { <div onclick={Callback::new(|_event: wal::events::MouseEvent| {})}></div> };
+    let rsx = rsx! { <div onclick={Callback::new(|_event: wal::events::MouseEvent| {})}></div> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
@@ -31,9 +31,9 @@ fn single_specialized_event_attribute() {
 }
 
 fn single_unspecialized_event_attribute() {
-    let html = rsx! { <div oncopy={Callback::new(|_event: wal::events::Event| {})}></div> };
+    let rsx = rsx! { <div oncopy={Callback::new(|_event: wal::events::Event| {})}></div> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
@@ -47,14 +47,14 @@ fn single_unspecialized_event_attribute() {
 }
 
 fn multiple_event_attributes() {
-    let html = rsx! {
+    let rsx = rsx! {
         <div
             onclick={Callback::new(|_event: wal::events::MouseEvent| {})}
             oncopy={Callback::new(|_event: wal::events::Event| {})}>
         </div>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),

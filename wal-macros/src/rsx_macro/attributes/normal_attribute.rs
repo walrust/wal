@@ -70,17 +70,3 @@ impl ToTokens for NormalAttributeValue {
         }
     }
 }
-
-// impl From<HtmlComponentAttributeValue> for NormalAttributeValue {
-//     fn from(value: HtmlComponentAttributeValue) -> Self {
-//         match value {
-//             HtmlComponentAttributeValue::Literal(lit) => NormalAttributeValue::Literal(lit),
-//             HtmlComponentAttributeValue::ExpressionBlock(expr_block) => {
-//                 NormalAttributeValue::ExpressionBlock(expr_block)
-//             }
-//             _ => panic!(
-//                 "Unsupported conversion from HtmlComponentAttributeValue to HtmlAttributeValue - should never happen"
-//             ),
-//         }
-//     }
-// }

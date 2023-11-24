@@ -20,58 +20,58 @@ fn main() {
 }
 
 fn if_true() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
             "hello"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello"))));
 }
 
 fn if_false() {
-    let html = rsx! {
+    let rsx = rsx! {
         if false {
             "hello"
         }
     };
-    assert_eq!(html, VNode::List(VList::new_empty(None)));
+    assert_eq!(rsx, VNode::List(VList::new_empty(None)));
 }
 
 fn if_true_else_if() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
             "hello"
         } else if true {
             "hello2"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello"))));
 }
 
 fn if_false_else_if_true() {
-    let html = rsx! {
+    let rsx = rsx! {
         if false {
             "hello"
         } else if true {
             "hello2"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello2"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello2"))));
 }
 
 fn if_false_else_if_false() {
-    let html = rsx! {
+    let rsx = rsx! {
         if false {
             "hello"
         } else if false {
             "hello2"
         }
     };
-    assert_eq!(html, VNode::List(VList::new_empty(None)));
+    assert_eq!(rsx, VNode::List(VList::new_empty(None)));
 }
 
 fn if_multiple_else_ifs() {
-    let html = rsx! {
+    let rsx = rsx! {
         if false {
             "hello"
         } else if false {
@@ -82,33 +82,33 @@ fn if_multiple_else_ifs() {
             "hello4"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello3"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello3"))));
 }
 
 fn if_true_else() {
-    let html = rsx! {
+    let rsx = rsx! {
         if true {
             "hello"
         } else {
             "hello2"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello"))));
 }
 
 fn if_false_else() {
-    let html = rsx! {
+    let rsx = rsx! {
         if false {
             "hello"
         } else {
             "hello2"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello2"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello2"))));
 }
 
 fn if_multiple_else_ifs_else() {
-    let html = rsx! {
+    let rsx = rsx! {
         if false {
             "hello"
         } else if false {
@@ -119,11 +119,11 @@ fn if_multiple_else_ifs_else() {
             "hello4"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello3"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello3"))));
 }
 
 fn if_false_multiple_else_ifs_false_else() {
-    let html = rsx! {
+    let rsx = rsx! {
         if false {
             "hello"
         } else if false {
@@ -134,11 +134,11 @@ fn if_false_multiple_else_ifs_false_else() {
             "hello4"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello4"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello4"))));
 }
 
 fn if_in_element() {
-    let html = rsx! {
+    let rsx = rsx! {
         <div>
             if true {
                 "hello"
@@ -146,7 +146,7 @@ fn if_in_element() {
         </div>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(VElement::new(
             String::from("div"),
             HashMap::new(),
@@ -159,12 +159,12 @@ fn if_in_element() {
 
 fn if_with_complex_condition() {
     let f = false;
-    let html = rsx! {
+    let rsx = rsx! {
         if 1 == 1 && f {
             "hello"
         } else if false || !f {
             "hello2"
         }
     };
-    assert_eq!(html, wrap_in_list(VNode::Text(VText::new("hello2"))));
+    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello2"))));
 }

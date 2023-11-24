@@ -11,31 +11,31 @@ fn main() {
 }
 
 fn empty() {
-    let html = rsx! {};
-    assert_eq!(html, VNode::List(VList::new_empty(None)));
+    let rsx = rsx! {};
+    assert_eq!(rsx, VNode::List(VList::new_empty(None)));
 }
 
 fn empty_string() {
-    let html = rsx! { "" };
-    assert_eq!(html, VNode::Text(VText::new("")));
+    let rsx = rsx! { "" };
+    assert_eq!(rsx, VNode::Text(VText::new("")));
 }
 
 fn non_empty_string() {
-    let html = rsx! { "Hello world!" };
-    assert_eq!(html, VNode::Text(VText::new("Hello world!")));
+    let rsx = rsx! { "Hello world!" };
+    assert_eq!(rsx, VNode::Text(VText::new("Hello world!")));
 }
 
 fn char() {
-    let html = rsx! { 'a' };
-    assert_eq!(html, VNode::Text(VText::new("a")));
+    let rsx = rsx! { 'a' };
+    assert_eq!(rsx, VNode::Text(VText::new("a")));
 }
 
 fn integer() {
-    let html = rsx! { 15 };
-    assert_eq!(html, VNode::Text(VText::new("15")));
+    let rsx = rsx! { 15 };
+    assert_eq!(rsx, VNode::Text(VText::new("15")));
 }
 
 fn float() {
-    let html = rsx! { 15.5 };
-    assert_eq!(html, VNode::Text(VText::new("15.5")));
+    let rsx = rsx! { 15.5 };
+    assert_eq!(rsx, VNode::Text(VText::new("15.5")));
 }

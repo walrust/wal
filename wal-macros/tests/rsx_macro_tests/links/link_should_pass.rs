@@ -17,9 +17,9 @@ fn main() {
 }
 
 fn link_with_to_attr_as_string() {
-    let html = rsx! { <Link to="/home" /> };
+    let rsx = rsx! { <Link to="/home" /> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),
@@ -31,9 +31,9 @@ fn link_with_to_attr_as_string() {
 }
 
 fn non_self_closing_link_with_to_attr_as_string() {
-    let html = rsx! { <Link to="/home"></Link> };
+    let rsx = rsx! { <Link to="/home"></Link> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),
@@ -46,9 +46,9 @@ fn non_self_closing_link_with_to_attr_as_string() {
 
 fn link_with_to_attr_as_expr() {
     let link = "/home";
-    let html = rsx! { <Link to={link}></Link> };
+    let rsx = rsx! { <Link to={link}></Link> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "a",
             HashMap::from([("href", link), ("data_link", link)]),
@@ -60,9 +60,9 @@ fn link_with_to_attr_as_expr() {
 }
 
 fn link_with_key_attr() {
-    let html = rsx! { <Link key="value" to="/home"></Link> };
+    let rsx = rsx! { <Link key="value" to="/home"></Link> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),
@@ -74,9 +74,9 @@ fn link_with_key_attr() {
 }
 
 fn link_with_single_child() {
-    let html = rsx! { <Link to="/home">"Home"</Link> };
+    let rsx = rsx! { <Link to="/home">"Home"</Link> };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),
@@ -88,14 +88,14 @@ fn link_with_single_child() {
 }
 
 fn link_with_multiple_children() {
-    let html = rsx! {
+    let rsx = rsx! {
         <Link to="/home">
             "Home"
             <span>"Span"</span>
         </Link>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "a",
             HashMap::from([("href", "/home"), ("data_link", "/home")]),

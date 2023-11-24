@@ -5,8 +5,8 @@ use syn::{
 };
 
 // This struct is generic because we want to be able to have:
-// - For<syn::Expr> as a single element in html macro
-// - For<syn::ExprBlock> as a part of more complex structure in html macro
+// - For<syn::Expr> as a single element in rsx macro
+// - For<syn::ExprBlock> as a part of more complex structure in rsx macro
 pub struct For<Expr: ExprInFor>(Expr);
 
 pub trait ExprInFor: Spanned {}

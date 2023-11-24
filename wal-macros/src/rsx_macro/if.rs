@@ -7,30 +7,30 @@ use syn::{
 use super::root::Root;
 
 pub struct IfExpression {
-    html_if: If,
+    rsx_if: If,
     else_ifs: Vec<ElseIf>,
-    html_else: Option<Else>,
+    rsx_else: Option<Else>,
 }
 
 impl Parse for IfExpression {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let html_if = input.parse()?;
+        let rsx_if = input.parse()?;
 
         let mut else_ifs = Vec::new();
         while ElseIf::peek(input) {
             else_ifs.push(input.parse()?);
         }
 
-        let html_else = if input.peek(syn::token::Else) {
+        let rsx_else = if input.peek(syn::token::Else) {
             Some(input.parse()?)
         } else {
             None
         };
 
         Ok(IfExpression {
-            html_if,
+            rsx_if,
             else_ifs,
-            html_else,
+            rsx_else,
         })
     }
 }
@@ -38,21 +38,21 @@ impl Parse for IfExpression {
 impl ToTokens for IfExpression {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let IfExpression {
-            html_if,
+            rsx_if,
             else_ifs,
-            html_else,
+            rsx_else,
         } = self;
 
-        let else_tokens = match html_else {
-            Some(html_else) => html_else.into_token_stream(),
+        let else_tokens = match rsx_else {
+            Some(rsx_else) => rsx_else.into_token_stream(),
             None => {
                 let default_else_body = &Root::Empty;
                 quote! { else { #default_else_body } }
             }
         };
 
-        tokens.extend(quote_spanned! {html_if.if_token.span() =>
-            #html_if
+        tokens.extend(quote_spanned! {rsx_if.if_token.span() =>
+            #rsx_if
             #(#else_ifs)*
             #else_tokens
         });

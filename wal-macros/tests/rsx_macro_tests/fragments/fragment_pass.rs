@@ -16,18 +16,18 @@ fn main() {
 }
 
 fn empty() {
-    let html = rsx! { <></> };
-    assert_eq!(html, VNode::List(VList::new_empty(None)));
+    let rsx = rsx! { <></> };
+    assert_eq!(rsx, VNode::List(VList::new_empty(None)));
 }
 
 fn with_single_element() {
-    let html = rsx! {
+    let rsx = rsx! {
         <>
             <div></div>
         </>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![VNode::Element(new_velement_str(
                 "div",
@@ -42,14 +42,14 @@ fn with_single_element() {
 }
 
 fn with_multiple_elements() {
-    let html = rsx! {
+    let rsx = rsx! {
         <>
             <div></div>
             <div></div>
         </>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 VNode::Element(new_velement_str(
@@ -73,13 +73,13 @@ fn with_multiple_elements() {
 }
 
 fn inside_element() {
-    let html = rsx! {
+    let rsx = rsx! {
         <div>
             <></>
         </div>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
@@ -91,9 +91,9 @@ fn inside_element() {
 }
 
 fn with_key_attribute() {
-    let html = rsx! { <key="value"></> };
+    let rsx = rsx! { <key="value"></> };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new_empty(Some("value".to_string())))
     );
 }

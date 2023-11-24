@@ -21,12 +21,12 @@ pub struct Element {
 impl Parse for Element {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek2(syn::token::Slash) {
-            let html_end_tag = input.parse::<ElementEndTag>()?;
+            let end_tag = input.parse::<ElementEndTag>()?;
             return Err(syn::Error::new_spanned(
-                html_end_tag.to_spanned(),
+                end_tag.to_spanned(),
                 format!(
                     "This closing tag does not have a corresponding opening tag. (hint: try adding `<{}>`)",
-                    html_end_tag.name
+                    end_tag.name
                 )
             ));
         }

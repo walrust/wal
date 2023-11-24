@@ -15,26 +15,26 @@ fn main() {
     for_non_empty_iter();
 
     for_with_mapped_elements();
-    for_with_mapped_elements_to_html();
+    for_with_mapped_elements_to_rsx();
 
     for_as_first_child_of_element();
     for_as_a_not_first_child_of_element();
 }
 
 fn for_empty_iter() {
-    let html = rsx! { for empty_iter() };
-    assert_eq!(html, VNode::List(VList::new_empty(None)));
+    let rsx = rsx! { for empty_iter() };
+    assert_eq!(rsx, VNode::List(VList::new_empty(None)));
 }
 
 fn for_empty_vec() {
-    let html = rsx! { for empty_vec() };
-    assert_eq!(html, VNode::List(VList::new_empty(None)));
+    let rsx = rsx! { for empty_vec() };
+    assert_eq!(rsx, VNode::List(VList::new_empty(None)));
 }
 
 fn for_non_empty_vec() {
-    let html = rsx! { for vec![0, 1, 2] };
+    let rsx = rsx! { for vec![0, 1, 2] };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 VNode::Text(VText::new("0")),
@@ -47,9 +47,9 @@ fn for_non_empty_vec() {
 }
 
 fn for_non_empty_iter() {
-    let html = rsx! { for 0..3 };
+    let rsx = rsx! { for 0..3 };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 VNode::Text(VText::new("0")),
@@ -62,9 +62,9 @@ fn for_non_empty_iter() {
 }
 
 fn for_with_mapped_elements() {
-    let html = rsx! { for std::iter::Iterator::map(0..2, |num| {num + 1}) };
+    let rsx = rsx! { for std::iter::Iterator::map(0..2, |num| {num + 1}) };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![VNode::Text(VText::new("1")), VNode::Text(VText::new("2")),],
             None
@@ -72,10 +72,10 @@ fn for_with_mapped_elements() {
     );
 }
 
-fn for_with_mapped_elements_to_html() {
-    let html = rsx! { for std::iter::Iterator::map(0..2, |num| { rsx! { <div>{ num }</div> } }) };
+fn for_with_mapped_elements_to_rsx() {
+    let rsx = rsx! { for std::iter::Iterator::map(0..2, |num| { rsx! { <div>{ num }</div> } }) };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 VNode::Element(new_velement_str(
@@ -99,13 +99,13 @@ fn for_with_mapped_elements_to_html() {
 }
 
 fn for_as_first_child_of_element() {
-    let html = rsx! {
+    let rsx = rsx! {
         <div>
             for { empty_vec() }
         </div>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
@@ -117,14 +117,14 @@ fn for_as_first_child_of_element() {
 }
 
 fn for_as_a_not_first_child_of_element() {
-    let html = rsx! {
+    let rsx = rsx! {
         <>
             <div/>
             for { empty_vec() }
         </>
     };
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 VNode::Element(new_velement_str(

@@ -19,12 +19,12 @@ pub struct Link {
 impl Parse for Link {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         if input.peek2(syn::token::Slash) {
-            let html_link_end_tag = input.parse::<LinkEndTag>()?;
+            let end_tag = input.parse::<LinkEndTag>()?;
             return Err(syn::Error::new_spanned(
-                html_link_end_tag.to_spanned(),
+                end_tag.to_spanned(),
                 format!(
                     "This closing tag does not have a corresponding opening tag. (hint: try adding `<{}>`)",
-                    html_link_end_tag.name
+                    end_tag.name
                 )
             ));
         }

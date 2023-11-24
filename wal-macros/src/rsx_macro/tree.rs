@@ -19,7 +19,7 @@ pub enum Tree {
 
 impl Parse for Tree {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let html_tree = if input.peek(syn::token::If) {
+        let tree = if input.peek(syn::token::If) {
             Self::If(input.parse()?)
         } else if input.peek(syn::token::For) {
             Self::For(input.parse()?)
@@ -36,13 +36,13 @@ impl Parse for Tree {
             return Err(input.error("Invalid syntax encountered"));
         };
 
-        Ok(html_tree)
+        Ok(tree)
     }
 }
 
 impl Tree {
     fn parse_after_lt(input: ParseStream, forked_input: ParseStream) -> syn::Result<Self> {
-        let html_tree = if forked_input.peek(syn::token::Gt) {
+        let tree = if forked_input.peek(syn::token::Gt) {
             Self::Fragment(input.parse()?)
         } else if forked_input.peek(syn::token::PathSep) {
             Self::Component(input.parse()?)
@@ -52,7 +52,7 @@ impl Tree {
             Self::Element(input.parse()?)
         };
 
-        Ok(html_tree)
+        Ok(tree)
     }
 
     fn parse_where_after_lt_is_ident(
@@ -61,7 +61,7 @@ impl Tree {
     ) -> syn::Result<Self> {
         let ident = forked_input.parse::<proc_macro2::Ident>()?.to_string();
 
-        let html_tree = if forked_input.peek(syn::token::Eq) {
+        let tree = if forked_input.peek(syn::token::Eq) {
             Self::Fragment(input.parse()?)
         } else if ident
             .chars()
@@ -79,21 +79,21 @@ impl Tree {
             Self::Element(input.parse()?)
         };
 
-        Ok(html_tree)
+        Ok(tree)
     }
 }
 
 impl ToTokens for Tree {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-            Self::If(html_if) => html_if.to_tokens(tokens),
-            Self::For(html_for) => html_for.to_tokens(tokens),
-            Self::Fragment(html_fragment) => html_fragment.to_tokens(tokens),
-            Self::Component(html_component) => html_component.to_tokens(tokens),
-            Self::Element(html_element) => html_element.to_tokens(tokens),
-            Self::Literal(html_literal) => html_literal.to_tokens(tokens),
-            Self::ExpressionBlock(html_expr_block) => html_expr_block.to_tokens(tokens),
-            Self::Link(html_link) => html_link.to_tokens(tokens),
+            Self::If(rsx_if) => rsx_if.to_tokens(tokens),
+            Self::For(rsx_for) => rsx_for.to_tokens(tokens),
+            Self::Fragment(fragment) => fragment.to_tokens(tokens),
+            Self::Component(component) => component.to_tokens(tokens),
+            Self::Element(element) => element.to_tokens(tokens),
+            Self::Literal(literal) => literal.to_tokens(tokens),
+            Self::ExpressionBlock(expr_block) => expr_block.to_tokens(tokens),
+            Self::Link(link) => link.to_tokens(tokens),
         }
     }
 }

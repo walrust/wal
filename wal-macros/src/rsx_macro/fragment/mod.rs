@@ -17,9 +17,9 @@ pub struct Fragment {
 impl Parse for Fragment {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         if input.peek2(syn::token::Slash) {
-            let html_end_tag = input.parse::<FragmentEndTag>()?;
+            let end_tag = input.parse::<FragmentEndTag>()?;
             return Err(syn::Error::new_spanned(
-                html_end_tag.to_spanned(),
+                end_tag.to_spanned(),
                 "This closing fragment does not have a corresponding opening fragment. (hint: try adding `<>`)",
             ));
         }

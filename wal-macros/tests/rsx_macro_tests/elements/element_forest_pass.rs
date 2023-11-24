@@ -8,7 +8,7 @@ use wal_macros::rsx;
 include!("../utils/new_velement_str.rs");
 
 fn main() {
-    let html = rsx! {
+    let rsx = rsx! {
         <div></div>
         <div>
             <span/>
@@ -17,7 +17,7 @@ fn main() {
     };
 
     assert_eq!(
-        html,
+        rsx,
         VNode::List(VList::new(
             vec![
                 VNode::Element(new_velement_str(
