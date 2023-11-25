@@ -1,7 +1,10 @@
 use element_end_tag::ElementEndTag;
 use element_start_tag::ElementStartTag;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{parse::{Parse, ParseStream}, spanned::Spanned};
+use syn::{
+    parse::{Parse, ParseStream},
+    spanned::Spanned,
+};
 
 use super::tree::Tree;
 
@@ -10,7 +13,7 @@ mod element_attributes;
 mod element_end_tag;
 mod element_start_tag;
 
-pub struct Element {
+pub(crate) struct Element {
     start_tag: ElementStartTag,
     children: Vec<Tree>,
     end_tag: Option<ElementEndTag>,
@@ -48,7 +51,7 @@ impl Parse for Element {
             ));
         }
 
-        let children = Self::parse_children(&start_tag, input)?;
+        let children = Self::parse_children(input, &start_tag)?;
         let end_tag = input.parse::<ElementEndTag>()?;
 
         Ok(Element {
@@ -60,7 +63,7 @@ impl Parse for Element {
 }
 
 impl Element {
-    fn parse_children(start_tag: &ElementStartTag, input: ParseStream) -> syn::Result<Vec<Tree>> {
+    fn parse_children(input: ParseStream, start_tag: &ElementStartTag) -> syn::Result<Vec<Tree>> {
         let mut children = Vec::new();
 
         loop {
@@ -89,7 +92,7 @@ impl ToTokens for Element {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let name = &self.start_tag.name.to_string();
         let attributes = self.start_tag.attributes.get_attributes_token_stream();
-        let key = self.start_tag.attributes.get_key_token_stream();
+        let key = self.start_tag.attributes.get_key_attribute_token_stream();
         let event_handlers = self.start_tag.attributes.get_event_handlers_token_stream();
         let children = &self.children;
 

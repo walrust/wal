@@ -1,9 +1,11 @@
 use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 
-pub struct PropsAttribute {
-    pub ident: proc_macro2::Ident,
-    pub value: PropsAttributeValue,
+use super::Attribute;
+
+pub(crate) struct PropsAttribute {
+    pub(crate) ident: proc_macro2::Ident,
+    pub(crate) value: PropsAttributeValue,
 }
 
 impl Parse for PropsAttribute {
@@ -16,7 +18,20 @@ impl Parse for PropsAttribute {
     }
 }
 
-pub enum PropsAttributeValue {
+impl Attribute for PropsAttribute {
+    type AttributeValue = PropsAttributeValue;
+
+    fn ident(&self) -> &proc_macro2::Ident {
+        &self.ident
+    }
+
+    fn value(&self) -> &Self::AttributeValue {
+        &self.value
+    }
+}
+
+#[derive(Clone)]
+pub(crate) enum PropsAttributeValue {
     Literal(syn::Lit),
     ExpressionBlock(syn::ExprBlock),
     StructExpression(syn::ExprStruct),

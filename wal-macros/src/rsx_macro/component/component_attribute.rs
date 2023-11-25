@@ -6,7 +6,7 @@ use crate::rsx_macro::attributes::{
 
 const PROPS_ATTR: &str = "props";
 
-pub enum ComponentAttribute {
+pub(crate) enum ComponentAttribute {
     Props(PropsAttribute),
     Key(NormalAttribute),
 }
@@ -35,7 +35,7 @@ impl Parse for ComponentAttribute {
 }
 
 impl ComponentAttribute {
-    pub fn peek(input: ParseStream) -> bool {
+    pub(crate) fn peek(input: ParseStream) -> bool {
         input.peek(syn::Ident)
     }
 }

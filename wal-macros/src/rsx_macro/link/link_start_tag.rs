@@ -1,15 +1,17 @@
 use quote::{quote, quote_spanned, ToTokens};
 use syn::parse::Parse;
 
-use crate::rsx_macro::attributes::{normal_attribute::NormalAttribute, KEY_ATTR};
+use crate::rsx_macro::attributes::{
+    normal_attribute::NormalAttribute, process_specialized_attribute, KEY_ATTR,
+};
 
 use super::TO_ATTR;
 
-pub struct LinkStartTag {
+pub(crate) struct LinkStartTag {
     lt: syn::token::Lt,
-    pub name: proc_macro2::Ident,
-    pub to: NormalAttribute,
-    pub key: Option<NormalAttribute>,
+    pub(crate) name: proc_macro2::Ident,
+    pub(crate) to: NormalAttribute,
+    pub(crate) key: Option<NormalAttribute>,
     slash: Option<syn::token::Slash>,
     gt: syn::token::Gt,
 }
@@ -22,8 +24,8 @@ impl Parse for LinkStartTag {
         let mut key = None;
         let mut to = None;
         while NormalAttribute::peek(input) {
-            let attribute = input.parse::<NormalAttribute>()?;
-            Self::process_attribute(&mut key, &mut to, attribute, &name)?;
+            let incoming_attribute = input.parse::<NormalAttribute>()?;
+            Self::process_attribute(&mut key, &mut to, incoming_attribute, &name)?;
         }
 
         if to.is_none() {
@@ -51,45 +53,31 @@ impl LinkStartTag {
     fn process_attribute(
         key: &mut Option<NormalAttribute>,
         to: &mut Option<NormalAttribute>,
-        attribute: NormalAttribute,
-        name: &proc_macro2::Ident,
+        incoming_attribute: NormalAttribute,
+        tag_ident: &proc_macro2::Ident,
     ) -> syn::Result<()> {
-        if attribute.ident == KEY_ATTR {
-            Self::process_supported_attribute(key, attribute)
-        } else if attribute.ident == TO_ATTR {
-            Self::process_supported_attribute(to, attribute)
+        if incoming_attribute.ident == KEY_ATTR {
+            process_specialized_attribute(key, incoming_attribute)
+        } else if incoming_attribute.ident == TO_ATTR {
+            process_specialized_attribute(to, incoming_attribute)
         } else {
             Err(syn::Error::new(
-                attribute.ident.span(),
+                incoming_attribute.ident.span(),
                 format!(
                     "Unsupported attribute `{}`. `{}` supports only `{}` and `{}` attributes",
-                    attribute.ident, name, KEY_ATTR, TO_ATTR
+                    incoming_attribute.ident, tag_ident, KEY_ATTR, TO_ATTR
                 ),
             ))
         }
     }
-
-    fn process_supported_attribute(
-        attribute_storage: &mut Option<NormalAttribute>,
-        attribute: NormalAttribute,
-    ) -> syn::Result<()> {
-        if attribute_storage.is_some() {
-            return Err(syn::Error::new(
-                attribute.ident.span(),
-                format!("Duplicate attribute `{}`", attribute.ident),
-            ));
-        }
-        *attribute_storage = Some(attribute);
-        Ok(())
-    }
 }
 
 impl LinkStartTag {
-    pub fn is_self_closing(&self) -> bool {
+    pub(crate) fn is_self_closing(&self) -> bool {
         self.slash.is_some()
     }
 
-    pub fn error_spanned(&self) -> impl ToTokens {
+    pub(crate) fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }
@@ -108,11 +96,6 @@ impl LinkStartTag {
     }
 
     pub(crate) fn get_key_attribute_token_stream(&self) -> proc_macro2::TokenStream {
-        if let Some(key) = &self.key {
-            let key_value = &key.value;
-            quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
-        } else {
-            quote!(None)
-        }
+        NormalAttribute::get_key_attribute_token_stream(self.key.as_ref())
     }
 }

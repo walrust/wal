@@ -1,15 +1,16 @@
 use std::collections::HashSet;
 
 use once_cell::sync::Lazy;
-use proc_macro2::Ident;
 use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 
-pub type EventAttributeValue = syn::ExprBlock;
+use super::Attribute;
 
-pub struct EventAttribute {
-    pub ident: proc_macro2::Ident,
-    pub value: EventAttributeValue,
+pub(crate) type EventAttributeValue = syn::ExprBlock;
+
+pub(crate) struct EventAttribute {
+    pub(crate) ident: proc_macro2::Ident,
+    pub(crate) value: EventAttributeValue,
 }
 
 impl Parse for EventAttribute {
@@ -34,11 +35,23 @@ impl ToTokens for EventAttribute {
     }
 }
 
-pub trait IsEvent {
+impl Attribute for EventAttribute {
+    type AttributeValue = EventAttributeValue;
+
+    fn ident(&self) -> &proc_macro2::Ident {
+        &self.ident
+    }
+
+    fn value(&self) -> &Self::AttributeValue {
+        &self.value
+    }
+}
+
+pub(crate) trait IsEvent {
     fn is_event(&self) -> bool;
 }
 
-impl IsEvent for Ident {
+impl IsEvent for proc_macro2::Ident {
     fn is_event(&self) -> bool {
         EVENTS.contains(self.to_string().as_str())
     }

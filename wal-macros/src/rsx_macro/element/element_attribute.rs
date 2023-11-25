@@ -7,10 +7,10 @@ use crate::rsx_macro::attributes::{
     KEY_ATTR,
 };
 
-pub const CLASS_ATTR: &str = "class";
+pub(crate) const CLASS_ATTR: &str = "class";
 const WAL_CLASS_ATTR: &str = "wal_class";
 
-pub enum ElementAttribute {
+pub(crate) enum ElementAttribute {
     Normal(NormalAttribute),
     Event(EventAttribute),
     Key(NormalAttribute),
@@ -38,7 +38,7 @@ impl Parse for ElementAttribute {
 }
 
 impl ElementAttribute {
-    pub fn peek(input: ParseStream) -> bool {
+    pub(crate) fn peek(input: ParseStream) -> bool {
         input.peek(syn::Ident)
     }
 }

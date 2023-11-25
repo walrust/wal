@@ -4,17 +4,18 @@ use quote::{quote, quote_spanned};
 use syn::{parse::Parse, spanned::Spanned};
 
 use crate::rsx_macro::attributes::{
-    event_attribute::{EventAttribute, EventAttributeValue},
+    event_attribute::EventAttributeValue,
     normal_attribute::{NormalAttribute, NormalAttributeValue},
+    process_specialized_attribute, process_unspecialized_attribute,
     wal_class_attribute::WalClassAttribute,
 };
 
 use super::element_attribute::{ElementAttribute, CLASS_ATTR};
 
-pub struct ElementAttributes {
+pub(crate) struct ElementAttributes {
     normal: HashMap<proc_macro2::Ident, NormalAttributeValue>,
     events: HashMap<proc_macro2::Ident, syn::ExprBlock>,
-    pub key: Option<NormalAttribute>,
+    pub(crate) key: Option<NormalAttribute>,
     class: Option<NormalAttribute>,
     wal_class: Option<WalClassAttribute>,
 }
@@ -28,14 +29,14 @@ impl Parse for ElementAttributes {
         let mut wal_class = None;
 
         while ElementAttribute::peek(input) {
-            let attribute = input.parse::<ElementAttribute>()?;
+            let incoming_attribute = input.parse::<ElementAttribute>()?;
             Self::process_attribute(
                 &mut normal,
                 &mut events,
                 &mut key,
                 &mut class,
                 &mut wal_class,
-                attribute,
+                incoming_attribute,
             )?;
         }
 
@@ -56,98 +57,30 @@ impl ElementAttributes {
         key: &mut Option<NormalAttribute>,
         class: &mut Option<NormalAttribute>,
         wal_class: &mut Option<WalClassAttribute>,
-        attribute: ElementAttribute,
+        incoming_attribute: ElementAttribute,
     ) -> syn::Result<()> {
-        match attribute {
-            ElementAttribute::Normal(attribute) => {
-                Self::process_normal_attribute(normal, attribute)
+        match incoming_attribute {
+            ElementAttribute::Normal(incoming_attribute) => {
+                process_unspecialized_attribute(normal, incoming_attribute)
             }
-            ElementAttribute::Event(attribute) => Self::process_event_attribute(events, attribute),
-            ElementAttribute::Key(attribute) => Self::process_key_attribute(key, attribute),
-            ElementAttribute::Class(attribute) => Self::process_class_attribute(class, attribute),
-            ElementAttribute::WalClass(attribute) => {
-                Self::process_wal_class_attribute(wal_class, attribute)
+            ElementAttribute::Event(incoming_attribute) => {
+                process_unspecialized_attribute(events, incoming_attribute)
+            }
+            ElementAttribute::Key(incoming_attribute) => {
+                process_specialized_attribute(key, incoming_attribute)
+            }
+            ElementAttribute::Class(incoming_attribute) => {
+                process_specialized_attribute(class, incoming_attribute)
+            }
+            ElementAttribute::WalClass(incoming_attribute) => {
+                process_specialized_attribute(wal_class, incoming_attribute)
             }
         }
     }
 
-    fn process_normal_attribute(
-        normal: &mut HashMap<proc_macro2::Ident, NormalAttributeValue>,
-        attribute: NormalAttribute,
-    ) -> syn::Result<()> {
-        if normal
-            .insert(attribute.ident.clone(), attribute.value)
-            .is_some()
-        {
-            Err(syn::Error::new(
-                attribute.ident.span(),
-                format!("Duplicate attribute `{}`", attribute.ident),
-            ))
-        } else {
-            Ok(())
-        }
-    }
-
-    fn process_event_attribute(
-        events: &mut HashMap<proc_macro2::Ident, EventAttributeValue>,
-        attribute: EventAttribute,
-    ) -> syn::Result<()> {
-        if events
-            .insert(attribute.ident.clone(), attribute.value)
-            .is_some()
-        {
-            return Err(syn::Error::new(
-                attribute.ident.span(),
-                format!("Duplicate event attribute `{}`", attribute.ident),
-            ));
-        }
-        Ok(())
-    }
-
-    fn process_key_attribute(
-        key: &mut Option<NormalAttribute>,
-        attribute: NormalAttribute,
-    ) -> syn::Result<()> {
-        if key.is_some() {
-            return Err(syn::Error::new(
-                attribute.ident.span(),
-                format!("Duplicate attribute `{}`", attribute.ident),
-            ));
-        }
-        *key = Some(attribute);
-        Ok(())
-    }
-
-    fn process_class_attribute(
-        class: &mut Option<NormalAttribute>,
-        attribute: NormalAttribute,
-    ) -> syn::Result<()> {
-        if class.is_some() {
-            return Err(syn::Error::new(
-                attribute.ident.span(),
-                format!("Duplicate attribute `{}`", attribute.ident),
-            ));
-        }
-        *class = Some(attribute);
-        Ok(())
-    }
-
-    fn process_wal_class_attribute(
-        wal_class: &mut Option<WalClassAttribute>,
-        attribute: WalClassAttribute,
-    ) -> syn::Result<()> {
-        if wal_class.is_some() {
-            return Err(syn::Error::new(
-                attribute.ident.span(),
-                format!("Duplicate attribute `{}`", attribute.ident),
-            ));
-        }
-        *wal_class = Some(attribute);
-        Ok(())
-    }
-
+    // TODO: refactor this shit
     pub(crate) fn get_attributes_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
-        let mut atttributes_token_stream: Vec<proc_macro2::TokenStream> = self
+        let mut attributes_token_stream: Vec<proc_macro2::TokenStream> = self
             .normal
             .iter()
             .map(|(ident, value)| -> proc_macro2::TokenStream {
@@ -157,10 +90,10 @@ impl ElementAttributes {
             .collect();
 
         if let Some(class_attribute_token_stream) = self.get_class_attribute_token_stream() {
-            atttributes_token_stream.push(class_attribute_token_stream);
+            attributes_token_stream.push(class_attribute_token_stream);
         }
 
-        atttributes_token_stream
+        attributes_token_stream
     }
 
     fn get_class_attribute_token_stream(&self) -> Option<proc_macro2::TokenStream> {
@@ -193,13 +126,8 @@ impl ElementAttributes {
         }
     }
 
-    pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
-        if let Some(key) = &self.key {
-            let key_value = &key.value;
-            quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
-        } else {
-            quote!(None)
-        }
+    pub(crate) fn get_key_attribute_token_stream(&self) -> proc_macro2::TokenStream {
+        NormalAttribute::get_key_attribute_token_stream(self.key.as_ref())
     }
 
     pub(crate) fn get_event_handlers_token_stream(&self) -> Vec<proc_macro2::TokenStream> {

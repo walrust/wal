@@ -6,7 +6,7 @@ use syn::{
 
 use super::{forest::Forest, r#for::For};
 
-pub enum Root {
+pub(crate) enum Root {
     Empty,
     Expression(syn::Expr),
     For(For<syn::Expr>),

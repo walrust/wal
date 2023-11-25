@@ -4,7 +4,7 @@ use syn::{
     spanned::Spanned,
 };
 
-pub struct ExpressionBlock(syn::ExprBlock);
+pub(crate) struct ExpressionBlock(syn::ExprBlock);
 
 impl Parse for ExpressionBlock {
     fn parse(input: ParseStream) -> syn::Result<Self> {

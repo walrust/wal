@@ -1,12 +1,14 @@
-use quote::ToTokens;
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
 };
 
-pub struct NormalAttribute {
-    pub ident: proc_macro2::Ident,
-    pub value: NormalAttributeValue,
+use super::Attribute;
+
+pub(crate) struct NormalAttribute {
+    pub(crate) ident: proc_macro2::Ident,
+    pub(crate) value: NormalAttributeValue,
 }
 
 impl Parse for NormalAttribute {
@@ -19,13 +21,38 @@ impl Parse for NormalAttribute {
     }
 }
 
-impl NormalAttribute {
-    pub fn peek(input: ParseStream) -> bool {
-        input.peek(syn::Ident)
+impl Attribute for NormalAttribute {
+    type AttributeValue = NormalAttributeValue;
+
+    fn ident(&self) -> &proc_macro2::Ident {
+        &self.ident
+    }
+
+    fn value(&self) -> &Self::AttributeValue {
+        &self.value
     }
 }
 
-pub enum NormalAttributeValue {
+impl NormalAttribute {
+    pub(crate) fn peek(input: ParseStream) -> bool {
+        input.peek(syn::Ident)
+    }
+
+    pub(crate) fn get_key_attribute_token_stream(
+        key_attribute: Option<&Self>,
+    ) -> proc_macro2::TokenStream {
+        key_attribute.map_or_else(
+            || quote!(None),
+            |key_attribute| {
+                let key_value = &key_attribute.value;
+                quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
+            },
+        )
+    }
+}
+
+#[derive(Clone)]
+pub(crate) enum NormalAttributeValue {
     Literal(syn::Lit),
     ExpressionBlock(syn::ExprBlock),
 }
@@ -60,7 +87,7 @@ impl ToTokens for NormalAttributeValue {
 }
 
 impl NormalAttributeValue {
-    pub fn error_span(&self) -> proc_macro2::Span {
+    pub(crate) fn error_span(&self) -> proc_macro2::Span {
         match self {
             NormalAttributeValue::Literal(lit) => lit.span(),
             NormalAttributeValue::ExpressionBlock(expr_block) => expr_block.span(),

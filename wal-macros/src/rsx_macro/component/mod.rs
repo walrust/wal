@@ -3,10 +3,10 @@ use syn::{parse::Parse, spanned::Spanned};
 
 use self::component_attributes::ComponentAttributes;
 
-pub mod component_attribute;
-pub mod component_attributes;
+pub(crate) mod component_attribute;
+pub(crate) mod component_attributes;
 
-pub struct Component {
+pub(crate) struct Component {
     lt: syn::token::Lt,
     ty: syn::Type,
     attributes: ComponentAttributes,
@@ -33,8 +33,8 @@ impl Parse for Component {
 impl ToTokens for Component {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let ty = &self.ty;
-        let props = self.attributes.get_props_token_stream(ty);
-        let key = self.attributes.get_key_token_stream();
+        let props = self.attributes.get_props_attribute_token_stream(ty);
+        let key = self.attributes.get_key_attribute_token_stream();
 
         tokens.extend(quote_spanned! { self.error_span() =>
             ::wal::virtual_dom::VNode::Component(

@@ -8,5 +8,5 @@ mod fragment;
 mod r#if;
 mod link;
 mod literal;
-pub mod root;
+pub(crate) mod root;
 mod tree;

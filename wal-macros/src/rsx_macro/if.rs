@@ -6,7 +6,7 @@ use syn::{
 
 use super::root::Root;
 
-pub struct IfExpression {
+pub(crate) struct IfExpression {
     rsx_if: If,
     else_ifs: Vec<ElseIf>,
     rsx_else: Option<Else>,

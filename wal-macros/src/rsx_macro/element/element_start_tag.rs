@@ -3,10 +3,10 @@ use syn::parse::Parse;
 
 use super::element_attributes::ElementAttributes;
 
-pub struct ElementStartTag {
+pub(crate) struct ElementStartTag {
     lt: syn::token::Lt,
-    pub name: proc_macro2::Ident,
-    pub attributes: ElementAttributes,
+    pub(crate) name: proc_macro2::Ident,
+    pub(crate) attributes: ElementAttributes,
     slash: Option<syn::token::Slash>,
     gt: syn::token::Gt,
 }
@@ -30,11 +30,11 @@ impl Parse for ElementStartTag {
 }
 
 impl ElementStartTag {
-    pub fn is_self_closing(&self) -> bool {
+    pub(crate) fn is_self_closing(&self) -> bool {
         self.slash.is_some()
     }
 
-    pub fn is_void(&self) -> bool {
+    pub(crate) fn is_void(&self) -> bool {
         const VOID_ELEMENTS: [&str; 14] = [
             "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param",
             "source", "track", "wbr",
@@ -42,7 +42,7 @@ impl ElementStartTag {
         VOID_ELEMENTS.contains(&self.name.to_string().as_str())
     }
 
-    pub fn error_spanned(&self) -> impl ToTokens {
+    pub(crate) fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }

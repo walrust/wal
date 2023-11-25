@@ -3,9 +3,9 @@ use syn::parse::{Parse, ParseStream};
 
 use super::LINK_TAG;
 
-pub struct LinkEndTag {
+pub(crate) struct LinkEndTag {
     lt: syn::token::Lt,
-    pub name: proc_macro2::Ident,
+    pub(crate) name: proc_macro2::Ident,
     gt: syn::token::Gt,
 }
 
@@ -20,13 +20,13 @@ impl Parse for LinkEndTag {
 }
 
 impl LinkEndTag {
-    pub fn error_spanned(&self) -> impl ToTokens {
+    pub(crate) fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }
     }
 
-    pub fn peek(input: ParseStream) -> bool {
+    pub(crate) fn peek(input: ParseStream) -> bool {
         let forked_input = input.fork();
         if forked_input.parse::<syn::token::Lt>().is_err()
             || forked_input.parse::<syn::token::Slash>().is_err()

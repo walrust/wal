@@ -1,7 +1,7 @@
 use quote::{quote_spanned, ToTokens};
 use syn::parse::{Parse, ParseStream};
 
-pub struct Literal(syn::Lit);
+pub(crate) struct Literal(syn::Lit);
 
 impl Parse for Literal {
     fn parse(input: ParseStream) -> syn::Result<Self> {

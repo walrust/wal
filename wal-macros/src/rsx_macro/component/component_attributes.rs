@@ -1,15 +1,16 @@
-use quote::{quote, quote_spanned};
+use quote::quote_spanned;
 use syn::{parse::Parse, spanned::Spanned, Type};
 
 use crate::rsx_macro::attributes::{
     normal_attribute::NormalAttribute,
+    process_specialized_attribute,
     props_attribute::{PropsAttribute, PropsAttributeValue},
 };
 
 use super::component_attribute::ComponentAttribute;
 
-pub struct ComponentAttributes {
-    pub props: Option<PropsAttribute>,
+pub(crate) struct ComponentAttributes {
+    pub(crate) props: Option<PropsAttribute>,
     key: Option<NormalAttribute>,
 }
 
@@ -19,8 +20,8 @@ impl Parse for ComponentAttributes {
         let mut key = None;
 
         while ComponentAttribute::peek(input) {
-            let attribute = input.parse::<ComponentAttribute>()?;
-            Self::process_attribute(&mut props, &mut key, attribute)?;
+            let incoming_attribute = input.parse::<ComponentAttribute>()?;
+            Self::process_attribute(&mut props, &mut key, incoming_attribute)?;
         }
         Ok(ComponentAttributes { props, key })
     }
@@ -30,58 +31,28 @@ impl ComponentAttributes {
     fn process_attribute(
         props: &mut Option<PropsAttribute>,
         key: &mut Option<NormalAttribute>,
-        attribute: ComponentAttribute,
+        incoming_attribute: ComponentAttribute,
     ) -> syn::Result<()> {
-        match attribute {
-            ComponentAttribute::Props(props_attribute) => {
-                Self::process_props_attribute(props, props_attribute)
+        match incoming_attribute {
+            ComponentAttribute::Props(incoming_props_attribute) => {
+                process_specialized_attribute(props, incoming_props_attribute)
             }
-            ComponentAttribute::Key(key_attribute) => {
-                Self::process_key_attribute(key, key_attribute)
+            ComponentAttribute::Key(incoming_key_attribute) => {
+                process_specialized_attribute(key, incoming_key_attribute)
             }
         }
-    }
-
-    fn process_props_attribute(
-        props: &mut Option<PropsAttribute>,
-        attribute: PropsAttribute,
-    ) -> syn::Result<()> {
-        if props.is_some() {
-            return Err(syn::Error::new(
-                attribute.ident.span(),
-                format!("Duplicate attribute `{}`", attribute.ident),
-            ));
-        }
-        *props = Some(attribute);
-        Ok(())
-    }
-
-    fn process_key_attribute(
-        key: &mut Option<NormalAttribute>,
-        attribute: NormalAttribute,
-    ) -> syn::Result<()> {
-        if key.is_some() {
-            return Err(syn::Error::new(
-                attribute.ident.span(),
-                format!("Duplicate attribute `{}`", attribute.ident),
-            ));
-        }
-        *key = Some(attribute);
-        Ok(())
     }
 }
 
 impl ComponentAttributes {
-    pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
-        if let Some(key) = &self.key {
-            let key_value = &key.value;
-            quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
-        } else {
-            quote!(None)
-        }
+    pub(crate) fn get_key_attribute_token_stream(&self) -> proc_macro2::TokenStream {
+        NormalAttribute::get_key_attribute_token_stream(self.key.as_ref())
     }
 
-    pub(crate) fn get_props_token_stream(&self, component_type: &Type) -> proc_macro2::TokenStream {
+    pub(crate) fn get_props_attribute_token_stream(
+        &self,
+        component_type: &Type,
+    ) -> proc_macro2::TokenStream {
         let props_type = quote_spanned!(component_type.span() => <#component_type as ::wal::component::Component>::Properties);
 
         self.props.as_ref().map_or_else(

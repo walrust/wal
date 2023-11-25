@@ -11,10 +11,10 @@ use super::tree::Tree;
 mod link_end_tag;
 mod link_start_tag;
 
-pub const LINK_TAG: &str = "Link";
+pub(crate) const LINK_TAG: &str = "Link";
 const TO_ATTR: &str = "to";
 
-pub struct Link {
+pub(crate) struct Link {
     start_tag: LinkStartTag,
     children: Vec<Tree>,
     end_tag: Option<LinkEndTag>,

@@ -4,9 +4,13 @@ use syn::{
     spanned::Spanned,
 };
 
-pub struct WalClassAttribute {
-    pub ident: proc_macro2::Ident,
-    pub value: syn::ExprArray,
+use super::Attribute;
+
+pub(crate) type WalClassAttributeValue = syn::ExprArray;
+
+pub(crate) struct WalClassAttribute {
+    pub(crate) ident: proc_macro2::Ident,
+    pub(crate) value: WalClassAttributeValue,
 }
 
 impl Parse for WalClassAttribute {
@@ -25,8 +29,20 @@ impl ToTokens for WalClassAttribute {
     }
 }
 
+impl Attribute for WalClassAttribute {
+    type AttributeValue = WalClassAttributeValue;
+
+    fn ident(&self) -> &proc_macro2::Ident {
+        &self.ident
+    }
+
+    fn value(&self) -> &Self::AttributeValue {
+        &self.value
+    }
+}
+
 impl WalClassAttribute {
-    pub fn get_values_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
+    pub(crate) fn get_values_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
         self.value
             .elems
             .iter()

@@ -3,7 +3,7 @@ use syn::parse::{Parse, ParseStream};
 
 use super::tree::Tree;
 
-pub struct Forest(Vec<Tree>);
+pub(crate) struct Forest(Vec<Tree>);
 
 impl Parse for Forest {
     fn parse(input: ParseStream) -> syn::Result<Self> {

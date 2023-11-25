@@ -16,7 +16,7 @@ error: expected `=`
 7 |     rsx! { <div onclick {Callback::new(|_event: wal::events::MouseEvent)| {}}></div> };
   |                         ^
 
-error: Duplicate event attribute `onclick`
+error: Duplicate attribute `onclick`
   --> tests/rsx_macro_tests/attributes/event_attributes_fail.rs:11:13
    |
 11 |             onclick={Callback::new(|_event: wal::events::MouseEvent| {})}>

@@ -2,11 +2,17 @@ use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 
 use super::{
-    component::Component, element::Element, expression_block::ExpressionBlock, fragment::Fragment,
-    link::{Link, LINK_TAG}, literal::Literal, r#for::For, r#if::IfExpression,
+    component::Component,
+    element::Element,
+    expression_block::ExpressionBlock,
+    fragment::Fragment,
+    link::{Link, LINK_TAG},
+    literal::Literal,
+    r#for::For,
+    r#if::IfExpression,
 };
 
-pub enum Tree {
+pub(crate) enum Tree {
     If(IfExpression),
     For(For<syn::ExprBlock>),
     Fragment(Fragment),

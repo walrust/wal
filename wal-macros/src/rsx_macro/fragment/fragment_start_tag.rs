@@ -1,9 +1,9 @@
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::parse::Parse;
 
 use crate::rsx_macro::attributes::{normal_attribute::NormalAttribute, KEY_ATTR};
 
-pub struct FragmentStartTag {
+pub(crate) struct FragmentStartTag {
     lt: syn::token::Lt,
     key: Option<NormalAttribute>,
     gt: syn::token::Gt,
@@ -54,12 +54,7 @@ impl FragmentStartTag {
         quote! { #lt #gt }
     }
 
-    pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
-        if let Some(key) = &self.key {
-            let key_value = &key.value;
-            quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
-        } else {
-            quote!(None)
-        }
+    pub(crate) fn get_key_attribute_token_stream(&self) -> proc_macro2::TokenStream {
+        NormalAttribute::get_key_attribute_token_stream(self.key.as_ref())
     }
 }
