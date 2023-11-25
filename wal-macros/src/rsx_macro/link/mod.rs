@@ -1,4 +1,3 @@
-use proc_macro2::{Ident, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 use syn::parse::{Parse, ParseStream};
 
@@ -13,7 +12,7 @@ pub const LINK_TAG: &str = "Link";
 const TO_ATTR: &str = "to";
 
 pub struct Link {
-    name: Ident,
+    name: proc_macro2::Ident,
     to: NormalAttribute,
     key: Option<NormalAttribute>,
     children: Vec<Tree>,
@@ -82,8 +81,8 @@ impl Link {
 
 impl ToTokens for Link {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let attributes = self.get_attributes_token_stream();
-        let key = self.get_key_token_stream();
+        let attributes = self.get_to_attribute_token_stream();
+        let key = self.get_key_attribute_token_stream();
         let children = &self.children;
 
         tokens.extend(quote_spanned! { self.name.span() =>
@@ -103,23 +102,22 @@ impl ToTokens for Link {
 }
 
 impl Link {
-    fn get_attributes_token_stream(&self) -> Vec<TokenStream> {
+    fn get_to_attribute_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
         let mut attributes = Vec::new();
 
-        let to_ident = &self.to.ident;
-        let to_val = &self.to.value;
+        let to_value = &self.to.value;
         attributes
-            .push(quote_spanned!(to_ident.span() => (::std::string::String::from("href"), #to_val.to_string())));
+            .push(quote_spanned!(to_value.span() => (::std::string::String::from("href"), #to_value.to_string())));
         attributes
-            .push(quote_spanned!(to_ident.span() => (::std::string::String::from("data_link"), #to_val.to_string())));
+            .push(quote_spanned!(to_value.span() => (::std::string::String::from("data_link"), #to_value.to_string())));
 
         attributes
     }
 
-    fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
+    fn get_key_attribute_token_stream(&self) -> proc_macro2::TokenStream {
         if let Some(key) = &self.key {
-            let key_val = &key.value;
-            quote_spanned!(key.ident.span() => Some(#key_val.to_string()))
+            let key_value = &key.value;
+            quote_spanned!(key_value.span() => Some(#key_value.to_string()))
         } else {
             quote!(None)
         }
