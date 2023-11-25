@@ -19,7 +19,7 @@ impl Parse for Fragment {
         if input.peek2(syn::token::Slash) {
             let end_tag = input.parse::<FragmentEndTag>()?;
             return Err(syn::Error::new_spanned(
-                end_tag.to_spanned(),
+                end_tag.error_spanned(),
                 "This closing fragment does not have a corresponding opening fragment. (hint: try adding `<>`)",
             ));
         }
@@ -30,7 +30,7 @@ impl Parse for Fragment {
         while !FragmentEndTag::peek(input) {
             if input.is_empty() {
                 return Err(syn::Error::new_spanned(
-                    start_tag.to_spanned(),
+                    start_tag.error_spanned(),
                     "This opening fragment does not have a coressponding closing fragment. (hint: try adding `</>`)",
                 ));
             }
@@ -53,7 +53,7 @@ impl ToTokens for Fragment {
         let children = &self.children;
         let key = self.start_tag.get_key_token_stream();
 
-        tokens.extend(quote_spanned! {self.span() =>
+        tokens.extend(quote_spanned! {self.error_span() =>
             ::wal::virtual_dom::VNode::List(
                 ::wal::virtual_dom::VList::new(
                     ::std::vec![#(#children),*],
@@ -65,13 +65,13 @@ impl ToTokens for Fragment {
 }
 
 impl Fragment {
-    fn span(&self) -> proc_macro2::Span {
-        self.to_spanned().span()
+    fn error_span(&self) -> proc_macro2::Span {
+        self.error_spanned().span()
     }
 
-    fn to_spanned(&self) -> impl ToTokens {
-        let start_spanned = self.start_tag.to_spanned();
-        let end_spanned = self.end_tag.to_spanned();
+    fn error_spanned(&self) -> impl ToTokens {
+        let start_spanned = self.start_tag.error_spanned();
+        let end_spanned = self.end_tag.error_spanned();
         quote!(#start_spanned #end_spanned)
     }
 }

@@ -16,7 +16,7 @@ impl Parse for FragmentEndTag {
 }
 
 impl FragmentEndTag {
-    pub fn to_spanned(&self) -> impl ToTokens {
+    pub fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }
