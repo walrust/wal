@@ -24,10 +24,7 @@ impl Parse for ComponentAttribute {
             Err(syn::Error::new(
                 ident.span(),
                 format!(
-                    "Unsupported attribute `{}`. Custom components supports only `{}` and `{}` attributes",
-                    ident,
-                    PROPS_ATTR,
-                    KEY_ATTR
+                    "Unsupported attribute `{ident}`. Custom components supports only `{PROPS_ATTR}` and `{KEY_ATTR}` attributes"
                 ),
             ))
         }

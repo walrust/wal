@@ -25,7 +25,7 @@ impl Parse for WalClassAttribute {
 
 impl ToTokens for WalClassAttribute {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        self.value.to_tokens(tokens)
+        self.value.to_tokens(tokens);
     }
 }
 

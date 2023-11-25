@@ -10,7 +10,7 @@ use crate::rsx_macro::attributes::{
 use super::component_attribute::ComponentAttribute;
 
 pub(crate) struct ComponentAttributes {
-    pub(crate) props: Option<PropsAttribute>,
+    props: Option<PropsAttribute>,
     key: Option<NormalAttribute>,
 }
 

@@ -31,7 +31,7 @@ impl Parse for LinkStartTag {
         if to.is_none() {
             return Err(syn::Error::new(
                 name.span(),
-                format!("`{}` requires `{}` attribute", name, TO_ATTR),
+                format!("`{name}` requires `{TO_ATTR}` attribute"),
             ));
         }
 

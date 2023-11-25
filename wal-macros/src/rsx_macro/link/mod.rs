@@ -108,7 +108,7 @@ impl Link {
 
     fn error_spanned(&self) -> impl ToTokens {
         let start_error_spanned = self.start_tag.error_spanned();
-        let end_error_spanned = self.end_tag.as_ref().map(|end_tag| end_tag.error_spanned());
+        let end_error_spanned = self.end_tag.as_ref().map(LinkEndTag::error_spanned);
         if end_error_spanned.is_some() {
             quote!(#start_error_spanned #end_error_spanned)
         } else {

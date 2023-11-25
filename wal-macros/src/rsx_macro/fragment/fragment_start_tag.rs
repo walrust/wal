@@ -26,14 +26,13 @@ impl Parse for FragmentStartTag {
         if attribute.ident != KEY_ATTR {
             return Err(syn::Error::new(
                 attribute.ident.span(),
-                format!("Fragment supports only the `{}` attribute", KEY_ATTR),
+                format!("Fragment supports only the `{KEY_ATTR}` attribute"),
             ));
         }
 
         if !input.peek(syn::token::Gt) {
             return Err(input.error(format!(
-                "Fragment supports only a single `{}` attribute",
-                KEY_ATTR
+                "Fragment supports only a single `{KEY_ATTR}` attribute"
             )));
         }
 

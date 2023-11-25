@@ -74,7 +74,7 @@ impl Component for ChildComponent {
         CSS1.with(|css| {
             rsx! {
                 <div wal_class=[css["wrapper"]]>
-                    <button onclick={on_click} class={css["btn"]}>
+                    <button onclick={on_click} class={&css["btn"]}>
                         "click me"
                     </button>
                 </div>

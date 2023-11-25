@@ -15,7 +15,7 @@ use super::element_attribute::{ElementAttribute, CLASS_ATTR};
 pub(crate) struct ElementAttributes {
     normal: HashMap<proc_macro2::Ident, NormalAttributeValue>,
     events: HashMap<proc_macro2::Ident, syn::ExprBlock>,
-    pub(crate) key: Option<NormalAttribute>,
+    key: Option<NormalAttribute>,
     class: Option<NormalAttribute>,
     wal_class: Option<WalClassAttribute>,
 }
@@ -61,10 +61,10 @@ impl ElementAttributes {
     ) -> syn::Result<()> {
         match incoming_attribute {
             ElementAttribute::Normal(incoming_attribute) => {
-                process_unspecialized_attribute(normal, incoming_attribute)
+                process_unspecialized_attribute(normal, &incoming_attribute)
             }
             ElementAttribute::Event(incoming_attribute) => {
-                process_unspecialized_attribute(events, incoming_attribute)
+                process_unspecialized_attribute(events, &incoming_attribute)
             }
             ElementAttribute::Key(incoming_attribute) => {
                 process_specialized_attribute(key, incoming_attribute)
@@ -78,7 +78,6 @@ impl ElementAttributes {
         }
     }
 
-    // TODO: refactor this shit
     pub(crate) fn get_attributes_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
         let mut attributes_token_stream: Vec<proc_macro2::TokenStream> = self
             .normal

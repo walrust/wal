@@ -27,9 +27,9 @@ pub(crate) fn process_specialized_attribute<Attr: Attribute>(
     Ok(())
 }
 
-pub(crate) fn process_unspecialized_attribute<T: Attribute>(
-    attributes: &mut HashMap<proc_macro2::Ident, T::AttributeValue>,
-    incoming_attribute: T,
+pub(crate) fn process_unspecialized_attribute<Attr: Attribute>(
+    attributes: &mut HashMap<proc_macro2::Ident, Attr::AttributeValue>,
+    incoming_attribute: &Attr,
 ) -> syn::Result<()> {
     let incoming_attribute_ident = incoming_attribute.ident();
     if attributes
@@ -46,5 +46,5 @@ pub(crate) fn process_unspecialized_attribute<T: Attribute>(
 }
 
 fn duplicate_attribute_error(ident: &proc_macro2::Ident) -> syn::Error {
-    syn::Error::new(ident.span(), format!("Duplicate attribute `{}`", ident))
+    syn::Error::new(ident.span(), format!("Duplicate attribute `{ident}`"))
 }
