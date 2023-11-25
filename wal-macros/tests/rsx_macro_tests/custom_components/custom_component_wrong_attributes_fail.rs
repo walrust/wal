@@ -5,6 +5,7 @@ use wal::{
 use wal_macros::rsx;
 
 include!("../utils/custom_components/custom_component_props_i32.rs");
+include!("../utils/non_display_struct.rs");
 
 fn main() {
     rsx! { <CustomComponentPropsI32 attr = 5 /> };
@@ -21,4 +22,8 @@ fn main() {
     rsx! { <CustomComponentPropsI32 key /> };
     rsx! { <CustomComponentPropsI32 key = /> };
     rsx! { <CustomComponentPropsI32 key = props = 1 /> };
+    rsx! { <CustomComponentPropsI32 key = {NonDisplayStruct} /> };
+    rsx! { <CustomComponentPropsI32 props = "value" /> };
+    rsx! { <CustomComponentPropsI32 props = {"value"} /> };
+    rsx! { <CustomComponentPropsI32 props = NonDisplayStruct {} /> };
 }

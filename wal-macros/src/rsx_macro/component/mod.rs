@@ -36,7 +36,7 @@ impl ToTokens for Component {
         let props = self.attributes.get_props_token_stream(ty);
         let key = self.attributes.get_key_token_stream();
 
-        tokens.extend(quote_spanned! { self.span() =>
+        tokens.extend(quote_spanned! { self.error_span() =>
             ::wal::virtual_dom::VNode::Component(
                 ::wal::virtual_dom::VComponent::new::<#ty>(#props, #key)
             )
@@ -45,11 +45,11 @@ impl ToTokens for Component {
 }
 
 impl Component {
-    fn span(&self) -> proc_macro2::Span {
-        self.to_spanned().span()
+    fn error_span(&self) -> proc_macro2::Span {
+        self.error_spanned().span()
     }
 
-    fn to_spanned(&self) -> impl ToTokens {
+    fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }

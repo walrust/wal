@@ -1,83 +1,141 @@
 error: Unsupported attribute `attr`. Custom components supports only `props` and `key` attributes
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:10:37
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:11:37
    |
-10 |     rsx! { <CustomComponentPropsI32 attr = 5 /> };
+11 |     rsx! { <CustomComponentPropsI32 attr = 5 /> };
    |                                     ^^^^
 
 error: Unsupported attribute `attr`. Custom components supports only `props` and `key` attributes
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:11:47
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:12:47
    |
-11 |     rsx! { <CustomComponentPropsI32 props = 1 attr = 5 /> };
+12 |     rsx! { <CustomComponentPropsI32 props = 1 attr = 5 /> };
    |                                               ^^^^
 
 error: Unsupported attribute `attr`. Custom components supports only `props` and `key` attributes
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:12:49
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:13:49
    |
-12 |     rsx! { <CustomComponentPropsI32 key = "key" attr = 5 /> };
+13 |     rsx! { <CustomComponentPropsI32 key = "key" attr = 5 /> };
    |                                                 ^^^^
 
 error: Unsupported attribute `attr`. Custom components supports only `props` and `key` attributes
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:13:47
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:14:47
    |
-13 |     rsx! { <CustomComponentPropsI32 props = 1 attr = 5 key="key" /> };
+14 |     rsx! { <CustomComponentPropsI32 props = 1 attr = 5 key="key" /> };
    |                                               ^^^^
 
 error: Duplicate attribute `props`
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:14:47
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:15:47
    |
-14 |     rsx! { <CustomComponentPropsI32 props = 0 props = 1 /> };
+15 |     rsx! { <CustomComponentPropsI32 props = 0 props = 1 /> };
    |                                               ^^^^^
 
 error: Duplicate attribute `props`
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:15:59
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:16:59
    |
-15 |     rsx! { <CustomComponentPropsI32 props = 0 key = "key" props = 1 /> };
+16 |     rsx! { <CustomComponentPropsI32 props = 0 key = "key" props = 1 /> };
    |                                                           ^^^^^
 
 error: Duplicate attribute `key`
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:16:50
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:17:50
    |
-16 |     rsx! { <CustomComponentPropsI32 key = "key1" key = "key2" /> };
+17 |     rsx! { <CustomComponentPropsI32 key = "key1" key = "key2" /> };
    |                                                  ^^^
 
 error: Duplicate attribute `key`
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:17:60
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:18:60
    |
-17 |     rsx! { <CustomComponentPropsI32 key = "key1" props = 0 key = "key2" /> };
+18 |     rsx! { <CustomComponentPropsI32 key = "key1" props = 0 key = "key2" /> };
    |                                                            ^^^
 
 error: expected `=`
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:18:43
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:19:43
    |
-18 |     rsx! { <CustomComponentPropsI32 props /> };
+19 |     rsx! { <CustomComponentPropsI32 props /> };
    |                                           ^
-
-error: Expected a literal, a struct literal expression or an expression block
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:19:45
-   |
-19 |     rsx! { <CustomComponentPropsI32 props = /> };
-   |                                             ^
 
 error: Expected a literal, a struct literal expression or an expression block
   --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:20:45
    |
-20 |     rsx! { <CustomComponentPropsI32 props = key = "key" /> };
+20 |     rsx! { <CustomComponentPropsI32 props = /> };
+   |                                             ^
+
+error: Expected a literal, a struct literal expression or an expression block
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:21:45
+   |
+21 |     rsx! { <CustomComponentPropsI32 props = key = "key" /> };
    |                                             ^^^
 
 error: expected `=`
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:21:41
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:22:41
    |
-21 |     rsx! { <CustomComponentPropsI32 key /> };
+22 |     rsx! { <CustomComponentPropsI32 key /> };
    |                                         ^
-
-error: Expected a literal or an expression block
-  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:22:43
-   |
-22 |     rsx! { <CustomComponentPropsI32 key = /> };
-   |                                           ^
 
 error: Expected a literal or an expression block
   --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:23:43
    |
-23 |     rsx! { <CustomComponentPropsI32 key = props = 1 /> };
+23 |     rsx! { <CustomComponentPropsI32 key = /> };
+   |                                           ^
+
+error: Expected a literal or an expression block
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:24:43
+   |
+24 |     rsx! { <CustomComponentPropsI32 key = props = 1 /> };
    |                                           ^^^^^
+
+error[E0599]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:25:43
+   |
+25 |     rsx! { <CustomComponentPropsI32 key = {NonDisplayStruct} /> };
+   |                                           ^^^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+  ::: tests/rsx_macro_tests/custom_components/../utils/non_display_struct.rs
+   |
+   | pub struct NonDisplayStruct;
+   | ---------------------------
+   | |
+   | method `to_string` not found for this struct
+   | doesn't satisfy `NonDisplayStruct: ToString`
+   | doesn't satisfy `NonDisplayStruct: std::fmt::Display`
+   |
+   = note: the following trait bounds were not satisfied:
+           `NonDisplayStruct: std::fmt::Display`
+           which is required by `NonDisplayStruct: ToString`
+note: the trait `std::fmt::Display` must be implemented
+  --> $RUST/core/src/fmt/mod.rs
+   |
+   | pub trait Display {
+   | ^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:26:45
+   |
+26 |     rsx! { <CustomComponentPropsI32 props = "value" /> };
+   |            -                                ^^^^^^^ expected `i32`, found `&str`
+   |            |
+   |            arguments to this function are incorrect
+   |
+note: associated function defined here
+  --> $WORKSPACE/wal/src/virtual_dom/vcomponent.rs
+   |
+   |     pub fn new<C>(props: C::Properties, key: Option<String>) -> VComponent
+   |            ^^^
+
+error[E0308]: mismatched types
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:27:46
+   |
+27 |     rsx! { <CustomComponentPropsI32 props = {"value"} /> };
+   |                                              ^^^^^^^ expected `i32`, found `&str`
+
+error[E0308]: mismatched types
+  --> tests/rsx_macro_tests/custom_components/custom_component_wrong_attributes_fail.rs:28:45
+   |
+28 |     rsx! { <CustomComponentPropsI32 props = NonDisplayStruct {} /> };
+   |            -                                ^^^^^^^^^^^^^^^^^^^ expected `i32`, found `NonDisplayStruct`
+   |            |
+   |            arguments to this function are incorrect
+   |
+note: associated function defined here
+  --> $WORKSPACE/wal/src/virtual_dom/vcomponent.rs
+   |
+   |     pub fn new<C>(props: C::Properties, key: Option<String>) -> VComponent
+   |            ^^^

@@ -1,5 +1,5 @@
-use quote::{quote, ToTokens};
-use syn::{parse::{Parse, ParseStream}, spanned::Spanned};
+use quote::ToTokens;
+use syn::parse::{Parse, ParseStream};
 
 pub struct PropsAttribute {
     pub ident: proc_macro2::Ident,
@@ -13,18 +13,6 @@ impl Parse for PropsAttribute {
         let value = input.parse()?;
 
         Ok(PropsAttribute { ident, value })
-    }
-}
-
-impl PropsAttribute {
-    pub fn to_spanned(&self) -> impl ToTokens {
-        let ident = &self.ident;
-        let value = &self.value;
-        quote! { #ident #value }
-    }
-
-    pub fn span(&self) -> proc_macro2::Span {
-        self.to_spanned().span()
     }
 }
 

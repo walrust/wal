@@ -74,8 +74,8 @@ impl ComponentAttributes {
 impl ComponentAttributes {
     pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
         if let Some(key) = &self.key {
-            let key_val = &key.value;
-            quote_spanned!(key.ident.span() => Some(#key_val.to_string()))
+            let key_value = &key.value;
+            quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
         } else {
             quote!(None)
         }
@@ -87,12 +87,12 @@ impl ComponentAttributes {
         self.props.as_ref().map_or_else(
             || quote_spanned!(component_type.span() => <#props_type as ::std::default::Default>::default()),
             |props| match &props.value {
-                PropsAttributeValue::Literal(lit) => quote_spanned!(props.span() => #lit),
+                PropsAttributeValue::Literal(lit) => quote_spanned!(lit.span() => #lit),
                 PropsAttributeValue::StructExpression(expr_struct) => {
-                    quote_spanned!(props.span() => #expr_struct)
+                    quote_spanned!(expr_struct.span() => #expr_struct)
                 }
                 PropsAttributeValue::ExpressionBlock(expr_block) => {
-                    quote_spanned!(props.span() => #[allow(unused_braces)] #expr_block)
+                    quote_spanned!(expr_block.span() => #[allow(unused_braces)] #expr_block)
                 }
             },
         )
