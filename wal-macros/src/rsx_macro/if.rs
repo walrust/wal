@@ -95,18 +95,25 @@ impl Parse for If {
 impl ToTokens for If {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let If {
-            condition,
-            body,
-            if_token,
+            condition, body, ..
         } = self;
 
-        let spanned = quote!(#if_token #body);
-
-        tokens.extend(quote_spanned! {spanned.span() =>
+        tokens.extend(quote_spanned! {self.error_span() =>
             if #condition {
                 #body
             }
         });
+    }
+}
+
+impl If {
+    fn error_span(&self) -> proc_macro2::Span {
+        self.error_spanned().span()
+    }
+
+    fn error_spanned(&self) -> impl ToTokens {
+        let If { body, if_token, .. } = self;
+        quote!(#if_token #body)
     }
 }
 
@@ -138,18 +145,27 @@ impl ElseIf {
 impl ToTokens for ElseIf {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let ElseIf {
-            condition,
-            body,
-            else_token,
+            condition, body, ..
         } = self;
 
-        let spanned = quote!(#else_token #body);
-
-        tokens.extend(quote_spanned! {spanned.span() =>
+        tokens.extend(quote_spanned! {self.error_span() =>
             else if #condition {
                 #body
             }
         });
+    }
+}
+
+impl ElseIf {
+    fn error_span(&self) -> proc_macro2::Span {
+        self.error_spanned().span()
+    }
+
+    fn error_spanned(&self) -> impl ToTokens {
+        let ElseIf {
+            body, else_token, ..
+        } = self;
+        quote!(#else_token #body)
     }
 }
 
@@ -169,13 +185,23 @@ impl Parse for Else {
 
 impl ToTokens for Else {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let Else { body, else_token } = self;
-        let spanned = quote!(#else_token #body);
-        tokens.extend(quote_spanned! { spanned.span() =>
+        let body = &self.body;
+        tokens.extend(quote_spanned! { self.error_span() =>
             else {
                 #body
             }
         });
+    }
+}
+
+impl Else {
+    fn error_span(&self) -> proc_macro2::Span {
+        self.error_spanned().span()
+    }
+
+    fn error_spanned(&self) -> impl ToTokens {
+        let Else { body, else_token } = self;
+        quote!(#else_token #body)
     }
 }
 
