@@ -60,7 +60,7 @@ impl ToTokens for NormalAttributeValue {
 }
 
 impl NormalAttributeValue {
-    pub fn span(&self) -> proc_macro2::Span {
+    pub fn error_span(&self) -> proc_macro2::Span {
         match self {
             NormalAttributeValue::Literal(lit) => lit.span(),
             NormalAttributeValue::ExpressionBlock(expr_block) => expr_block.span(),

@@ -1,4 +1,4 @@
-use quote::{quote, ToTokens, quote_spanned};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::parse::Parse;
 
 use crate::rsx_macro::attributes::{normal_attribute::NormalAttribute, KEY_ATTR};
@@ -100,9 +100,9 @@ impl LinkStartTag {
 
         let to_value = &self.to.value;
         attributes
-            .push(quote_spanned!(to_value.span() => (::std::string::String::from("href"), #to_value.to_string())));
+            .push(quote_spanned!(to_value.error_span() => (::std::string::String::from("href"), #to_value.to_string())));
         attributes
-            .push(quote_spanned!(to_value.span() => (::std::string::String::from("data_link"), #to_value.to_string())));
+            .push(quote_spanned!(to_value.error_span() => (::std::string::String::from("data_link"), #to_value.to_string())));
 
         attributes
     }
@@ -110,7 +110,7 @@ impl LinkStartTag {
     pub(crate) fn get_key_attribute_token_stream(&self) -> proc_macro2::TokenStream {
         if let Some(key) = &self.key {
             let key_value = &key.value;
-            quote_spanned!(key_value.span() => Some(#key_value.to_string()))
+            quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
         } else {
             quote!(None)
         }

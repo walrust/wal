@@ -42,7 +42,7 @@ impl ElementStartTag {
         VOID_ELEMENTS.contains(&self.name.to_string().as_str())
     }
 
-    pub fn to_spanned(&self) -> impl ToTokens {
+    pub fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }

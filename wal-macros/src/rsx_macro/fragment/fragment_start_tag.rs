@@ -57,7 +57,7 @@ impl FragmentStartTag {
     pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
         if let Some(key) = &self.key {
             let key_value = &key.value;
-            quote_spanned!(key_value.span() => Some(#key_value.to_string()))
+            quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
         } else {
             quote!(None)
         }

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use quote::{quote, quote_spanned};
-use syn::parse::Parse;
+use syn::{parse::Parse, spanned::Spanned};
 
 use crate::rsx_macro::attributes::{
     event_attribute::{EventAttribute, EventAttributeValue},
@@ -152,7 +152,7 @@ impl ElementAttributes {
             .iter()
             .map(|(ident, value)| -> proc_macro2::TokenStream {
                 let ident_str = ident.to_string();
-                quote_spanned!(ident.span() => (::std::string::String::from(#ident_str), #value.to_string()))
+                quote_spanned!(value.error_span() => (::std::string::String::from(#ident_str), #value.to_string()))
             })
             .collect();
 
@@ -167,7 +167,8 @@ impl ElementAttributes {
         match (&self.class, &self.wal_class) {
             (Some(class), Some(wal_class)) => {
                 let class_value = &class.value;
-                let class_value = quote_spanned!(class_value.span() => #class_value.to_string());
+                let class_value =
+                    quote_spanned!(class_value.error_span() => #class_value.to_string());
                 let wal_class_value = wal_class.get_values_token_stream();
                 Some(quote!((
                     ::std::string::String::from(#CLASS_ATTR),
@@ -176,7 +177,7 @@ impl ElementAttributes {
             }
             (Some(class), None) => {
                 let value = &class.value;
-                Some(quote_spanned!(value.span() => (
+                Some(quote_spanned!(value.error_span() => (
                     ::std::string::String::from(#CLASS_ATTR),
                     #value.to_string()
                 )))
@@ -194,8 +195,8 @@ impl ElementAttributes {
 
     pub(crate) fn get_key_token_stream(&self) -> proc_macro2::TokenStream {
         if let Some(key) = &self.key {
-            let key_val = &key.value;
-            quote_spanned!(key.ident.span() => Some(#key_val.to_string()))
+            let key_value = &key.value;
+            quote_spanned!(key_value.error_span() => Some(#key_value.to_string()))
         } else {
             quote!(None)
         }
@@ -205,7 +206,7 @@ impl ElementAttributes {
         self.events
             .iter()
             .map(|(ident, expr_block)| -> proc_macro2::TokenStream {
-                quote_spanned!(ident.span() => ::wal::events::EventHandler::new(
+                quote_spanned!(expr_block.span() => ::wal::events::EventHandler::new(
                     #[allow(unused_braces)]
                     ::wal::events::#ident(#expr_block)
                 ))
