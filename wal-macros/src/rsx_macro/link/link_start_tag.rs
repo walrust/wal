@@ -1,4 +1,4 @@
-use quote::{quote, ToTokens};
+use quote::{quote, ToTokens, quote_spanned};
 use syn::parse::Parse;
 
 use crate::rsx_macro::attributes::{normal_attribute::NormalAttribute, KEY_ATTR};
@@ -89,9 +89,30 @@ impl LinkStartTag {
         self.slash.is_some()
     }
 
-    pub fn to_spanned(&self) -> impl ToTokens {
+    pub fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
         quote! { #lt #gt }
+    }
+
+    pub(crate) fn get_to_attribute_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
+        let mut attributes = Vec::new();
+
+        let to_value = &self.to.value;
+        attributes
+            .push(quote_spanned!(to_value.span() => (::std::string::String::from("href"), #to_value.to_string())));
+        attributes
+            .push(quote_spanned!(to_value.span() => (::std::string::String::from("data_link"), #to_value.to_string())));
+
+        attributes
+    }
+
+    pub(crate) fn get_key_attribute_token_stream(&self) -> proc_macro2::TokenStream {
+        if let Some(key) = &self.key {
+            let key_value = &key.value;
+            quote_spanned!(key_value.span() => Some(#key_value.to_string()))
+        } else {
+            quote!(None)
+        }
     }
 }

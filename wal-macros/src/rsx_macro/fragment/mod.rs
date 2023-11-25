@@ -70,8 +70,8 @@ impl Fragment {
     }
 
     fn error_spanned(&self) -> impl ToTokens {
-        let start_spanned = self.start_tag.error_spanned();
-        let end_spanned = self.end_tag.error_spanned();
-        quote!(#start_spanned #end_spanned)
+        let start_error_spanned = self.start_tag.error_spanned();
+        let end_error_spanned = self.end_tag.error_spanned();
+        quote!(#start_error_spanned #end_error_spanned)
     }
 }

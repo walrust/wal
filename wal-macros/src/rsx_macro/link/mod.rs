@@ -1,9 +1,12 @@
 use quote::{quote, quote_spanned, ToTokens};
-use syn::parse::{Parse, ParseStream};
+use syn::{
+    parse::{Parse, ParseStream},
+    spanned::Spanned,
+};
 
 use self::{link_end_tag::LinkEndTag, link_start_tag::LinkStartTag};
 
-use super::{attributes::normal_attribute::NormalAttribute, tree::Tree};
+use super::tree::Tree;
 
 mod link_end_tag;
 mod link_start_tag;
@@ -12,10 +15,9 @@ pub const LINK_TAG: &str = "Link";
 const TO_ATTR: &str = "to";
 
 pub struct Link {
-    name: proc_macro2::Ident,
-    to: NormalAttribute,
-    key: Option<NormalAttribute>,
+    start_tag: LinkStartTag,
     children: Vec<Tree>,
+    end_tag: Option<LinkEndTag>,
 }
 
 impl Parse for Link {
@@ -23,7 +25,7 @@ impl Parse for Link {
         if input.peek2(syn::token::Slash) {
             let end_tag = input.parse::<LinkEndTag>()?;
             return Err(syn::Error::new_spanned(
-                end_tag.to_spanned(),
+                end_tag.error_spanned(),
                 format!(
                     "This closing tag does not have a corresponding opening tag. (hint: try adding `<{}>`)",
                     end_tag.name
@@ -34,21 +36,19 @@ impl Parse for Link {
         let start_tag = input.parse::<LinkStartTag>()?;
         if start_tag.is_self_closing() {
             return Ok(Link {
-                name: start_tag.name,
-                to: start_tag.to,
-                key: start_tag.key,
+                start_tag,
                 children: Vec::new(),
+                end_tag: None,
             });
         }
 
         let children = Self::parse_children(&start_tag, input)?;
-        input.parse::<LinkEndTag>()?;
+        let end_tag = input.parse()?;
 
         Ok(Link {
-            name: start_tag.name,
-            to: start_tag.to,
-            key: start_tag.key,
+            start_tag,
             children,
+            end_tag: Some(end_tag),
         })
     }
 }
@@ -60,7 +60,7 @@ impl Link {
         loop {
             if input.is_empty() {
                 return Err(syn::Error::new_spanned(
-                    start_tag.to_spanned(),
+                    start_tag.error_spanned(),
                     format!(
                         "This start tag does not have a corresponding end tag. (hint: try adding `</{}>`)",
                         start_tag.name
@@ -81,11 +81,11 @@ impl Link {
 
 impl ToTokens for Link {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let attributes = self.get_to_attribute_token_stream();
-        let key = self.get_key_attribute_token_stream();
+        let attributes = self.start_tag.get_to_attribute_token_stream();
+        let key = self.start_tag.get_key_attribute_token_stream();
         let children = &self.children;
 
-        tokens.extend(quote_spanned! { self.name.span() =>
+        tokens.extend(quote_spanned! { self.error_span() =>
             ::wal::virtual_dom::VNode::Element(
                 ::wal::virtual_dom::VElement::new(
                     ::std::string::String::from("a"),
@@ -102,24 +102,17 @@ impl ToTokens for Link {
 }
 
 impl Link {
-    fn get_to_attribute_token_stream(&self) -> Vec<proc_macro2::TokenStream> {
-        let mut attributes = Vec::new();
-
-        let to_value = &self.to.value;
-        attributes
-            .push(quote_spanned!(to_value.span() => (::std::string::String::from("href"), #to_value.to_string())));
-        attributes
-            .push(quote_spanned!(to_value.span() => (::std::string::String::from("data_link"), #to_value.to_string())));
-
-        attributes
+    fn error_span(&self) -> proc_macro2::Span {
+        self.error_spanned().span()
     }
 
-    fn get_key_attribute_token_stream(&self) -> proc_macro2::TokenStream {
-        if let Some(key) = &self.key {
-            let key_value = &key.value;
-            quote_spanned!(key_value.span() => Some(#key_value.to_string()))
+    fn error_spanned(&self) -> impl ToTokens {
+        let start_error_spanned = self.start_tag.error_spanned();
+        let end_error_spanned = self.end_tag.as_ref().map(|end_tag| end_tag.error_spanned());
+        if end_error_spanned.is_some() {
+            quote!(#start_error_spanned #end_error_spanned)
         } else {
-            quote!(None)
+            quote!(#start_error_spanned)
         }
     }
 }
