@@ -167,24 +167,25 @@ impl ElementAttributes {
         match (&self.class, &self.wal_class) {
             (Some(class), Some(wal_class)) => {
                 let class_value = &class.value;
+                let class_value = quote_spanned!(class_value.span() => #class_value.to_string());
                 let wal_class_value = wal_class.get_values_token_stream();
-                Some(quote_spanned!(class.ident.span() => (
+                Some(quote!((
                     ::std::string::String::from(#CLASS_ATTR),
-                    ::std::format!("{} {}", #class_value, ::std::vec![#(#wal_class_value.to_string()),*].join(" "))
+                    ::std::format!("{} {}", #class_value, ::std::vec![#(#wal_class_value),*].join(" "))
                 )))
             }
             (Some(class), None) => {
                 let value = &class.value;
-                Some(quote_spanned!(class.ident.span() => (
+                Some(quote_spanned!(value.span() => (
                     ::std::string::String::from(#CLASS_ATTR),
                     #value.to_string()
                 )))
             }
             (None, Some(wal_class)) => {
                 let values = wal_class.get_values_token_stream();
-                Some(quote_spanned!(wal_class.ident.span() => (
+                Some(quote!((
                     ::std::string::String::from(#CLASS_ATTR),
-                    ::std::vec![#(#values.to_string()),*].join(" ")
+                    ::std::vec![#(#values),*].join(" ")
                 )))
             }
             (None, None) => None,

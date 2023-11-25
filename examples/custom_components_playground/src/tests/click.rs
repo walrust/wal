@@ -73,8 +73,8 @@ impl Component for ChildComponent {
 
         CSS1.with(|css| {
             rsx! {
-                <div class="eluwina1 eluwina2" wal_class=[css["wrapper"], String::from("xd"), 2]>
-                    <button onclick={on_click} class={&css["btn"]}>
+                <div wal_class=[css["wrapper"]]>
+                    <button onclick={on_click} class={css["btn"]}>
                         "click me"
                     </button>
                 </div>
@@ -91,3 +91,5 @@ pub fn start() {
     let comp = FatherComponent(0);
     wal::app::start(comp);
 }
+
+struct Xd;

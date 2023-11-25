@@ -1,5 +1,8 @@
-use quote::ToTokens;
-use syn::parse::{Parse, ParseStream};
+use quote::{quote_spanned, ToTokens};
+use syn::{
+    parse::{Parse, ParseStream},
+    spanned::Spanned,
+};
 
 pub struct WalClassAttribute {
     pub ident: proc_macro2::Ident,
@@ -27,7 +30,7 @@ impl WalClassAttribute {
         self.value
             .elems
             .iter()
-            .map(|elem| elem.into_token_stream())
+            .map(|elem| quote_spanned!(elem.span() => #elem.to_string()))
             .collect()
     }
 }

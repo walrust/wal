@@ -20,6 +20,8 @@ fn rsx_macro_tests() {
     t.compile_fail("tests/rsx_macro_tests/attributes/attributes_fail.rs");
     t.pass("tests/rsx_macro_tests/attributes/event_attributes_pass.rs");
     t.compile_fail("tests/rsx_macro_tests/attributes/event_attributes_fail.rs");
+    t.pass("tests/rsx_macro_tests/attributes/class_attributes_pass.rs");
+    t.compile_fail("tests/rsx_macro_tests/attributes/class_attributes_fail.rs");
     t.pass("tests/rsx_macro_tests/fragments/fragment_pass.rs");
     t.compile_fail("tests/rsx_macro_tests/fragments/fragment_fail.rs");
     t.pass("tests/rsx_macro_tests/for/for_loop_pass.rs");

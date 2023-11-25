@@ -1,5 +1,8 @@
 use quote::ToTokens;
-use syn::parse::{Parse, ParseStream};
+use syn::{
+    parse::{Parse, ParseStream},
+    spanned::Spanned,
+};
 
 pub struct NormalAttribute {
     pub ident: proc_macro2::Ident,
@@ -52,6 +55,15 @@ impl ToTokens for NormalAttributeValue {
         match self {
             NormalAttributeValue::Literal(lit) => lit.to_tokens(tokens),
             NormalAttributeValue::ExpressionBlock(expr_block) => expr_block.to_tokens(tokens),
+        }
+    }
+}
+
+impl NormalAttributeValue {
+    pub fn span(&self) -> proc_macro2::Span {
+        match self {
+            NormalAttributeValue::Literal(lit) => lit.span(),
+            NormalAttributeValue::ExpressionBlock(expr_block) => expr_block.span(),
         }
     }
 }
