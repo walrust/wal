@@ -1,0 +1,16 @@
+error[E0277]: the trait bound `PropsWithoutHash: Hash` is not satisfied
+ --> tests/rsx_macro_tests/custom_components/../utils/custom_components/custom_component_props_struct_without_hash.rs
+  |
+  |     type Properties = PropsWithoutHash;
+  |                       ^^^^^^^^^^^^^^^^ the trait `Hash` is not implemented for `PropsWithoutHash`
+  |
+note: required by a bound in `wal::component::Component::Properties`
+ --> $WORKSPACE/wal/src/component/mod.rs
+  |
+  |     type Properties: Hash + 'static;
+  |                      ^^^^ required by this bound in `Component::Properties`
+help: consider annotating `PropsWithoutHash` with `#[derive(Hash)]`
+  |
+4  + #[derive(Hash)]
+5  | struct PropsWithoutHash;
+   |
