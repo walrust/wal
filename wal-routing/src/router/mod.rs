@@ -144,7 +144,7 @@ impl Router {
 #[cfg(test)]
 mod tests {
     use wal::{
-        component::{behavior::Behavior, root::RootComponent},
+        component::{behavior::Behavior, Component},
         virtual_dom::{VNode, VText},
     };
     use wasm_bindgen_test::wasm_bindgen_test;
@@ -164,9 +164,15 @@ mod tests {
     }
 
     struct Root;
-    impl RootComponent for Root {
+    impl Default for Root {
+        fn default() -> Self {
+            Self::new(())
+        }
+    }
+    impl Component for Root {
         type Message = ();
-        fn new_root() -> Self {
+        type Properties = ();
+        fn new(_props: Self::Properties) -> Self {
             Root
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
@@ -206,9 +212,10 @@ mod tests {
     }
 
     struct Root2;
-    impl RootComponent for Root2 {
+    impl Component for Root2 {
         type Message = ();
-        fn new_root() -> Self {
+        type Properties = ();
+        fn new(_props: Self::Properties) -> Self {
             Root2
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {

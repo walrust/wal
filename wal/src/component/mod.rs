@@ -7,7 +7,6 @@ use self::behavior::{AnyComponentBehavior, Behavior};
 pub mod behavior;
 pub mod callback;
 pub mod node;
-pub mod root;
 pub mod scheduler;
 
 pub trait Component: Sized {

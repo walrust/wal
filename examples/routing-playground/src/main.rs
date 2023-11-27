@@ -1,6 +1,6 @@
 use wal::{
     self,
-    component::{behavior::Behavior, callback::Callback, root::RootComponent},
+    component::{behavior::Behavior, callback::Callback, Component},
     events::MouseEvent,
     utils::debug,
 };
@@ -8,10 +8,11 @@ use wal_macros::rsx;
 use wal_routing::prelude::RouterBuilder;
 
 struct NavigationComp;
-impl RootComponent for NavigationComp {
+impl Component for NavigationComp {
     type Message = ();
+    type Properties = ();
 
-    fn new_root() -> Self {
+    fn new(_props: Self::Properties) -> Self {
         NavigationComp
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
@@ -30,10 +31,16 @@ impl RootComponent for NavigationComp {
 }
 
 struct RootComp;
+impl Default for RootComp {
+    fn default() -> Self {
+        Self::new(())
+    }
+}
 #[allow(clippy::unused_unit)]
-impl RootComponent for RootComp {
+impl Component for RootComp {
     type Message = ();
-    fn new_root() -> Self {
+    type Properties = ();
+    fn new(_props: Self::Properties) -> Self {
         RootComp
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
@@ -53,10 +60,17 @@ impl RootComponent for RootComp {
 }
 
 struct AltComp;
+impl Default for AltComp {
+    fn default() -> Self {
+        Self::new(())
+    }
+}
+
 #[allow(clippy::unused_unit)]
-impl RootComponent for AltComp {
+impl Component for AltComp {
     type Message = ();
-    fn new_root() -> Self {
+    type Properties = ();
+    fn new(_props: Self::Properties) -> Self {
         AltComp
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
@@ -76,10 +90,17 @@ impl RootComponent for AltComp {
 }
 
 struct AnotherComp;
+impl Default for AnotherComp {
+    fn default() -> Self {
+        Self::new(())
+    }
+}
+
 #[allow(clippy::unused_unit)]
-impl RootComponent for AnotherComp {
+impl Component for AnotherComp {
     type Message = ();
-    fn new_root() -> Self {
+    type Properties = ();
+    fn new(_props: Self::Properties) -> Self {
         AnotherComp
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {

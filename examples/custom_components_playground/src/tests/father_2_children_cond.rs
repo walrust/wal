@@ -1,6 +1,6 @@
 use gloo::timers::callback::Timeout;
 use wal::{
-    component::{behavior::Behavior, callback::Callback, root::RootComponent, Component},
+    component::{behavior::Behavior, callback::Callback, Component},
     virtual_dom::VNode,
 };
 use wal_macros::rsx;
@@ -14,10 +14,16 @@ enum FatherMessages {
 struct FatherProperties(i32);
 
 struct FatherComponent(i32);
-impl RootComponent for FatherComponent {
+impl Default for FatherComponent {
+    fn default() -> Self {
+        Self::new(())
+    }
+}
+impl Component for FatherComponent {
     type Message = FatherMessages;
+    type Properties = ();
 
-    fn new_root() -> Self {
+    fn new(_props: Self::Properties) -> Self {
         Self(1)
     }
 

@@ -1,7 +1,7 @@
 use gloo::console::log;
 use std::thread_local;
 use wal::{
-    component::{behavior::Behavior, callback::Callback, root::RootComponent, Component},
+    component::{behavior::Behavior, callback::Callback, Component},
     events::MouseEvent,
     virtual_dom::VNode,
 };
@@ -22,10 +22,16 @@ struct FatherProperties;
 
 struct FatherComponent(i32);
 
-impl RootComponent for FatherComponent {
-    type Message = FatherMessages;
+impl Default for FatherComponent {
+    fn default() -> Self {
+        Self::new(())
+    }
+}
 
-    fn new_root() -> Self {
+impl Component for FatherComponent {
+    type Message = FatherMessages;
+    type Properties = ();
+    fn new(_props: Self::Properties) -> Self {
         Self(0)
     }
 
@@ -93,5 +99,3 @@ pub fn start() {
         .build()
         .start();
 }
-
-struct Xd;

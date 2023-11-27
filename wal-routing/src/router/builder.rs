@@ -3,7 +3,7 @@ use super::{
     PageRenderer, Router,
 };
 use std::{collections::HashMap, marker::PhantomData};
-use wal::component::{node::AnyComponentNode, root::RootComponent};
+use wal::component::{node::AnyComponentNode, Component};
 
 pub struct Invalid;
 pub struct Valid;
@@ -33,10 +33,10 @@ impl Default for RouterBuilder<Invalid> {
 impl<T> RouterBuilder<T> {
     pub fn add_page<C>(self, path: &'static str) -> RouterBuilder<Valid>
     where
-        C: RootComponent + 'static,
+        C: Component + Default + 'static,
     {
         let generator = Box::new(|| {
-            AnyComponentNode::new(C::new_root(), wal::virtual_dom::dom::get_root_element())
+            AnyComponentNode::new(C::default(), wal::virtual_dom::dom::get_root_element())
         });
 
         let mut pages = self.pages;
@@ -51,7 +51,7 @@ impl<T> RouterBuilder<T> {
 
     pub fn add_not_found_page<C>(self, path: &'static str) -> RouterBuilder<Valid>
     where
-        C: RootComponent + 'static,
+        C: Component + Default + 'static,
     {
         let router: RouterBuilder<T> = RouterBuilder {
             pages: self.pages,
@@ -74,7 +74,7 @@ impl RouterBuilder<Valid> {
                 NOT_FOUND_PATH,
                 PageRenderer::new(|| {
                     AnyComponentNode::new(
-                        NotFoundComponent::new_root(),
+                        NotFoundComponent,
                         wal::virtual_dom::dom::get_root_element(),
                     )
                 }),
@@ -94,7 +94,7 @@ mod tests {
     };
     use std::any::{Any, TypeId};
     use wal::{
-        component::{behavior::Behavior, root::RootComponent},
+        component::{behavior::Behavior, Component},
         virtual_dom::{VNode, VText},
     };
     use wasm_bindgen_test::wasm_bindgen_test;
@@ -116,9 +116,15 @@ mod tests {
     }
 
     struct Root;
-    impl RootComponent for Root {
+    impl Default for Root {
+        fn default() -> Self {
+            Self::new(())
+        }
+    }
+    impl Component for Root {
         type Message = ();
-        fn new_root() -> Self {
+        type Properties = ();
+        fn new(_props: Self::Properties) -> Self {
             Root
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
@@ -139,9 +145,15 @@ mod tests {
     }
 
     struct Root2;
-    impl RootComponent for Root2 {
+    impl Default for Root2 {
+        fn default() -> Self {
+            Self::new(())
+        }
+    }
+    impl Component for Root2 {
         type Message = ();
-        fn new_root() -> Self {
+        type Properties = ();
+        fn new(_props: Self::Properties) -> Self {
             Root2
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
