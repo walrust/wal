@@ -1,4 +1,5 @@
 pub mod builder;
+pub mod not_found_component;
 
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
@@ -27,8 +28,6 @@ thread_local! {
     pub static ROUTER: RefCell<Router> = RefCell::new(Router::empty());
 }
 
-const WAL_ROUTING_ATTR: &str = "data_link";
-
 struct CurrentPage {
     pub path: String,
     pub page: Rc<RefCell<AnyComponentNode>>,
@@ -36,7 +35,7 @@ struct CurrentPage {
 
 pub struct Router {
     pages: HashMap<&'static str, PageRenderer>,
-    error_path: Option<&'static str>,
+    not_found_path: Option<&'static str>,
     current: Option<CurrentPage>,
 }
 
@@ -44,18 +43,18 @@ impl Router {
     pub(crate) fn empty() -> Router {
         Router {
             pages: [].into(),
-            error_path: None,
+            not_found_path: None,
             current: None,
         }
     }
 
     pub(crate) fn new(
         pages: HashMap<&'static str, PageRenderer>,
-        error_path: &'static str,
+        not_found_path: Option<&'static str>,
     ) -> Router {
         Router {
             pages,
-            error_path: Some(error_path),
+            not_found_path,
             current: None,
         }
     }
@@ -76,7 +75,8 @@ impl Router {
             *router = self;
         });
 
-        Self::navigate_to(window().location().pathname().unwrap().as_str());
+        let pathname = window().location().pathname().unwrap();
+        Self::navigate_to(pathname.as_str());
     }
 
     fn route() {
@@ -107,10 +107,12 @@ impl Router {
         });
     }
 
+    const WAL_ROUTING_ATTR: &'static str = "data_link";
+
     fn click(e: Event) {
         let target = e.target().unwrap().unchecked_into::<Element>();
         let matches = target
-            .matches(&("[".to_owned() + WAL_ROUTING_ATTR + "]"))
+            .matches(&("[".to_owned() + Self::WAL_ROUTING_ATTR + "]"))
             .unwrap();
         if matches {
             e.prevent_default();
@@ -122,7 +124,7 @@ impl Router {
         let mut url = url;
         ROUTER.with(|router| {
             if !router.borrow().pages.contains_key(url) {
-                url = router.borrow().error_path.unwrap();
+                url = router.borrow().not_found_path.unwrap();
             }
         });
 
@@ -147,6 +149,8 @@ mod tests {
     };
     use wasm_bindgen_test::wasm_bindgen_test;
 
+    use crate::router::not_found_component::NOT_FOUND_PATH;
+
     use super::{builder::RouterBuilder, Router, ROUTER};
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
@@ -155,7 +159,7 @@ mod tests {
         let empty = Router::empty();
 
         assert_eq!(empty.pages.len(), 0);
-        assert!(empty.error_path.is_none());
+        assert!(empty.not_found_path.is_none());
         assert!(empty.current.is_none());
     }
 
@@ -178,8 +182,8 @@ mod tests {
         let router = RouterBuilder::default().add_page::<Root>("/").build();
 
         assert!(router.pages.contains_key("/"));
-        assert_eq!(router.pages.len(), 1);
-        assert_eq!(router.error_path, Some("/"));
+        assert_eq!(router.pages.len(), 2);
+        assert_eq!(router.not_found_path, Some(NOT_FOUND_PATH));
         assert!(router.current.is_none());
     }
 
@@ -192,8 +196,8 @@ mod tests {
 
         ROUTER.with(move |router| {
             let router = router.borrow();
-            assert!(router.pages.keys().eq(router2.pages.keys()));
-            assert_eq!(router.error_path, router2.error_path);
+            assert!(router.pages.keys().all(|x| router2.pages.contains_key(*x)));
+            assert_eq!(router.not_found_path, router2.not_found_path);
             assert!(router.current.is_some());
             if let Some(cur) = &router.current {
                 assert_eq!(cur.path, "/");
@@ -229,7 +233,7 @@ mod tests {
             let router = router.borrow();
             assert!(router.current.is_some());
             if let Some(cur) = &router.current {
-                assert_eq!(cur.path, "/");
+                assert_eq!(cur.path, NOT_FOUND_PATH);
             }
         });
         Router::navigate_to("/2");
@@ -238,6 +242,14 @@ mod tests {
             assert!(router.current.is_some());
             if let Some(cur) = &router.current {
                 assert_eq!(cur.path, "/2");
+            }
+        });
+        Router::navigate_to("/");
+        ROUTER.with(move |router| {
+            let router = router.borrow();
+            assert!(router.current.is_some());
+            if let Some(cur) = &router.current {
+                assert_eq!(cur.path, "/");
             }
         });
     }
