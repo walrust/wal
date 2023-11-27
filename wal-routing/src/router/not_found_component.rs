@@ -2,7 +2,7 @@ use wal::{
     component::{behavior::Behavior, root::RootComponent},
     virtual_dom::VNode,
 };
-use wal_macros::html;
+use wal_macros::rsx;
 
 pub(crate) const NOT_FOUND_PATH: &str = "/404";
 
@@ -14,7 +14,7 @@ impl RootComponent for NotFoundComponent {
     }
 
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-        html! {
+        rsx! {
             "Page was not found :(("
         }
     }

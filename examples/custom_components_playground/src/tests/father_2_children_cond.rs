@@ -3,7 +3,7 @@ use wal::{
     component::{behavior::Behavior, callback::Callback, root::RootComponent, Component},
     virtual_dom::VNode,
 };
-use wal_macros::html;
+use wal_macros::rsx;
 use wal_routing::prelude::RouterBuilder;
 
 enum FatherMessages {
@@ -24,7 +24,7 @@ impl RootComponent for FatherComponent {
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
         let callback = _behavior.create_callback(|()| FatherMessages::Add);
 
-        html! {
+        rsx! {
             <div>
                 if self.0 % 2 == 0 {
                     <ChildComponent props = {ChildProperties(self.0, callback.clone())} />
@@ -65,7 +65,7 @@ impl Component for ChildComponent {
     }
 
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-        html! {
+        rsx! {
             <div counter_child="0"></div>
         }
     }

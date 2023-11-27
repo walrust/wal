@@ -7,8 +7,8 @@ use wal::{
 };
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
-use wal_macros::html;
-use wal_routing::prelude::RouterBuilder;
+use wal_macros::rsx;
+use wal_routing::router::builder::RouterBuilder;
 
 thread_local! {
     static CSS1: Css = css_stylesheet!("../styles/styles1.css");
@@ -33,7 +33,7 @@ impl RootComponent for FatherComponent {
         let callback = behavior.create_callback(|()| FatherMessages::Clicked);
 
         CSS1.with(|css| {
-            html! {
+            rsx! {
                 <div class={&css["wrapper"]}>
                     { format!("My child got clicked {} times", self.0) }
                 </div>
@@ -72,8 +72,8 @@ impl Component for ChildComponent {
         });
 
         CSS1.with(|css| {
-            html! {
-                <div class={&css["wrapper"]}>
+            rsx! {
+                <div wal_class=[css["wrapper"]]>
                     <button onclick={on_click} class={&css["btn"]}>
                         "click me"
                     </button>
@@ -93,3 +93,5 @@ pub fn start() {
         .build()
         .start();
 }
+
+struct Xd;

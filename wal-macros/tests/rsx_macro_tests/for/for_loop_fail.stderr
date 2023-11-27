@@ -1,0 +1,111 @@
+error: unexpected end of input, expected curly braces
+ --> tests/rsx_macro_tests/for/for_loop_fail.rs:6:5
+  |
+6 |     rsx! { for };
+  |     ^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `rsx` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: expected curly braces
+  --> tests/rsx_macro_tests/for/for_loop_fail.rs:14:17
+   |
+14 |             for vec![1, 2, 3]
+   |                 ^^^
+
+warning: unnecessary braces around function argument
+ --> tests/rsx_macro_tests/for/for_loop_fail.rs:9:16
+  |
+9 |     rsx! { for { () } };
+  |                ^^  ^^
+  |
+  = note: `#[warn(unused_braces)]` on by default
+help: remove these braces
+  |
+9 -     rsx! { for { () } };
+9 +     rsx! { for () };
+  |
+
+warning: unnecessary braces around function argument
+  --> tests/rsx_macro_tests/for/for_loop_fail.rs:11:16
+   |
+11 |     rsx! { for { Vec::<NonDisplayStruct>::new() } };
+   |                ^^                              ^^
+   |
+help: remove these braces
+   |
+11 -     rsx! { for { Vec::<NonDisplayStruct>::new() } };
+11 +     rsx! { for Vec::<NonDisplayStruct>::new() };
+   |
+
+error[E0277]: `()` is not an iterator
+ --> tests/rsx_macro_tests/for/for_loop_fail.rs:7:16
+  |
+7 |     rsx! { for () };
+  |                ^^ `()` is not an iterator
+  |
+  = help: the trait `Iterator` is not implemented for `()`
+  = note: required for `()` to implement `IntoIterator`
+note: required by a bound in `std::iter::FromIterator::from_iter`
+ --> $RUST/core/src/iter/traits/collect.rs
+  |
+  |     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self;
+  |                     ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `FromIterator::from_iter`
+
+error[E0277]: `()` is not an iterator
+ --> tests/rsx_macro_tests/for/for_loop_fail.rs:8:16
+  |
+8 |     rsx! { for {} };
+  |                ^^ `()` is not an iterator
+  |
+  = help: the trait `Iterator` is not implemented for `()`
+  = note: required for `()` to implement `IntoIterator`
+note: required by a bound in `std::iter::FromIterator::from_iter`
+ --> $RUST/core/src/iter/traits/collect.rs
+  |
+  |     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self;
+  |                     ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `FromIterator::from_iter`
+
+error[E0277]: `()` is not an iterator
+ --> tests/rsx_macro_tests/for/for_loop_fail.rs:9:16
+  |
+9 |     rsx! { for { () } };
+  |                ^^--^^
+  |                | |
+  |                | this tail expression is of type `()`
+  |                `()` is not an iterator
+  |
+  = help: the trait `Iterator` is not implemented for `()`
+  = note: required for `()` to implement `IntoIterator`
+note: required by a bound in `std::iter::FromIterator::from_iter`
+ --> $RUST/core/src/iter/traits/collect.rs
+  |
+  |     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self;
+  |                     ^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `FromIterator::from_iter`
+
+error[E0277]: `()` doesn't implement `std::fmt::Display`
+  --> tests/rsx_macro_tests/for/for_loop_fail.rs:10:16
+   |
+10 |     rsx! { for Vec::<()>::new() };
+   |                ^^^ `()` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `()`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the trait `FromIterator<T>` is implemented for `VNode`
+   = note: required for `()` to implement `ToString`
+   = note: required for `VNode` to implement `From<()>`
+   = note: required for `()` to implement `Into<VNode>`
+   = note: required for `VNode` to implement `FromIterator<()>`
+
+error[E0277]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/rsx_macro_tests/for/for_loop_fail.rs:11:16
+   |
+11 |     rsx! { for { Vec::<NonDisplayStruct>::new() } };
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `NonDisplayStruct`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the trait `FromIterator<T>` is implemented for `VNode`
+   = note: required for `NonDisplayStruct` to implement `ToString`
+   = note: required for `VNode` to implement `From<NonDisplayStruct>`
+   = note: required for `NonDisplayStruct` to implement `Into<VNode>`
+   = note: required for `VNode` to implement `FromIterator<NonDisplayStruct>`

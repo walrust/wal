@@ -4,7 +4,7 @@ use wal::{
     events::MouseEvent,
     utils::debug,
 };
-use wal_macros::html;
+use wal_macros::rsx;
 use wal_routing::prelude::RouterBuilder;
 
 struct NavigationComp;
@@ -16,7 +16,7 @@ impl RootComponent for NavigationComp {
     }
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> wal::virtual_dom::VNode {
         // idea: <route href="/elo">"Homepage"</route> should be treated as <a href="/elo" data_link>"Homepage"</a>
-        html! {
+        rsx! {
             <nav>
                 <a href="/" data_link="/">"Homepage"</a><br/>
                 <a href="/alt" data_link="/alt">"Alt"</a><br/>
@@ -40,7 +40,7 @@ impl RootComponent for RootComp {
         let call = Callback::new(|_event: MouseEvent| {
             debug::alert("Homepage");
         });
-        html! {
+        rsx! {
             <div id="rootcomp">
                 <NavigationComp props={()} />
                 <button onclick={call}>"Homepage"</button>
@@ -63,7 +63,7 @@ impl RootComponent for AltComp {
         let call = Callback::new(|_event: MouseEvent| {
             debug::alert("Alt");
         });
-        html! {
+        rsx! {
             <div id="rootcomp">
                 <NavigationComp props={()} />
                 <button onclick={call}>"Alt"</button>
@@ -86,7 +86,7 @@ impl RootComponent for AnotherComp {
         let call = Callback::new(|_event: MouseEvent| {
             debug::alert("Another");
         });
-        html! {
+        rsx! {
             <div id="rootcomp">
                 <NavigationComp props={()} />
                 <button onclick={call}>"Another"</button>

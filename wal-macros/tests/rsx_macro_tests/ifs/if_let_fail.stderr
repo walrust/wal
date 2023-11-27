@@ -1,0 +1,25 @@
+error: unexpected end of input, expected one of: identifier, `::`, `<`, `_`, literal, `const`, `ref`, `mut`, `&`, parentheses, square brackets, `..`, `const`
+ --> tests/rsx_macro_tests/ifs/if_let_fail.rs:4:5
+  |
+4 |     rsx! { if let };
+  |     ^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `rsx` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: expected one of: identifier, `::`, `<`, `_`, literal, `const`, `ref`, `mut`, `&`, parentheses, square brackets, `..`, `const`
+ --> tests/rsx_macro_tests/ifs/if_let_fail.rs:5:19
+  |
+5 |     rsx! { if let {} };
+  |                   ^
+
+error: expected `=`
+ --> tests/rsx_macro_tests/ifs/if_let_fail.rs:6:24
+  |
+6 |     rsx! { if let true {}};
+  |                        ^
+
+error: expected one of: identifier, `::`, `<`, `_`, literal, `const`, `ref`, `mut`, `&`, parentheses, square brackets, `..`, `const`
+ --> tests/rsx_macro_tests/ifs/if_let_fail.rs:7:19
+  |
+7 |     rsx! { if let {} {} };
+  |                   ^

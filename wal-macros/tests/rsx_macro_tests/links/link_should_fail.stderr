@@ -1,0 +1,107 @@
+error: `Link` requires `to` attribute
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:6:13
+  |
+6 |     rsx! { <Link /> };
+  |             ^^^^
+
+error: `Link` requires `to` attribute
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:7:13
+  |
+7 |     rsx! { <Link></Link> };
+  |             ^^^^
+
+error: expected `=`
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:8:21
+  |
+8 |     rsx! { <Link to /> };
+  |                     ^
+
+error: Expected a literal or an expression block
+ --> tests/rsx_macro_tests/links/link_should_fail.rs:9:22
+  |
+9 |     rsx! { <Link to= /> };
+  |                      ^
+
+error: Unsupported attribute `unsupported_attr`. `Link` supports only `key` and `to` attributes
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:10:18
+   |
+10 |     rsx! { <Link unsupported_attr="value" /> };
+   |                  ^^^^^^^^^^^^^^^^
+
+error: Unsupported attribute `unsupported_attr`. `Link` supports only `key` and `to` attributes
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:11:29
+   |
+11 |     rsx! { <Link to="value" unsupported_attr="value" /> };
+   |                             ^^^^^^^^^^^^^^^^
+
+error: `Link` requires `to` attribute
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:12:13
+   |
+12 |     rsx! { <Link key="value" /> };
+   |             ^^^^
+
+error: This closing tag does not have a corresponding opening tag. (hint: try adding `<Link>`)
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:13:12
+   |
+13 |     rsx! { </Link> };
+   |            ^^^^^^^
+
+error: `Link` requires `to` attribute
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:14:13
+   |
+14 |     rsx! { <Link> };
+   |             ^^^^
+
+error: This start tag does not have a corresponding end tag. (hint: try adding `</Link>`)
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:15:12
+   |
+15 |     rsx! { <Link to="value"> };
+   |            ^^^^^^^^^^^^^^^^^
+
+error[E0599]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:16:21
+   |
+16 |     rsx! { <Link to={NonDisplayStruct}></Link> };
+   |                     ^^^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+  ::: tests/rsx_macro_tests/links/../utils/non_display_struct.rs
+   |
+   | pub struct NonDisplayStruct;
+   | ---------------------------
+   | |
+   | method `to_string` not found for this struct
+   | doesn't satisfy `NonDisplayStruct: ToString`
+   | doesn't satisfy `NonDisplayStruct: std::fmt::Display`
+   |
+   = note: the following trait bounds were not satisfied:
+           `NonDisplayStruct: std::fmt::Display`
+           which is required by `NonDisplayStruct: ToString`
+note: the trait `std::fmt::Display` must be implemented
+  --> $RUST/core/src/fmt/mod.rs
+   |
+   | pub trait Display {
+   | ^^^^^^^^^^^^^^^^^
+
+error[E0599]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/rsx_macro_tests/links/link_should_fail.rs:17:22
+   |
+17 |     rsx! { <Link key={NonDisplayStruct} to="value"></Link> };
+   |                      ^^^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+  ::: tests/rsx_macro_tests/links/../utils/non_display_struct.rs
+   |
+   | pub struct NonDisplayStruct;
+   | ---------------------------
+   | |
+   | method `to_string` not found for this struct
+   | doesn't satisfy `NonDisplayStruct: ToString`
+   | doesn't satisfy `NonDisplayStruct: std::fmt::Display`
+   |
+   = note: the following trait bounds were not satisfied:
+           `NonDisplayStruct: std::fmt::Display`
+           which is required by `NonDisplayStruct: ToString`
+note: the trait `std::fmt::Display` must be implemented
+  --> $RUST/core/src/fmt/mod.rs
+   |
+   | pub trait Display {
+   | ^^^^^^^^^^^^^^^^^
