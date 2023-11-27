@@ -1,7 +1,5 @@
 [workspace]
 members = [
-    "wal",
-    "wal-macros",
-    "wal-css",
+    "wal*",
     "examples/*",
 ]

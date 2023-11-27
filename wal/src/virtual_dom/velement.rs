@@ -2,7 +2,7 @@ use itertools::{EitherOrBoth, Itertools};
 use std::collections::{HashMap, HashSet};
 use web_sys::{Element, Node};
 
-use crate::{events::EventHandler, utils::debug, virtual_dom::Dom};
+use crate::{events::EventHandler, utils::debug, virtual_dom::dom};
 
 use super::VNode;
 
@@ -11,7 +11,7 @@ pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
     pub event_handlers: Vec<EventHandler>,
-    _key: Option<String>, // TODO: add logic for key attribute
+    pub _key: Option<String>, // TODO: add logic for key attribute
     pub children: Vec<VNode>,
 
     pub dom: Option<Element>,
@@ -78,7 +78,7 @@ impl VElement {
 
     pub fn erase(&self) {
         if let Some(el) = &self.dom {
-            Dom::remove_node(el);
+            dom::remove_node(el);
         }
     }
 }
@@ -96,11 +96,11 @@ impl VElement {
                     .expect("Target dom object not created before rendering element");
                 // Compare attributes
                 for (key, val) in self.attr.iter() {
-                    Dom::set_attribute(target, key, val);
+                    dom::set_attribute(target, key, val);
                 }
                 for (key, _val) in last.attr.iter() {
                     if !self.attr.contains_key(key) {
-                        Dom::remove_attribute(target, key);
+                        dom::remove_attribute(target, key);
                     }
                 }
 
@@ -112,11 +112,11 @@ impl VElement {
                 // inverted check, if last == None || last = Some(x) that x.tag_name !=
                 // self.tag_name => Swap whole element
                 debug::log("\t\tRendering new node");
-                let el = Dom::create_element(&self.tag_name);
+                let el = dom::create_element(&self.tag_name);
 
                 // add attributes
                 for (name, value) in self.attr.iter() {
-                    Dom::set_attribute(&el, name, value);
+                    dom::set_attribute(&el, name, value);
                 }
 
                 for event_handler in &mut self.event_handlers {
@@ -124,8 +124,8 @@ impl VElement {
                 }
 
                 match &self.dom {
-                    Some(old_child) => Dom::replace_child(ancestor, old_child, &el),
-                    None => Dom::append_child(ancestor, &el),
+                    Some(old_child) => dom::replace_child(ancestor, old_child, &el),
+                    None => dom::append_child(ancestor, &el),
                 };
                 self.dom = Some(el);
             }
@@ -163,5 +163,157 @@ impl PartialEq for VElement {
             && self.children == other.children
             && self.dom == other.dom
             && self_event_handlers == other_event_handlers
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use wasm_bindgen_test::wasm_bindgen_test;
+
+    use crate::{
+        component::{behavior::Behavior, Component},
+        virtual_dom::{dom, VComponent, VList, VNode, VText},
+    };
+
+    use super::VElement;
+    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+
+    macro_rules! function_name {
+        () => {{
+            fn f() {}
+            fn type_name_of<T>(_: T) -> &'static str {
+                std::any::type_name::<T>()
+            }
+            let name = type_name_of(f);
+            name.strip_suffix("::f").unwrap()
+        }};
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_none() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let mut target = VElement::new(
+            "div".into(),
+            [("id".into(), "I love Rust".into())].into(),
+            vec![],
+            None,
+            vec![],
+        );
+        target.patch(None, &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_text() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+
+        let current = dom::create_text_node("I dont love Rust");
+        dom::append_child(&ancestor, &current);
+
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let text = VNode::Text(VText {
+            text: "I dont love Rust".into(),
+            dom: Some(current),
+        });
+
+        let mut target = VElement::new(
+            "div".into(),
+            [("id".into(), "I love Rust".into())].into(),
+            vec![],
+            None,
+            vec![],
+        );
+        target.patch(Some(text), &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_elem() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+
+        let current = dom::create_element("div");
+        dom::set_attribute(&current, "id", "I dont love Rust");
+        dom::append_child(&ancestor, &current);
+
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let elem = VNode::Element(VElement {
+            tag_name: "div".into(),
+            attr: [("id".into(), "I dont love Rust".into())].into(),
+            event_handlers: vec![],
+            _key: None,
+            children: vec![],
+            dom: Some(current),
+        });
+
+        let mut target = VElement::new(
+            "div".into(),
+            [("id".into(), "I love Rust".into())].into(),
+            vec![],
+            None,
+            vec![],
+        );
+        target.patch(Some(elem), &ancestor);
+    }
+
+    struct Comp;
+    impl Component for Comp {
+        type Message = ();
+        type Properties = ();
+
+        fn new(_props: Self::Properties) -> Self {
+            Comp
+        }
+        fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
+            VText::new("I dont love Rust").into()
+        }
+        fn update(&mut self, _message: Self::Message) -> bool {
+            false
+        }
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_comp() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let mut comp = VNode::Component(VComponent::new::<Comp>((), None));
+        comp.patch(None, &ancestor);
+
+        let mut target = VElement::new(
+            "div".into(),
+            [("id".into(), "I love Rust".into())].into(),
+            vec![],
+            None,
+            vec![],
+        );
+        target.patch(Some(comp), &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_list() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let mut list = VNode::List(VList::new(
+            vec![VText::new("I dont love Rust").into()],
+            None,
+        ));
+        list.patch(None, &ancestor);
+
+        let mut target = VElement::new(
+            "div".into(),
+            [("id".into(), "I love Rust".into())].into(),
+            vec![],
+            None,
+            vec![],
+        );
+        target.patch(Some(list), &ancestor);
     }
 }

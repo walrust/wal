@@ -3,9 +3,7 @@ use std::{
     rc::{Rc, Weak},
 };
 
-use super::{
-    callback::Callback, component_node::AnyComponentNode, scheduler::Scheduler, Component,
-};
+use super::{callback::Callback, node::AnyComponentNode, scheduler::Scheduler, Component};
 
 pub struct AnyComponentBehavior {
     any_component_node: Weak<RefCell<AnyComponentNode>>,

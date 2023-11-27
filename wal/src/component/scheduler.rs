@@ -4,7 +4,7 @@ use wasm_bindgen_futures::spawn_local;
 
 use crate::utils::{any_utils::raw_memory_compare, debug};
 
-use super::component_node::AnyComponentNode;
+use super::node::AnyComponentNode;
 
 #[derive(Debug)]
 enum SchedulerMessage {
@@ -160,6 +160,12 @@ impl Scheduler {
             scheduler.messages.push(message);
             scheduler.schedule_handle_messages();
         });
+    }
+}
+
+impl Default for Scheduler {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

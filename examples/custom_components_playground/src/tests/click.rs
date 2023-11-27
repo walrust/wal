@@ -8,6 +8,7 @@ use wal::{
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
 use wal_macros::rsx;
+use wal_routing::router::builder::RouterBuilder;
 
 thread_local! {
     static CSS1: Css = css_stylesheet!("../styles/styles1.css");
@@ -21,10 +22,15 @@ struct FatherProperties;
 
 struct FatherComponent(i32);
 
+impl Default for FatherComponent {
+    fn default() -> Self {
+        Self::new(())
+    }
+}
+
 impl Component for FatherComponent {
     type Message = FatherMessages;
-    type Properties = FatherProperties;
-
+    type Properties = ();
     fn new(_props: Self::Properties) -> Self {
         Self(0)
     }
@@ -88,8 +94,8 @@ impl Component for ChildComponent {
 }
 
 pub fn start() {
-    let comp = FatherComponent(0);
-    wal::app::start(comp);
+    RouterBuilder::default()
+        .add_page::<FatherComponent>("/")
+        .build()
+        .start();
 }
-
-struct Xd;

@@ -4,7 +4,7 @@ use gloo::events::EventListener;
 use wasm_bindgen::JsCast;
 use web_sys::Element;
 
-use crate::{component::callback::Callback, virtual_dom::Dom};
+use crate::{component::callback::Callback, virtual_dom::dom};
 
 #[macro_use]
 mod macros;
@@ -224,7 +224,7 @@ impl EventHandler {
     pub(crate) fn attach(&mut self, element: &Element) {
         let event_type = self.get_event_type();
         let callback = self.event_creator.create_callback();
-        self.event_listener = Some(Dom::create_event_listener(element, event_type, callback));
+        self.event_listener = Some(dom::create_event_listener(element, event_type, callback));
     }
 
     pub(crate) fn get_event_type(&self) -> Cow<'static, str> {

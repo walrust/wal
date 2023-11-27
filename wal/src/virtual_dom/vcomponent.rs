@@ -1,12 +1,12 @@
 use web_sys::Node;
 
 use crate::{
-    component::{component_node::AnyComponentNode, Component},
+    component::{node::AnyComponentNode, Component},
     utils::debug,
 };
 
 use std::{
-    any::Any,
+    any::{Any, TypeId},
     cell::RefCell,
     collections::hash_map::DefaultHasher,
     fmt,
@@ -36,7 +36,7 @@ impl VComponent {
     where
         C: Component + 'static,
     {
-        let hash = Self::calculate_hash(&props);
+        let hash = Self::calculate_hash::<C>(&props);
         let generator = Box::new(Self::generator::<C>);
         VComponent {
             props: Some(Box::new(props)),
@@ -47,9 +47,13 @@ impl VComponent {
         }
     }
 
-    fn calculate_hash<T: Hash>(props: &T) -> PropertiesHash {
+    fn calculate_hash<C>(props: &C::Properties) -> PropertiesHash
+    where
+        C: Component + 'static,
+    {
         let mut hasher = DefaultHasher::new();
         props.hash(&mut hasher);
+        TypeId::of::<C>().hash(&mut hasher);
         hasher.finish()
     }
 
@@ -144,10 +148,148 @@ impl PartialEq for VComponent {
         self.hash == other.hash
             && match (&self.props, &other.props) {
                 (Some(self_props), Some(other_props)) => {
-                    self_props.type_id() == other_props.type_id()
+                    (*(*self_props)).type_id() == (*(*other_props)).type_id()
                 }
                 (None, None) => true,
                 _ => false,
             }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use wasm_bindgen_test::wasm_bindgen_test;
+
+    use crate::{
+        component::{behavior::Behavior, Component},
+        virtual_dom::{dom, VElement, VList, VNode, VText},
+    };
+
+    use super::VComponent;
+    wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+
+    macro_rules! function_name {
+        () => {{
+            fn f() {}
+            fn type_name_of<T>(_: T) -> &'static str {
+                std::any::type_name::<T>()
+            }
+            let name = type_name_of(f);
+            name.strip_suffix("::f").unwrap()
+        }};
+    }
+
+    struct Tmp;
+    impl Component for Tmp {
+        type Message = ();
+        type Properties = ();
+
+        fn new(_props: Self::Properties) -> Self {
+            Tmp
+        }
+        fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
+            VText::new("I love Rust").into()
+        }
+        fn update(&mut self, _message: Self::Message) -> bool {
+            false
+        }
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_none() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let mut target = VComponent::new::<Tmp>((), None);
+        target.patch(None, &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_text() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+
+        let current = dom::create_text_node("I dont love Rust");
+        dom::append_child(&ancestor, &current);
+
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let text = VNode::Text(VText {
+            text: "I dont love Rust".into(),
+            dom: Some(current),
+        });
+
+        let mut target = VComponent::new::<Tmp>((), None);
+        target.patch(Some(text), &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_elem() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+
+        let current = dom::create_element("div");
+        dom::set_attribute(&current, "id", "I dont love Rust");
+        dom::append_child(&ancestor, &current);
+
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let elem = VNode::Element(VElement {
+            tag_name: "div".into(),
+            attr: [("id".into(), "I dont love Rust".into())].into(),
+            event_handlers: vec![],
+            _key: None,
+            children: vec![],
+            dom: Some(current),
+        });
+
+        let mut target = VComponent::new::<Tmp>((), None);
+        target.patch(Some(elem), &ancestor);
+    }
+
+    struct Comp;
+    impl Component for Comp {
+        type Message = ();
+        type Properties = ();
+
+        fn new(_props: Self::Properties) -> Self {
+            Comp
+        }
+        fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
+            VText::new("I dont love Rust").into()
+        }
+        fn update(&mut self, _message: Self::Message) -> bool {
+            false
+        }
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_comp() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let mut comp = VNode::Component(VComponent::new::<Comp>((), None));
+        comp.patch(None, &ancestor);
+
+        let mut target = VComponent::new::<Tmp>((), None);
+        target.patch(Some(comp), &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_list() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let mut list = VNode::List(VList::new(
+            vec![VText::new("I dont love Rust").into()],
+            None,
+        ));
+        list.patch(None, &ancestor);
+
+        let mut target = VComponent::new::<Tmp>((), None);
+        target.patch(Some(list), &ancestor);
     }
 }

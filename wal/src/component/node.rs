@@ -14,14 +14,11 @@ pub struct AnyComponentNode {
 }
 
 impl AnyComponentNode {
-    pub(crate) fn new_root<C: Component + 'static>(
-        component: C,
-        ancestor: Node,
-    ) -> Rc<RefCell<Self>> {
+    pub fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
         Self::new_internal(component, ancestor, true)
     }
 
-    pub(crate) fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+    pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
         Self::new_internal(component, ancestor, false)
     }
 
@@ -58,7 +55,7 @@ impl AnyComponentNode {
         node_rc
     }
 
-    fn view(&mut self) {
+    pub fn view(&mut self) {
         self.vdom = Some(self.component.view(&mut self.behavior));
     }
 
