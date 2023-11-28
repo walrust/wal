@@ -24,6 +24,7 @@ impl ToTokens for ExpressionBlock {
         let expr_block = &self.0;
         tokens.extend(quote_spanned! { expr_block.span() =>
             #[allow(unused_braces)]
+            #[allow(clippy::useless_conversion)]
             ::wal::virtual_dom::VNode::from(#expr_block)
         });
     }

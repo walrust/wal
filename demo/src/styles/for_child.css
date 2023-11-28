@@ -1,0 +1,8 @@
+.container {
+  padding: 2vw;
+  margin-top: 2vw;
+  border-radius: 15px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  color: #058c42;
+  background-color: #f0e2e7;
+}
