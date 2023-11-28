@@ -1,15 +1,19 @@
+use crate::pages::click_not_immediate_reload::click_not_immediate_reload_child::{
+    ClickNotImmediateReloadChild, ClickNotImmediateReloadChildProperties,
+};
 use wal::{
     component::{behavior::Behavior, Component},
     virtual_dom::VNode,
 };
-use wal_macros::rsx;
-
-use crate::pages::click_not_immediate_reload::click_not_immediate_reload_child::{
-    ClickNotImmediateReloadChild, ClickNotImmediateReloadChildProperties,
-};
 
 use super::click_not_immediate_reload_child::ToBeUpdatedMessage;
+use wal_css::css::Css;
+use wal_css::css_stylesheet;
+use wal_macros::rsx;
 
+thread_local! {
+    static CSS: Css = css_stylesheet!("../../styles/click_father.css");
+}
 pub(crate) struct NotImmediateReloadFatherComponent {
     children: Vec<Children>,
 }
@@ -49,19 +53,23 @@ impl Component for NotImmediateReloadFatherComponent {
         let children_to_be_updated_message_callback =
             behavior.create_callback(MyMessage::ChildToBeUpdated);
 
-        rsx! {
-            { self.children_raport() }
-            for { self.children.iter().map(|child|
-                rsx! { <ClickNotImmediateReloadChild props = {
-                    ClickNotImmediateReloadChildProperties {
-                        id: child.id,
-                        count: child.count,
-                        name: child.name.clone(),
-                        click: children_to_be_updated_message_callback.clone()
-                    }
-                }/>
-            })}
-        }
+        CSS.with(|css| {
+            rsx! {
+                <div  class={&css["container"]}>
+                { self.children_raport() }
+                for { self.children.iter().map(|child|
+                    rsx! { <ClickNotImmediateReloadChild props = {
+                        ClickNotImmediateReloadChildProperties {
+                            id: child.id,
+                            count: child.count,
+                            name: child.name.clone(),
+                            click: children_to_be_updated_message_callback.clone()
+                        }
+                    }/>
+                })}
+                </div>
+            }
+        })
     }
 
     fn update(&mut self, message: Self::Message) -> bool {
@@ -89,11 +97,13 @@ impl NotImmediateReloadFatherComponent {
     }
 
     fn child_raport(child: &Children) -> VNode {
-        rsx! {
-            <div>
-                { format!("Child with id {}, name {}, got clicked {} times", child.id, child.name, child.count) }
-            </div>
-        }
+        CSS.with(|css| {
+            rsx! {
+                <div class={&css["raport-container"]}>
+                    { format!("Child with id {}, name {}, got clicked {} times", child.id, child.name, child.count) }
+                </div>
+            }
+        })
     }
 }
 

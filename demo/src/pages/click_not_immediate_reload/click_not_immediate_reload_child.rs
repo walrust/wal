@@ -1,14 +1,16 @@
 use wal::{
     component::{callback::Callback, Component},
     events::MouseEvent,
-    utils::debug,
 };
+use wal_css::css::Css;
+use wal_css::css_stylesheet;
 use wal_macros::rsx;
 use wasm_bindgen::JsCast;
-use web_sys::{
-    console::{log, log_0, log_1},
-    HtmlInputElement,
-};
+use web_sys::HtmlInputElement;
+
+thread_local! {
+    static CSS: Css = css_stylesheet!("../../styles/click_child.css");
+}
 
 pub(crate) struct ClickNotImmediateReloadChild {
     props: ClickNotImmediateReloadChildProperties,
@@ -61,17 +63,19 @@ impl Component for ClickNotImmediateReloadChild {
             props.click.emit(message);
         });
 
-        rsx! {
-            <div>
-                <button onclick={update_counter_on_click}>
-                    "update counter"
-                </button>
-                <input id={self.props.id} value = {props.name} />
-                <button onclick={save_changes_on_click}>
-                    "save changes"
-                </button>
-            </div>
-        }
+        CSS.with(|css| {
+            rsx! {
+                <div class={&css["container"]}>
+                    <button class={&css["fill-btn"]} onclick={update_counter_on_click}>
+                        "update counter"
+                    </button>
+                    <input class={&css["input-txt"]} id={self.props.id} value = {props.name} />
+                    <button class={&css["fill-btn"]} onclick={save_changes_on_click}>
+                        "save changes"
+                    </button>
+                </div>
+            }
+        })
     }
 
     fn update(&mut self, _message: Self::Message) -> bool {

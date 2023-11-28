@@ -1,0 +1,29 @@
+.container {
+  margin: 2vw 0;
+  display: flex;
+  justify-content: space-between;
+  width: 70%;
+}
+
+.fill-btn {
+  width: 100%;
+  height: 100%;
+  margin: 0 10px;
+  background-color: rgb(181, 210, 33);
+  border-width: 0;
+  color: #060606;
+  font-size: x-large;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  &:hover {
+    background-color: #058c42;
+    color: #f0e2e7;
+    transition: 0.5s;
+  }
+}
+
+.input-txt {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  font-size: x-large;
+}

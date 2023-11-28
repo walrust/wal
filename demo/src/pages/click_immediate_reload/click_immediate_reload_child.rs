@@ -3,9 +3,15 @@ use wal::{
     events::{InputEvent, MouseEvent},
     virtual_dom::VNode,
 };
+use wal_css::css::Css;
+use wal_css::css_stylesheet;
 use wal_macros::rsx;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
+
+thread_local! {
+    static CSS: Css = css_stylesheet!("../../styles/click_child.css");
+}
 
 #[derive(Hash)]
 pub(crate) struct ChildImmediateReloadProperties {
@@ -37,14 +43,16 @@ impl Component for ChildImmediateReloadComponent {
             change_name.emit(input_element.value());
         });
 
-        rsx! {
-            <div>
-                <button onclick={on_click}>
-                    "click me"
-                </button>
-                <input value = {self.0.name.clone()} oninput = {on_change_name} />
-            </div>
-        }
+        CSS.with(|css| {
+            rsx! {
+                <div class={&css["container"]}>
+                    <button  class={&css["fill-btn"]} onclick={on_click}>
+                        "click me"
+                    </button>
+                    <input class={&css["input-txt"]} value = {self.0.name.clone()} oninput = {on_change_name} />
+                </div>
+            }
+        })
     }
 
     fn update(&mut self, _message: Self::Message) -> bool {

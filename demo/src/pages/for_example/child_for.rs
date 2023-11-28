@@ -1,8 +1,17 @@
-use wal::{component::{Component, behavior::Behavior}, virtual_dom::VNode};
+use wal::{
+    component::{behavior::Behavior, Component},
+    virtual_dom::VNode,
+};
+use wal_css::css::Css;
+use wal_css::css_stylesheet;
 use wal_macros::rsx;
 
 pub(crate) struct ChildForComponent {
     id: u32,
+}
+
+thread_local! {
+    static CSS: Css = css_stylesheet!("../../styles/for_child.css");
 }
 
 impl Component for ChildForComponent {
@@ -14,11 +23,13 @@ impl Component for ChildForComponent {
     }
 
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-        rsx! {
-            <div>
-                {format!("Child {}", self.id)}
-            </div>
-        }
+        CSS.with(|css| {
+            rsx! {
+                <div class={&css["container"]}>
+                    {format!("Child {}", self.id)}
+                </div>
+            }
+        })
     }
 
     fn update(&mut self, _message: Self::Message) -> bool {

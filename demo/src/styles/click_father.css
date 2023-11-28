@@ -1,0 +1,11 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.raport-container {
+  font-size: xx-large;
+  padding: 3vh 0;
+}

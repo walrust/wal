@@ -3,8 +3,13 @@ use wal::{
     virtual_dom::VNode,
 };
 
+use wal_css::css::Css;
+use wal_css::css_stylesheet;
 use wal_macros::rsx;
 
+thread_local! {
+    static CSS: Css = css_stylesheet!("../../styles/click_father.css");
+}
 use crate::pages::click_immediate_reload::click_immediate_reload_child::{
     ChildImmediateReloadComponent, ChildImmediateReloadProperties,
 };
@@ -49,31 +54,33 @@ impl Component for FatherImmediateReloadComponent {
         let second_child_change_name_callback =
             behavior.create_callback(FatherImmediateReloadMessages::SecondChildChangeName);
 
-        rsx! {
-            <div>
-                <div>
-                    { format!("My children got clicked {} times", self.first_child_count + self.second_child_count) }
+        CSS.with(|css| {
+            rsx! {
+                <div class={&css["container"]}>
+                    <div class={&css["raport-container"]}>
+                        { format!("My children got clicked {} times", self.first_child_count + self.second_child_count) }
+                    </div>
+                    <div class={&css["raport-container"]}>
+                        { format!("{} child got clicked {} times", self.first_child_name, self.first_child_count) }
+                    </div>
+                    <div class={&css["raport-container"]}>
+                        { format!("{} child got clicked {} times", self.second_child_name, self.second_child_count) }
+                    </div>
+                    <ChildImmediateReloadComponent
+                    props = ChildImmediateReloadProperties {
+                        click: first_child_click_callback,
+                        on_change_name: first_child_change_name_callback,
+                        name: self.first_child_name.clone()
+                    }/>
+                    <ChildImmediateReloadComponent
+                    props = ChildImmediateReloadProperties {
+                        click: second_child_click_callback,
+                        on_change_name: second_child_change_name_callback,
+                        name: self.second_child_name.clone()
+                    }/>
                 </div>
-                <div>
-                    { format!("{} child got clicked {} times", self.first_child_name, self.first_child_count) }
-                </div>
-                <div>
-                    { format!("{} child got clicked {} times", self.second_child_name, self.second_child_count) }
-                </div>
-            </div>
-            <ChildImmediateReloadComponent
-                props = ChildImmediateReloadProperties {
-                    click: first_child_click_callback,
-                    on_change_name: first_child_change_name_callback,
-                    name: self.first_child_name.clone()
-                }/>
-            <ChildImmediateReloadComponent
-                props = ChildImmediateReloadProperties {
-                    click: second_child_click_callback,
-                    on_change_name: second_child_change_name_callback,
-                    name: self.second_child_name.clone()
-                }/>
-        }
+            }
+        })
     }
 
     fn update(&mut self, message: Self::Message) -> bool {
