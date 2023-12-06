@@ -62,7 +62,7 @@ pub mod dom {
 
     pub fn replace_child(ancestor: &Node, old_child: &Node, child: &Node) -> Node {
         ancestor
-            .replace_child(old_child, child)
+            .replace_child(child, old_child)
             .expect("Couldnt replace child with a new node")
     }
 
