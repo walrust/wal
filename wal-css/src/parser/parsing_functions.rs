@@ -156,7 +156,7 @@ fn is_instruction_terminator(c: char) -> bool {
 }
 
 fn needs_nested_parsing(command: &str) -> bool {
-    let commands_to_parse = vec!["media", "scope", "supports", "document"];
+    let commands_to_parse = ["media", "scope", "supports", "document"];
     commands_to_parse.contains(&command)
 }
 
