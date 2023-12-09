@@ -1,0 +1,111 @@
+error: unexpected end of input, expected an expression
+ --> tests/ifs/if_fail.rs:4:5
+  |
+4 |     rsx! { if };
+  |     ^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `rsx` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unexpected end of input, expected curly braces
+ --> tests/ifs/if_fail.rs:5:5
+  |
+5 |     rsx! { if true };
+  |     ^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `rsx` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: Expected condition for `if` expression, found an empty block
+ --> tests/ifs/if_fail.rs:6:15
+  |
+6 |     rsx! { if {} };
+  |               ^^
+
+error: unexpected end of input, expected curly braces
+  --> tests/ifs/if_fail.rs:10:5
+   |
+10 |     rsx! { if true {} else };
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the macro `rsx` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unexpected end of input, expected an expression
+  --> tests/ifs/if_fail.rs:11:5
+   |
+11 |     rsx! { if true {} else if };
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the macro `rsx` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unexpected end of input, expected curly braces
+  --> tests/ifs/if_fail.rs:12:5
+   |
+12 |     rsx! { if true {} else if true };
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the macro `rsx` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: Expected condition for `if` expression, found an empty block
+  --> tests/ifs/if_fail.rs:13:31
+   |
+13 |     rsx! { if true {} else if {} };
+   |                               ^^
+
+error: unexpected end of input, expected curly braces
+  --> tests/ifs/if_fail.rs:14:5
+   |
+14 |     rsx! { if true {} else if true {} else };
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the macro `rsx` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0425]: cannot find value `invalid_reference` in this scope
+  --> tests/ifs/if_fail.rs:17:22
+   |
+17 |     rsx! { if true { invalid_reference } };
+   |                      ^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0308]: mismatched types
+ --> tests/ifs/if_fail.rs:7:15
+  |
+7 |     rsx! { if 1 {} };
+  |               ^ expected `bool`, found integer
+
+error[E0308]: mismatched types
+ --> tests/ifs/if_fail.rs:9:15
+  |
+9 |     rsx! { if x {} };
+  |               ^ expected `bool`, found integer
+
+error[E0277]: `()` doesn't implement `std::fmt::Display`
+  --> tests/ifs/if_fail.rs:15:22
+   |
+15 |     rsx! { if true { {} } };
+   |                      ^^ `()` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `()`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the following other types implement trait `From<T>`:
+             <VNode as From<T>>
+             <VNode as From<VComponent>>
+             <VNode as From<VElement>>
+             <VNode as From<VList>>
+             <VNode as From<VText>>
+   = note: required for `()` to implement `ToString`
+   = note: required for `VNode` to implement `From<()>`
+
+error[E0277]: `()` doesn't implement `std::fmt::Display`
+  --> tests/ifs/if_fail.rs:16:22
+   |
+16 |     rsx! { if true { () } };
+   |                      ^^ `()` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `()`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = help: the following other types implement trait `From<T>`:
+             <VNode as From<T>>
+             <VNode as From<VComponent>>
+             <VNode as From<VElement>>
+             <VNode as From<VList>>
+             <VNode as From<VText>>
+   = note: required for `()` to implement `ToString`
+   = note: required for `VNode` to implement `From<()>`

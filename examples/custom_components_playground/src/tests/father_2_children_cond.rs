@@ -3,8 +3,8 @@ use wal::{
     component::{behavior::Behavior, callback::Callback, Component},
     virtual_dom::VNode,
 };
-use wal_macros::rsx;
 use wal_routing::prelude::RouterBuilder;
+use wal_rsx::rsx;
 
 enum FatherMessages {
     Add,

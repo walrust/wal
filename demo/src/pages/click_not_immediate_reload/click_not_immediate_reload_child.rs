@@ -4,7 +4,7 @@ use wal::{
 };
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
-use wal_macros::rsx;
+use wal_rsx::rsx;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 

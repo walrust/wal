@@ -7,8 +7,8 @@ use wal::{
 };
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
-use wal_macros::rsx;
 use wal_routing::router::builder::RouterBuilder;
+use wal_rsx::rsx;
 
 thread_local! {
     static CSS1: Css = css_stylesheet!("../styles/styles1.css");

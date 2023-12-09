@@ -9,7 +9,7 @@ use wal::{
 use super::click_not_immediate_reload_child::ToBeUpdatedMessage;
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
-use wal_macros::rsx;
+use wal_rsx::rsx;
 
 thread_local! {
     static CSS: Css = css_stylesheet!("../../styles/click_father.css");

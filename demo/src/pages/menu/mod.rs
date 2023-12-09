@@ -1,7 +1,7 @@
 use wal::component::Component;
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
-use wal_macros::rsx;
+use wal_rsx::rsx;
 
 pub(crate) struct MenuComponent;
 

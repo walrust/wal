@@ -4,8 +4,8 @@ use wal::{
     events::MouseEvent,
     utils::debug,
 };
-use wal_macros::rsx;
 use wal_routing::prelude::RouterBuilder;
+use wal_rsx::rsx;
 
 struct NavigationComp;
 impl Component for NavigationComp {

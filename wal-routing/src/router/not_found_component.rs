@@ -2,7 +2,7 @@ use wal::{
     component::{behavior::Behavior, Component},
     virtual_dom::VNode,
 };
-use wal_macros::rsx;
+use wal_rsx::rsx;
 
 pub(crate) const NOT_FOUND_PATH: &str = "/404";
 
