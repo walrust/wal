@@ -1,5 +1,0 @@
-error: Byte string literals are not supported
- --> tests/rsx_macro_tests/literals/single_literal_fail.rs:4:12
-  |
-4 |     rsx! { b"val" };
-  |            ^^^^^^

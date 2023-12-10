@@ -1,0 +1,53 @@
+error: expected `=`
+ --> tests/attributes/attributes_fail.rs:6:21
+  |
+6 |     rsx! { <div attr></div> };
+  |                     ^
+
+error: Expected a literal or an expression block
+ --> tests/attributes/attributes_fail.rs:7:22
+  |
+7 |     rsx! { <div attr=></div> };
+  |                      ^
+
+error: expected `=`
+ --> tests/attributes/attributes_fail.rs:8:22
+  |
+8 |     rsx! { <div attr "value"></div> };
+  |                      ^^^^^^^
+
+error: Duplicate attribute `attr`
+ --> tests/attributes/attributes_fail.rs:9:29
+  |
+9 |     rsx! { <div attr="key1" attr="key2"></div> };
+  |                             ^^^^
+
+error: Expected a literal or an expression block
+  --> tests/attributes/attributes_fail.rs:10:24
+   |
+10 |     rsx! { <div attr1= attr2="key2"></div> };
+   |                        ^^^^^
+
+error[E0599]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/attributes/attributes_fail.rs:11:22
+   |
+11 |     rsx! { <div attr={NonDisplayStruct}></div> };
+   |                      ^^^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+  ::: tests/attributes/../utils/non_display_struct.rs
+   |
+   | pub struct NonDisplayStruct;
+   | ---------------------------
+   | |
+   | method `to_string` not found for this struct
+   | doesn't satisfy `NonDisplayStruct: ToString`
+   | doesn't satisfy `NonDisplayStruct: std::fmt::Display`
+   |
+   = note: the following trait bounds were not satisfied:
+           `NonDisplayStruct: std::fmt::Display`
+           which is required by `NonDisplayStruct: ToString`
+note: the trait `std::fmt::Display` must be implemented
+  --> $RUST/core/src/fmt/mod.rs
+   |
+   | pub trait Display {
+   | ^^^^^^^^^^^^^^^^^

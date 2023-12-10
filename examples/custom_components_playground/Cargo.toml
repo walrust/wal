@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 wasm-bindgen = "0.2.87"
 wal = { path = "../../wal" }
-wal-macros = { path = "../../wal-macros" }
+wal-rsx = { path = "../../wal-rsx" }
 wal-css = { path = "../../wal-css" }
 wal-routing = { path = "../../wal-routing" }
 gloo = { version = "0.10.0", features = ["utils"] }

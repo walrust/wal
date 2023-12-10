@@ -1,5 +1,0 @@
-error: Byte string literals are not supported
- --> tests/rsx_macro_tests/elements/element_with_single_literal_fail.rs:4:18
-  |
-4 |     rsx! { <div> b"val" </div> };
-  |                  ^^^^^^

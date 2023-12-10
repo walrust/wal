@@ -1,0 +1,131 @@
+error: expected `=`
+ --> tests/attributes/class_attributes_fail.rs:6:22
+  |
+6 |     rsx! { <div class></div> };
+  |                      ^
+
+error: Expected a literal or an expression block
+ --> tests/attributes/class_attributes_fail.rs:7:23
+  |
+7 |     rsx! { <div class=></div> };
+  |                       ^
+
+error: expected `=`
+ --> tests/attributes/class_attributes_fail.rs:8:23
+  |
+8 |     rsx! { <div class "class"></div> };
+  |                       ^^^^^^^
+
+error: Duplicate attribute `class`
+ --> tests/attributes/class_attributes_fail.rs:9:32
+  |
+9 |     rsx! { <div class="class1" class="class2"></div> };
+  |                                ^^^^^
+
+error: Expected a literal or an expression block
+  --> tests/attributes/class_attributes_fail.rs:10:24
+   |
+10 |     rsx! { <div class= class="class1"></div> };
+   |                        ^^^^^
+
+error: expected `=`
+  --> tests/attributes/class_attributes_fail.rs:13:26
+   |
+13 |     rsx! { <div wal_class></div> };
+   |                          ^
+
+error: expected square brackets
+  --> tests/attributes/class_attributes_fail.rs:14:27
+   |
+14 |     rsx! { <div wal_class=></div> };
+   |                           ^
+
+error: expected `=`
+  --> tests/attributes/class_attributes_fail.rs:15:27
+   |
+15 |     rsx! { <div wal_class ["value"]></div> };
+   |                           ^
+
+error: Duplicate attribute `wal_class`
+  --> tests/attributes/class_attributes_fail.rs:16:38
+   |
+16 |     rsx! { <div wal_class=["class1"] wal_class=["class2"]></div> };
+   |                                      ^^^^^^^^^
+
+error: expected square brackets
+  --> tests/attributes/class_attributes_fail.rs:17:28
+   |
+17 |     rsx! { <div wal_class= wal_class=["class1"]></div> };
+   |                            ^^^^^^^^^
+
+error[E0599]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/attributes/class_attributes_fail.rs:11:23
+   |
+11 |     rsx! { <div class={NonDisplayStruct}></div> };
+   |                       ^^^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+  ::: tests/attributes/../utils/non_display_struct.rs
+   |
+   | pub struct NonDisplayStruct;
+   | ---------------------------
+   | |
+   | method `to_string` not found for this struct
+   | doesn't satisfy `NonDisplayStruct: ToString`
+   | doesn't satisfy `NonDisplayStruct: std::fmt::Display`
+   |
+   = note: the following trait bounds were not satisfied:
+           `NonDisplayStruct: std::fmt::Display`
+           which is required by `NonDisplayStruct: ToString`
+note: the trait `std::fmt::Display` must be implemented
+  --> $RUST/core/src/fmt/mod.rs
+   |
+   | pub trait Display {
+   | ^^^^^^^^^^^^^^^^^
+
+error[E0599]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/attributes/class_attributes_fail.rs:18:28
+   |
+18 |     rsx! { <div wal_class=[NonDisplayStruct]></div> };
+   |                            ^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+  ::: tests/attributes/../utils/non_display_struct.rs
+   |
+   | pub struct NonDisplayStruct;
+   | ---------------------------
+   | |
+   | method `to_string` not found for this struct
+   | doesn't satisfy `NonDisplayStruct: ToString`
+   | doesn't satisfy `NonDisplayStruct: std::fmt::Display`
+   |
+   = note: the following trait bounds were not satisfied:
+           `NonDisplayStruct: std::fmt::Display`
+           which is required by `NonDisplayStruct: ToString`
+note: the trait `std::fmt::Display` must be implemented
+  --> $RUST/core/src/fmt/mod.rs
+   |
+   | pub trait Display {
+   | ^^^^^^^^^^^^^^^^^
+
+error[E0599]: `NonDisplayStruct` doesn't implement `std::fmt::Display`
+  --> tests/attributes/class_attributes_fail.rs:19:48
+   |
+19 |     rsx! { <div wal_class=["class1", "class2", NonDisplayStruct, "class3"]></div> };
+   |                                                ^^^^^^^^^^^^^^^^ `NonDisplayStruct` cannot be formatted with the default formatter
+   |
+  ::: tests/attributes/../utils/non_display_struct.rs
+   |
+   | pub struct NonDisplayStruct;
+   | ---------------------------
+   | |
+   | method `to_string` not found for this struct
+   | doesn't satisfy `NonDisplayStruct: ToString`
+   | doesn't satisfy `NonDisplayStruct: std::fmt::Display`
+   |
+   = note: the following trait bounds were not satisfied:
+           `NonDisplayStruct: std::fmt::Display`
+           which is required by `NonDisplayStruct: ToString`
+note: the trait `std::fmt::Display` must be implemented
+  --> $RUST/core/src/fmt/mod.rs
+   |
+   | pub trait Display {
+   | ^^^^^^^^^^^^^^^^^
