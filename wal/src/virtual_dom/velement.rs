@@ -189,6 +189,8 @@ mod tests {
         }};
     }
 
+    const VALID_TEXT: &str = "";
+
     #[wasm_bindgen_test]
     fn patch_last_none() {
         let ancestor = dom::create_element("div");
@@ -197,7 +199,7 @@ mod tests {
 
         let mut target = VElement::new(
             "div".into(),
-            [("id".into(), "I love Rust".into())].into(),
+            [("id".into(), VALID_TEXT.into())].into(),
             vec![],
             None,
             vec![],
@@ -222,7 +224,7 @@ mod tests {
 
         let mut target = VElement::new(
             "div".into(),
-            [("id".into(), "I love Rust".into())].into(),
+            [("id".into(), VALID_TEXT.into())].into(),
             vec![],
             None,
             vec![],
@@ -252,7 +254,7 @@ mod tests {
 
         let mut target = VElement::new(
             "div".into(),
-            [("id".into(), "I love Rust".into())].into(),
+            [("id".into(), VALID_TEXT.into())].into(),
             vec![],
             None,
             vec![],
@@ -287,7 +289,7 @@ mod tests {
 
         let mut target = VElement::new(
             "div".into(),
-            [("id".into(), "I love Rust".into())].into(),
+            [("id".into(), VALID_TEXT.into())].into(),
             vec![],
             None,
             vec![],
@@ -309,7 +311,7 @@ mod tests {
 
         let mut target = VElement::new(
             "div".into(),
-            [("id".into(), "I love Rust".into())].into(),
+            [("id".into(), VALID_TEXT.into())].into(),
             vec![],
             None,
             vec![],

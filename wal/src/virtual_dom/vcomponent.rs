@@ -179,6 +179,8 @@ mod tests {
         }};
     }
 
+    const VALID_TEXT: &str = "";
+
     struct Tmp;
     impl Component for Tmp {
         type Message = ();
@@ -188,7 +190,7 @@ mod tests {
             Tmp
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-            VText::new("I love Rust").into()
+            VText::new(VALID_TEXT).into()
         }
         fn update(&mut self, _message: Self::Message) -> bool {
             false

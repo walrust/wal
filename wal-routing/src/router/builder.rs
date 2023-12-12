@@ -100,6 +100,8 @@ mod tests {
     use wasm_bindgen_test::wasm_bindgen_test;
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
+    const VALID_TEXT: &str = "";
+
     #[wasm_bindgen_test]
     fn generic_struct_typeid_check() {
         assert_ne!(
@@ -128,7 +130,7 @@ mod tests {
             Root
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-            VText::new("RootComponent so cool").into()
+            VText::new(VALID_TEXT).into()
         }
         fn update(&mut self, _message: Self::Message) -> bool {
             false
@@ -157,7 +159,7 @@ mod tests {
             Root2
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-            VText::new("RootComponent so cool").into()
+            VText::new(VALID_TEXT).into()
         }
         fn update(&mut self, _message: Self::Message) -> bool {
             false
