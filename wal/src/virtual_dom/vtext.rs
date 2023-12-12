@@ -51,6 +51,14 @@ impl VText {
         }
 
         self.render(old_virt, ancestor);
+
+        // Corner case when parent is changed but child cannot be reassigned earlier
+        let parent_node = self.dom.as_ref().unwrap().parent_node().unwrap();
+        if !parent_node.eq(ancestor) {
+            let dom_ref = self.dom.as_ref().unwrap();
+            dom::remove_child(&parent_node, dom_ref);
+            dom::append_child(ancestor, dom_ref);
+        }
     }
 
     pub fn erase(&self) {
