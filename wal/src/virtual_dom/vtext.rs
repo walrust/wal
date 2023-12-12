@@ -51,6 +51,7 @@ impl VText {
         }
 
         self.render(old_virt, ancestor);
+        self.check_if_parents_match(ancestor);
     }
 
     pub fn erase(&self) {
@@ -85,6 +86,16 @@ impl VText {
             }
         }
     }
+
+    fn check_if_parents_match(&mut self, ancestor: &Node) {
+        // Corner case when parent is changed but child cannot be reassigned earlier
+        let parent_node = self.dom.as_ref().unwrap().parent_node().unwrap();
+        if !parent_node.eq(ancestor) {
+            let dom_ref = self.dom.as_ref().unwrap();
+            dom::remove_child(&parent_node, dom_ref);
+            dom::append_child(ancestor, dom_ref);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -116,13 +127,15 @@ mod tests {
         }};
     }
 
+    const VALID_TEXT: &str = "";
+
     #[wasm_bindgen_test]
     fn patch_last_none() {
         let ancestor = dom::create_element("div");
         dom::set_attribute(&ancestor, "id", function_name!());
         dom::append_child(&dom::get_root_element(), &ancestor);
 
-        let mut target = VText::new("I love Rust");
+        let mut target = VText::new(VALID_TEXT);
         target.patch(None, &ancestor);
     }
 
@@ -141,7 +154,7 @@ mod tests {
             dom: Some(current),
         });
 
-        let mut target = VText::new("I love Rust");
+        let mut target = VText::new(VALID_TEXT);
         target.patch(Some(text), &ancestor);
     }
 
@@ -165,7 +178,7 @@ mod tests {
             dom: Some(current),
         });
 
-        let mut target = VText::new("I love Rust");
+        let mut target = VText::new(VALID_TEXT);
         target.patch(Some(elem), &ancestor);
     }
 
@@ -194,7 +207,7 @@ mod tests {
         let mut comp = VNode::Component(VComponent::new::<Comp>((), None));
         comp.patch(None, &ancestor);
 
-        let mut target = VText::new("I love Rust");
+        let mut target = VText::new(VALID_TEXT);
         target.patch(Some(comp), &ancestor);
     }
 
@@ -210,7 +223,7 @@ mod tests {
         ));
         list.patch(None, &ancestor);
 
-        let mut target = VText::new("I love Rust");
+        let mut target = VText::new(VALID_TEXT);
         target.patch(Some(list), &ancestor);
     }
 }

@@ -98,13 +98,15 @@ mod tests {
         }};
     }
 
+    const VALID_TEXT: &str = "";
+
     #[wasm_bindgen_test]
     fn patch_last_none() {
         let ancestor = dom::create_element("div");
         dom::set_attribute(&ancestor, "id", function_name!());
         dom::append_child(&dom::get_root_element(), &ancestor);
 
-        let mut target = VList::new(vec![VText::new("I love Rust").into()], None);
+        let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
         target.patch(None, &ancestor);
     }
 
@@ -123,7 +125,7 @@ mod tests {
             dom: Some(current),
         });
 
-        let mut target = VList::new(vec![VText::new("I love Rust").into()], None);
+        let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
         target.patch(Some(text), &ancestor);
     }
 
@@ -147,7 +149,7 @@ mod tests {
             dom: Some(current),
         });
 
-        let mut target = VList::new(vec![VText::new("I love Rust").into()], None);
+        let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
         target.patch(Some(elem), &ancestor);
     }
 
@@ -176,7 +178,7 @@ mod tests {
         let mut comp = VNode::Component(VComponent::new::<Comp>((), None));
         comp.patch(None, &ancestor);
 
-        let mut target = VList::new(vec![VText::new("I love Rust").into()], None);
+        let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
         target.patch(Some(comp), &ancestor);
     }
 
@@ -192,7 +194,7 @@ mod tests {
         ));
         list.patch(None, &ancestor);
 
-        let mut target = VList::new(vec![VText::new("I love Rust").into()], None);
+        let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
         target.patch(Some(list), &ancestor);
     }
 }
