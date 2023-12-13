@@ -1,7 +1,7 @@
 use web_sys::Node;
 
 use crate::{
-    component::{node::AnyComponentNode, Component},
+    component::{behavior::AnyComponentBehavior, node::AnyComponentNode, Component},
     utils::debug,
 };
 
@@ -66,7 +66,10 @@ impl VComponent {
             .downcast::<C::Properties>()
             .expect("Trying to unpack others component props");
 
-        AnyComponentNode::new(C::new(*props), ancestor.clone())
+        AnyComponentNode::new(
+            C::new(*props, &mut AnyComponentBehavior::new()),
+            ancestor.clone(),
+        )
     }
 
     pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
@@ -186,7 +189,7 @@ mod tests {
         type Message = ();
         type Properties = ();
 
-        fn new(_props: Self::Properties) -> Self {
+        fn new(_props: Self::Properties, behavior: &mut impl Behavior<Self>) -> Self {
             Tmp
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
@@ -255,7 +258,7 @@ mod tests {
         type Message = ();
         type Properties = ();
 
-        fn new(_props: Self::Properties) -> Self {
+        fn new(_props: Self::Properties, behavior: &mut impl Behavior<Self>) -> Self {
             Comp
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {

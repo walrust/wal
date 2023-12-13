@@ -94,7 +94,7 @@ mod tests {
     };
     use std::any::{Any, TypeId};
     use wal::{
-        component::{behavior::Behavior, Component},
+        component::{behavior::Behavior, node::AnyComponentNode, Component},
         virtual_dom::{VNode, VText},
     };
     use wasm_bindgen_test::wasm_bindgen_test;
@@ -120,13 +120,13 @@ mod tests {
     struct Root;
     impl Default for Root {
         fn default() -> Self {
-            Self::new(())
+            Self::new((), &mut Beha::new())
         }
     }
     impl Component for Root {
         type Message = ();
         type Properties = ();
-        fn new(_props: Self::Properties) -> Self {
+        fn new(_props: Self::Properties, behavior: &mut impl Behavior<Self>) -> Self {
             Root
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {

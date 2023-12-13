@@ -25,7 +25,7 @@ pub trait Component: Sized {
     type Properties: Hash + 'static;
 
     /// Function that creates a new instance of the component therefore initialize a model using [Properties](#associatedtype.Properties).
-    fn new(props: Self::Properties) -> Self;
+    fn new(props: Self::Properties, behavior: &mut impl Behavior<Self>) -> Self;
 
     /// Function that returns a view of the component.
     /// It uses [Behavior](behavior::Behavior) to create [Callbacks](callback::Callback) that are responsible to send [Messages](#associatedtype.Message) to the component.
@@ -37,11 +37,6 @@ pub trait Component: Sized {
     /// It returns a boolean that indicates if the rerender of the component is necessary.
     /// Meaning whether the view of the component should be updated or not.
     fn update(&mut self, message: Self::Message) -> bool;
-
-    /// Function used to define which stores the component subscribes to. If user want this component subscribe certain stores,
-    /// he should create callbacks with correct messeages and call store.subscribe method inside this function.
-    /// If not, the default empty implementation should be used instead.
-    fn subscribe_stores(&self, _behavior: &mut impl Behavior<Self>) {}
 }
 
 pub(crate) trait AnyComponent {
@@ -58,7 +53,7 @@ impl<C: Component> AnyComponent for C {
         let props = *props.downcast::<C::Properties>().expect(
             "Failed to downcast properties in any component to properties of a real component",
         );
-        C::new(props)
+        C::new(props, &mut AnyComponentBehavior::new())
     }
 
     fn view(&self, any_component_behavior: &mut AnyComponentBehavior) -> VNode {

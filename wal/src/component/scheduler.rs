@@ -171,7 +171,10 @@ impl Default for Scheduler {
 
 #[cfg(test)]
 mod tests {
-    use crate::component::Component;
+    use crate::component::{
+        behavior::{AnyComponentBehavior, Behavior},
+        Component,
+    };
 
     use super::*;
     use crate::virtual_dom::*;
@@ -185,7 +188,7 @@ mod tests {
         type Message = i8;
         type Properties = ();
 
-        fn new(_props: Self::Properties) -> Self {
+        fn new(_props: Self::Properties, _behavior: &mut impl Behavior<Self>) -> Self {
             TestComponent
         }
 
@@ -203,7 +206,7 @@ mod tests {
         type Message = i8;
         type Properties = ();
 
-        fn new(_props: Self::Properties) -> Self {
+        fn new(_props: Self::Properties, _behavior: &mut impl Behavior<Self>) -> Self {
             TestComponent2
         }
 
@@ -222,7 +225,7 @@ mod tests {
         type Message = ();
         type Properties = ();
 
-        fn new(_props: Self::Properties) -> Self {
+        fn new(_props: Self::Properties, _behavior: &mut impl Behavior<Self>) -> Self {
             UpdateReturnsTrueComponent
         }
 
@@ -241,7 +244,7 @@ mod tests {
         type Message = ();
         type Properties = ();
 
-        fn new(_props: Self::Properties) -> Self {
+        fn new(_props: Self::Properties, _behavior: &mut impl Behavior<Self>) -> Self {
             UpdateReturnsFalseComponent
         }
 
@@ -276,7 +279,7 @@ mod tests {
         props: T::Properties,
     ) -> Rc<RefCell<AnyComponentNode>> {
         let ancestor = get_body();
-        let component = T::new(props);
+        let component = T::new(props, &mut AnyComponentBehavior::new());
         AnyComponentNode::new_root(component, ancestor)
     }
 

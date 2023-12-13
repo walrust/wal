@@ -278,7 +278,7 @@ mod tests {
         type Message = ();
         type Properties = ();
 
-        fn new(_props: Self::Properties) -> Self {
+        fn new(_props: Self::Properties, behavior: &mut impl Behavior<Self>) -> Self {
             Comp
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
