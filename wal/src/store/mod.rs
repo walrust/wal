@@ -13,7 +13,7 @@ impl<T: Copy> Store<T> {
         }
     }
 
-    pub fn add_subscriber(&mut self, callback: Callback<T>) {
+    pub fn subscribe(&mut self, callback: Callback<T>) {
         self.subscriber_callbacks.push(callback);
     }
 
@@ -21,6 +21,11 @@ impl<T: Copy> Store<T> {
         for s_callback in self.subscriber_callbacks.iter() {
             s_callback.emit(self.content);
         }
+    }
+
+    pub fn update(&mut self, new_content: T) {
+        self.content = new_content;
+        self.notify_all_subscribers();
     }
 }
 
