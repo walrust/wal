@@ -1,4 +1,4 @@
-use crate::virtual_dom::VNode;
+use crate::{store::subscription::Subscriptions, virtual_dom::VNode};
 use std::any::Any;
 use std::hash::Hash;
 
@@ -37,6 +37,13 @@ pub trait Component: Sized {
     /// It returns a boolean that indicates if the rerender of the component is necessary.
     /// Meaning whether the view of the component should be updated or not.
     fn update(&mut self, message: Self::Message) -> bool;
+
+    /// Function used to defibne which stores the component subscribes to.
+    /// It returns an option with the vector of subscribed stores. If user want this component subscribe certain stores,
+    /// he should return them from this method.
+    fn get_stores(&mut self, _message: Self::Message) -> Subscriptions {
+        return None;
+    }
 }
 
 pub(crate) trait AnyComponent {
