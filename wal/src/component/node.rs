@@ -30,6 +30,7 @@ impl AnyComponentNode {
         let component_box = Box::new(component) as Box<dyn AnyComponent>;
         let behavior = AnyComponentBehavior::new();
 
+        // init node
         let node = Self {
             component: component_box,
             depth: 0,
@@ -41,11 +42,19 @@ impl AnyComponentNode {
 
         let node_rc = Rc::new(RefCell::new(node));
 
+        // bind behavior to this node
         node_rc
             .borrow_mut()
             .behavior
             .set_any_component_node(node_rc.clone());
 
+        // subscribe stores
+        node_rc
+            .borrow_mut()
+            .component
+            .subscribe_stores(&mut node_rc.borrow_mut().behavior);
+
+        // view the node
         if to_patch {
             node_rc.borrow_mut().view_and_patch();
         } else {

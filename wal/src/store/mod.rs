@@ -1,7 +1,4 @@
-use crate::component::{callback::Callback, Component};
-use std::any::Any;
-
-pub mod subscription;
+use crate::component::callback::Callback;
 
 pub struct Store<T: Copy> {
     content: T,
@@ -27,38 +24,38 @@ impl<T: Copy> Store<T> {
     }
 }
 
-pub(crate) trait AnyStore {
-    fn new(initial_content: Box<dyn Any>) -> Self
-    where
-        Self: Sized;
-    fn add_subscriber(&mut self, callback: Box<dyn Any>);
+// pub(crate) trait AnyStore {
+//     fn new(initial_content: Box<dyn Any>) -> Self
+//     where
+//         Self: Sized;
+//     fn add_subscriber(&mut self, callback: Box<dyn Any>);
 
-    fn notify_all_subscribers(&mut self);
-}
+//     fn notify_all_subscribers(&mut self);
+// }
 
-impl<T> AnyStore for Store<T>
-where
-    T: Copy + 'static,
-{
-    fn new(initial_content: Box<dyn Any>) -> Self
-    where
-        Self: Sized,
-    {
-        let initial_content = *initial_content.downcast::<T>().expect(
-            "Failed to downcast initial_content in AnyStore to initial_content of a real store",
-        );
-        Store::<T>::new(initial_content)
-    }
+// impl<T> AnyStore for Store<T>
+// where
+//     T: Copy + 'static,
+// {
+//     fn new(initial_content: Box<dyn Any>) -> Self
+//     where
+//         Self: Sized,
+//     {
+//         let initial_content = *initial_content.downcast::<T>().expect(
+//             "Failed to downcast initial_content in AnyStore to initial_content of a real store",
+//         );
+//         Store::<T>::new(initial_content)
+//     }
 
-    fn add_subscriber(&mut self, callback: Box<dyn Any>) {
-        let callback = *callback
-            .downcast::<Callback<T>>()
-            .expect("Failed to downcast callback in AnyStore to callback of a real store");
+//     fn add_subscriber(&mut self, callback: Box<dyn Any>) {
+//         let callback = *callback
+//             .downcast::<Callback<T>>()
+//             .expect("Failed to downcast callback in AnyStore to callback of a real store");
 
-        self.add_subscriber(callback);
-    }
+//         self.add_subscriber(callback);
+//     }
 
-    fn notify_all_subscribers(&mut self) {
-        self.notify_all_subscribers();
-    }
-}
+//     fn notify_all_subscribers(&mut self) {
+//         self.notify_all_subscribers();
+//     }
+// }

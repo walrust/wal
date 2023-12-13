@@ -1,4 +1,4 @@
-use crate::{store::subscription::Subscriptions, virtual_dom::VNode};
+use crate::virtual_dom::VNode;
 use std::any::Any;
 use std::hash::Hash;
 
@@ -38,12 +38,10 @@ pub trait Component: Sized {
     /// Meaning whether the view of the component should be updated or not.
     fn update(&mut self, message: Self::Message) -> bool;
 
-    /// Function used to defibne which stores the component subscribes to.
-    /// It returns an option with the vector of subscribed stores. If user want this component subscribe certain stores,
-    /// he should return them from this method.
-    fn get_stores(&mut self, _message: Self::Message) -> Subscriptions {
-        return None;
-    }
+    /// Function used to define which stores the component subscribes to. If user want this component subscribe certain stores,
+    /// he should create callbacks with correct messeages and call store.subscribe method inside this function.
+    /// If not, the default empty implementation should be used instead.
+    fn subscribe_stores(&self, _behavior: &mut impl Behavior<Self>) {}
 }
 
 pub(crate) trait AnyComponent {
@@ -52,6 +50,7 @@ pub(crate) trait AnyComponent {
         Self: Sized;
     fn view(&self, behavior: &mut AnyComponentBehavior) -> VNode;
     fn update(&mut self, message: Box<dyn Any>) -> bool;
+    fn subscribe_stores(&self, behavior: &mut AnyComponentBehavior);
 }
 
 impl<C: Component> AnyComponent for C {
@@ -71,5 +70,9 @@ impl<C: Component> AnyComponent for C {
             .downcast::<C::Message>()
             .expect("Failed to downcast message in any component to message of a real component");
         self.update(msg)
+    }
+
+    fn subscribe_stores(&self, any_component_behavior: &mut AnyComponentBehavior) {
+        self.subscribe_stores(any_component_behavior)
     }
 }
