@@ -19,6 +19,7 @@ pub(crate) enum FatherImmediateReloadMessages {
     SecondChildClicked,
     FirstChildChangeName(String),
     SecondChildChangeName(String),
+    StoreUpdate(u32),
 }
 
 #[derive(Hash)]
@@ -35,7 +36,13 @@ impl Component for FatherImmediateReloadComponent {
     type Message = FatherImmediateReloadMessages;
     type Properties = FatherImmediateReloadProperties;
 
-    fn new(_props: Self::Properties) -> Self {
+    fn new(_props: Self::Properties, behavior: &mut impl Behavior<Self>) -> Self {
+        let store_callback =
+            behavior.create_callback(|val: i32| FatherImmediateReloadMessages::StoreUpdate(val));
+        <STATIC STORE>.subscribe(store_callback);
+
+        
+
         Self {
             first_child_count: 0,
             first_child_name: "first".to_string(),
