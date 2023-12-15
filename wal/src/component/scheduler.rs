@@ -34,7 +34,7 @@ impl UpdateMessage {
             if to_rerender {
                 Scheduler::add_rerender_message(
                     self.any_component_node,
-                    any_component_node.borrow().depth,
+                    any_component_node.borrow().depth.expect("Depth is not set"),
                 );
             }
         } else {

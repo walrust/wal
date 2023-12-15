@@ -82,6 +82,13 @@ impl VElement {
             dom::remove_node(el);
         }
     }
+
+    pub fn set_depth(&mut self, depth: u32) {
+        debug::log(format!("VElement: Setting depth: {depth}"));
+        for child in self.children.iter_mut() {
+            child.set_depth(depth);
+        }
+    }
 }
 
 impl VElement {
@@ -296,6 +303,7 @@ mod tests {
         dom::append_child(&dom::get_root_element(), &ancestor);
 
         let mut comp = VNode::Component(VComponent::new::<Comp>((), None));
+        comp.set_depth(0);
         comp.patch(None, &ancestor);
 
         let mut target = VElement::new(
@@ -318,6 +326,7 @@ mod tests {
             vec![VText::new("I dont love Rust").into()],
             None,
         ));
+        list.set_depth(0);
         list.patch(None, &ancestor);
 
         let mut target = VElement::new(

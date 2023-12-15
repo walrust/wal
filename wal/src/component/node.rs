@@ -1,4 +1,4 @@
-use crate::virtual_dom::VNode;
+use crate::{utils::debug, virtual_dom::VNode};
 use std::{any::Any, cell::RefCell, fmt, rc::Rc};
 use web_sys::Node;
 
@@ -6,7 +6,7 @@ use super::{behavior::AnyComponentBehavior, AnyComponent, Component};
 
 pub struct AnyComponentNode {
     component: Box<dyn AnyComponent>,
-    pub depth: u32,
+    pub depth: Option<u32>,
     to_rerender: bool,
     behavior: AnyComponentBehavior,
     pub vdom: Option<VNode>,
@@ -15,24 +15,32 @@ pub struct AnyComponentNode {
 
 impl AnyComponentNode {
     pub fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
-        Self::new_internal(component, ancestor, true)
+        Self::new_internal(component, ancestor, true, Some(0))
     }
 
     pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
-        Self::new_internal(component, ancestor, false)
+        Self::new_internal(component, ancestor, false, None)
+    }
+
+    pub fn new_root_routing<C: Component + 'static>(
+        component: C,
+        ancestor: Node,
+    ) -> Rc<RefCell<Self>> {
+        Self::new_internal(component, ancestor, false, Some(0))
     }
 
     fn new_internal<C: Component + 'static>(
         component: C,
         ancestor: Node,
         to_patch: bool,
+        depth: Option<u32>,
     ) -> Rc<RefCell<Self>> {
         let component_box = Box::new(component) as Box<dyn AnyComponent>;
         let behavior = AnyComponentBehavior::new();
 
         let node = Self {
             component: component_box,
-            depth: 0,
+            depth,
             to_rerender: false,
             behavior,
             vdom: None,
@@ -48,19 +56,25 @@ impl AnyComponentNode {
 
         if to_patch {
             node_rc.borrow_mut().view_and_patch();
-        } else {
-            node_rc.borrow_mut().view();
         }
+        // else {
+        //     node_rc.borrow_mut().view();
+        // }
 
         node_rc
     }
 
     pub fn view(&mut self) {
-        self.vdom = Some(self.component.view(&mut self.behavior));
+        let mut new_vdom = self.component.view(&mut self.behavior);
+        debug::log("view: set_depth");
+        new_vdom.set_depth(self.depth.unwrap() + 1);
+        self.vdom = Some(new_vdom);
     }
 
     pub(crate) fn view_and_patch(&mut self) {
         let mut new_vdom = self.component.view(&mut self.behavior);
+        debug::log("view_and_path: set_depth");
+        new_vdom.set_depth(self.depth.unwrap() + 1);
         new_vdom.patch(self.vdom.take(), &self.ancestor);
         self.vdom = Some(new_vdom);
         self.to_rerender = false;

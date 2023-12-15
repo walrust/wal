@@ -28,6 +28,15 @@ impl VNode {
             VNode::Component(v) => v.erase(),
         }
     }
+
+    pub fn set_depth(&mut self, depth: u32) {
+        match self {
+            VNode::Component(vcomp) => vcomp.set_depth(depth),
+            VNode::List(vlist) => vlist.set_depth(depth),
+            VNode::Element(velem) => velem.set_depth(depth),
+            VNode::Text(_) => {}
+        }
+    }
 }
 
 impl From<VElement> for VNode {

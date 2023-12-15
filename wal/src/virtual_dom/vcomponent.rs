@@ -26,6 +26,7 @@ pub struct VComponent {
     hash: PropertiesHash,
     generator: ComponentNodeGenerator,
     _key: Option<String>, // TODO: add logic for key attribute
+    depth: Option<u32>,
 
     // Sth stinks here
     pub comp: Option<Rc<RefCell<AnyComponentNode>>>,
@@ -43,6 +44,7 @@ impl VComponent {
             generator,
             hash,
             _key: key,
+            depth: None,
             comp: None,
         }
     }
@@ -105,6 +107,11 @@ impl VComponent {
         }
     }
 
+    pub fn set_depth(&mut self, depth: u32) {
+        debug::log(format!("VComponent: Setting depth: {depth}"));
+        self.depth = Some(depth);
+    }
+
     fn render(&mut self, last: Option<VComponent>, ancestor: &Node) {
         match last {
             Some(old_vcomp) if old_vcomp.hash == self.hash => {
@@ -116,6 +123,8 @@ impl VComponent {
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();
+                    any_component_node.depth = self.depth;
+                    any_component_node.view();
                     any_component_node.patch(old_vcomp.comp.clone(), ancestor);
                 }
                 self.comp = Some(any_component_node_rc);
@@ -125,6 +134,8 @@ impl VComponent {
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();
+                    any_component_node.depth = self.depth;
+                    any_component_node.view();
                     any_component_node.patch(None, ancestor);
                 }
                 self.comp = Some(any_component_node_rc);
@@ -204,6 +215,7 @@ mod tests {
         dom::append_child(&dom::get_root_element(), &ancestor);
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(None, &ancestor);
     }
 
@@ -223,6 +235,7 @@ mod tests {
         });
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(Some(text), &ancestor);
     }
 
@@ -247,6 +260,7 @@ mod tests {
         });
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(Some(elem), &ancestor);
     }
 
@@ -273,9 +287,11 @@ mod tests {
         dom::append_child(&dom::get_root_element(), &ancestor);
 
         let mut comp = VNode::Component(VComponent::new::<Comp>((), None));
+        comp.set_depth(0);
         comp.patch(None, &ancestor);
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(Some(comp), &ancestor);
     }
 
@@ -289,9 +305,11 @@ mod tests {
             vec![VText::new("I dont love Rust").into()],
             None,
         ));
+        list.set_depth(0);
         list.patch(None, &ancestor);
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(Some(list), &ancestor);
     }
 }

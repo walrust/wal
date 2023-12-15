@@ -57,6 +57,13 @@ impl VList {
             node.erase();
         }
     }
+
+    pub fn set_depth(&mut self, depth: u32) {
+        debug::log(format!("VList: Setting depth: {depth}"));
+        for child in self.nodes.iter_mut() {
+            child.set_depth(depth);
+        }
+    }
 }
 
 impl VList {
@@ -107,6 +114,7 @@ mod tests {
         dom::append_child(&dom::get_root_element(), &ancestor);
 
         let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
+        target.set_depth(0);
         target.patch(None, &ancestor);
     }
 
@@ -126,6 +134,7 @@ mod tests {
         });
 
         let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
+        target.set_depth(0);
         target.patch(Some(text), &ancestor);
     }
 
@@ -150,6 +159,7 @@ mod tests {
         });
 
         let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
+        target.set_depth(0);
         target.patch(Some(elem), &ancestor);
     }
 
@@ -176,9 +186,11 @@ mod tests {
         dom::append_child(&dom::get_root_element(), &ancestor);
 
         let mut comp = VNode::Component(VComponent::new::<Comp>((), None));
+        comp.set_depth(0);
         comp.patch(None, &ancestor);
 
         let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
+        target.set_depth(0);
         target.patch(Some(comp), &ancestor);
     }
 
@@ -192,9 +204,11 @@ mod tests {
             vec![VText::new("I dont love Rust").into()],
             None,
         ));
+        list.set_depth(0);
         list.patch(None, &ancestor);
 
         let mut target = VList::new(vec![VText::new(VALID_TEXT).into()], None);
+        target.set_depth(0);
         target.patch(Some(list), &ancestor);
     }
 }

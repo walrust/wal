@@ -36,7 +36,10 @@ impl<T> RouterBuilder<T> {
         C: Component + Default + 'static,
     {
         let generator = Box::new(|| {
-            AnyComponentNode::new(C::default(), wal::virtual_dom::dom::get_root_element())
+            AnyComponentNode::new_root_routing(
+                C::default(),
+                wal::virtual_dom::dom::get_root_element(),
+            )
         });
 
         let mut pages = self.pages;
@@ -73,7 +76,7 @@ impl RouterBuilder<Valid> {
             pages.insert(
                 NOT_FOUND_PATH,
                 PageRenderer::new(|| {
-                    AnyComponentNode::new(
+                    AnyComponentNode::new_root_routing(
                         NotFoundComponent,
                         wal::virtual_dom::dom::get_root_element(),
                     )
