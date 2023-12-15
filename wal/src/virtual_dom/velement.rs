@@ -11,7 +11,7 @@ pub struct VElement {
     pub tag_name: String,
     pub attr: HashMap<String, String>,
     pub event_handlers: Vec<EventHandler>,
-    pub _key: Option<String>, // TODO: add logic for key attribute
+    pub key: Option<String>,
     pub children: Vec<VNode>,
 
     pub dom: Option<Element>,
@@ -33,7 +33,7 @@ impl VElement {
             tag_name,
             attr,
             event_handlers,
-            _key: key,
+            key,
             children,
             dom: None,
         }
@@ -96,6 +96,9 @@ impl VElement {
     /// attributes and children
     fn render(&mut self, last: Option<&VElement>, ancestor: &Node) {
         match last {
+            // comparison over user-defined key, if match dont do anything
+            Some(last) if last.key == self.key => {}
+
             Some(last) if last.tag_name == self.tag_name => {
                 debug::log("\t\tComparing attrs");
                 let target = self
@@ -251,7 +254,7 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    fn patch_last_elem() {
+    fn patch_last_elem_different_key() {
         let ancestor = dom::create_element("div");
         dom::set_attribute(&ancestor, "id", function_name!());
 
@@ -265,7 +268,7 @@ mod tests {
             tag_name: "div".into(),
             attr: [("id".into(), "I dont love Rust".into())].into(),
             event_handlers: vec![],
-            _key: None,
+            key: None,
             children: vec![],
             dom: Some(current),
         });
@@ -274,7 +277,39 @@ mod tests {
             "div".into(),
             [("id".into(), VALID_TEXT.into())].into(),
             vec![],
-            None,
+            Some("Different_key".to_string()),
+            vec![],
+        );
+        target.patch(Some(elem), &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_elem_same_key() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+
+        let current = dom::create_element("div");
+        dom::set_attribute(&current, "id", "I dont love Rust");
+        dom::append_child(&ancestor, &current);
+
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let key = Some("Nice".to_string());
+
+        let elem = VNode::Element(VElement {
+            tag_name: "div".into(),
+            attr: [("id".into(), "I dont love Rust".into())].into(),
+            event_handlers: vec![],
+            key: key.clone(),
+            children: vec![],
+            dom: Some(current),
+        });
+
+        let mut target = VElement::new(
+            "div".into(),
+            [("id".into(), VALID_TEXT.into())].into(),
+            vec![],
+            key,
             vec![],
         );
         target.patch(Some(elem), &ancestor);

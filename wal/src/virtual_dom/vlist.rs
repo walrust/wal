@@ -153,7 +153,7 @@ mod tests {
             tag_name: "div".into(),
             attr: [("id".into(), "I dont love Rust".into())].into(),
             event_handlers: vec![],
-            _key: None,
+            key: None,
             children: vec![],
             dom: Some(current),
         });
