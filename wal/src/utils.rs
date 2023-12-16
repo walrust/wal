@@ -1,22 +1,24 @@
 #[cfg(debug_assertions)]
-pub mod debug {
+pub(crate) mod debug {
     use gloo::{
         console::{log, warn},
         dialogs,
     };
 
     #[inline]
-    pub fn log(text: impl ToString) {
+    pub(crate) fn log(text: impl ToString) {
         log!(text.to_string())
     }
 
     #[inline]
-    pub fn alert(text: impl ToString) {
+    #[allow(dead_code)]
+    pub(crate) fn alert(text: impl ToString) {
         dialogs::alert(text.to_string().as_str())
     }
 
     #[inline]
-    pub fn warn(text: impl ToString) {
+    #[allow(dead_code)]
+    pub(crate) fn warn(text: impl ToString) {
         warn!(text.to_string().as_str())
     }
 }

@@ -6,22 +6,32 @@ use crate::{events::EventHandler, utils::debug, virtual_dom::dom};
 
 use super::VNode;
 
+/// Represents [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) in DOM.
 #[derive(Debug)]
 pub struct VElement {
-    pub tag_name: String,
-    pub attr: HashMap<String, String>,
-    pub event_handlers: Vec<EventHandler>,
-    pub key: Option<String>,
-    pub children: Vec<VNode>,
+    pub(crate) tag_name: String,
+    pub(crate) attr: HashMap<String, String>,
+    pub(crate) event_handlers: Vec<EventHandler>,
+    pub(crate) key: Option<String>,
+    pub(crate) children: Vec<VNode>,
 
-    pub dom: Option<Element>,
+    pub(crate) dom: Option<Element>,
 }
 
 impl VElement {
-    // TODO: maybe some types for attributes and children
-    // List of attributes - https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes
-    //                    - https://www.w3schools.com/tags/ref_attributes.asp
-    // Maybe some oop approach with defined types for attributes and types for elements?
+    /// Creates [VElement] out of provided arguments. Optional key is a way of easy comparison, if key is some and keys match, old element is used.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let element = VElement::new(
+    ///     String::from("div")                                     // tag_name,
+    ///     [(String::from("id"),String::from("example"))].into(),  // attr,
+    ///     vec![],                                                 // event_handlers,
+    ///     None,                                                   // key,
+    ///     vec![VNode::Text(VText::new("child"))]                  // children
+    /// );
+    /// ```
     pub fn new(
         tag_name: String,
         attr: HashMap<String, String>,
@@ -39,7 +49,7 @@ impl VElement {
         }
     }
 
-    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
+    pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching element");
         let mut old_virt: Option<VElement> = None;
 
@@ -77,13 +87,13 @@ impl VElement {
         self.check_if_parents_match(ancestor);
     }
 
-    pub fn erase(&self) {
+    pub(crate) fn erase(&self) {
         if let Some(el) = &self.dom {
             dom::remove_node(el);
         }
     }
 
-    pub fn set_depth(&mut self, depth: u32) {
+    pub(crate) fn set_depth(&mut self, depth: u32) {
         debug::log(format!("VElement: Setting depth: {depth}"));
         for child in self.children.iter_mut() {
             child.set_depth(depth);
@@ -92,8 +102,6 @@ impl VElement {
 }
 
 impl VElement {
-    /// Renders virtual Element into concrete DOM Element object. Diffs on tag name,
-    /// attributes and children
     fn render(&mut self, last: Option<&VElement>, ancestor: &Node) {
         match last {
             // comparison over user-defined key, if match dont do anything

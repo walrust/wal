@@ -6,8 +6,8 @@ use self::behavior::{AnyComponentBehavior, Behavior};
 
 pub mod behavior;
 pub mod callback;
-pub mod node;
-pub mod scheduler;
+pub(crate) mod node;
+pub(crate) mod scheduler;
 
 /// Trait for defining custom component.
 ///

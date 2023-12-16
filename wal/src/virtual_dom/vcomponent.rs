@@ -21,6 +21,7 @@ pub(crate) type AnyProps = Option<Box<dyn Any>>;
 pub(crate) type ComponentNodeGenerator =
     Box<dyn Fn(AnyProps, &Node) -> Rc<RefCell<AnyComponentNode>> + 'static>;
 
+/// Representation of custom component node, there is no direct translation of [VComponent] to DOM node, but its evalutaion does.
 pub struct VComponent {
     props: AnyProps,
     hash: PropertiesHash,
@@ -29,10 +30,23 @@ pub struct VComponent {
     depth: Option<u32>,
 
     // Sth stinks here
-    pub comp: Option<Rc<RefCell<AnyComponentNode>>>,
+    pub(crate) comp: Option<Rc<RefCell<AnyComponentNode>>>,
 }
 
 impl VComponent {
+    /// Creates [VComponent] out of provided properties. Function is generic, therefore type of [Component] ***C*** has to be specified.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// struct ExampleComponent;
+    /// impl Component for ExampleComponent {
+    ///     type Properties = ();
+    ///     ...
+    /// }
+    /// let props = ();
+    /// let vcomp = VComponent::new::<ExampleComponent>(props, None);
+    /// ```
     pub fn new<C>(props: C::Properties, key: Option<String>) -> VComponent
     where
         C: Component + 'static,
@@ -71,7 +85,7 @@ impl VComponent {
         AnyComponentNode::new(C::new(*props), ancestor.clone())
     }
 
-    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
+    pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching component");
         let mut old_virt: Option<VComponent> = None;
 
@@ -100,14 +114,14 @@ impl VComponent {
         self.render(old_virt, ancestor);
     }
 
-    pub fn erase(&self) {
+    pub(crate) fn erase(&self) {
         if let Some(node) = self.comp.as_ref() {
             debug::log("Erasing vcomponent, feels kinda fucking sus");
             node.borrow_mut().vdom.as_ref().unwrap().erase();
         }
     }
 
-    pub fn set_depth(&mut self, depth: u32) {
+    pub(crate) fn set_depth(&mut self, depth: u32) {
         debug::log(format!("VComponent: Setting depth: {depth}"));
         self.depth = Some(depth);
     }

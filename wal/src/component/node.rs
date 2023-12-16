@@ -4,7 +4,7 @@ use web_sys::Node;
 
 use super::{behavior::AnyComponentBehavior, AnyComponent, Component};
 
-pub struct AnyComponentNode {
+pub(crate) struct AnyComponentNode {
     component: Box<dyn AnyComponent>,
     pub depth: Option<u32>,
     to_rerender: bool,
@@ -14,15 +14,18 @@ pub struct AnyComponentNode {
 }
 
 impl AnyComponentNode {
-    pub fn new_root<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+    pub(crate) fn new_root<C: Component + 'static>(
+        component: C,
+        ancestor: Node,
+    ) -> Rc<RefCell<Self>> {
         Self::new_internal(component, ancestor, true, Some(0))
     }
 
-    pub fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
+    pub(crate) fn new<C: Component + 'static>(component: C, ancestor: Node) -> Rc<RefCell<Self>> {
         Self::new_internal(component, ancestor, false, None)
     }
 
-    pub fn new_root_routing<C: Component + 'static>(
+    pub(crate) fn new_root_routing<C: Component + 'static>(
         component: C,
         ancestor: Node,
     ) -> Rc<RefCell<Self>> {

@@ -1,8 +1,7 @@
-use wal::{
+use crate::{
     component::{behavior::Behavior, Component},
-    virtual_dom::VNode,
+    virtual_dom::{VNode, VText},
 };
-use wal_rsx::rsx;
 
 pub(crate) const NOT_FOUND_PATH: &str = "/404";
 
@@ -20,9 +19,7 @@ impl Component for NotFoundComponent {
     }
 
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-        rsx! {
-            "Page was not found :(("
-        }
+        VText::new("Page was not found :((").into()
     }
 
     fn update(&mut self, _message: Self::Message) -> bool {

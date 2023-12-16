@@ -2,20 +2,27 @@ use super::{
     not_found_component::{NotFoundComponent, NOT_FOUND_PATH},
     PageRenderer, Router,
 };
+use crate::{
+    component::{node::AnyComponentNode, Component},
+    virtual_dom::dom,
+};
 use std::{collections::HashMap, marker::PhantomData};
-use wal::component::{node::AnyComponentNode, Component};
 
+/// Struct representing [RouterBuilder] state. In [Invalid] state, it is not possible to create application.
 pub struct Invalid;
+/// Struct representing [RouterBuilder] state. In [Valid] state, it is possible to create application.
 pub struct Valid;
 
+/// Builds application with routing.
 pub struct RouterBuilder<T> {
     pages: HashMap<&'static str, PageRenderer>,
     not_found_path: Option<&'static str>,
     _marker: PhantomData<T>,
 }
 
-impl RouterBuilder<Invalid> {
-    fn new() -> RouterBuilder<Invalid> {
+impl Default for RouterBuilder<Invalid> {
+    /// Creates default [RouterBuilder] in [Invalid] state.
+    fn default() -> Self {
         RouterBuilder {
             pages: HashMap::new(),
             not_found_path: None,
@@ -24,23 +31,14 @@ impl RouterBuilder<Invalid> {
     }
 }
 
-impl Default for RouterBuilder<Invalid> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl<T> RouterBuilder<T> {
+    /// Adds provided page to application under provided path in variable path. Page is represented by **custom component** - struct implementing trait [Component] and [Default].
     pub fn add_page<C>(self, path: &'static str) -> RouterBuilder<Valid>
     where
         C: Component + Default + 'static,
     {
-        let generator = Box::new(|| {
-            AnyComponentNode::new_root_routing(
-                C::default(),
-                wal::virtual_dom::dom::get_root_element(),
-            )
-        });
+        let generator =
+            Box::new(|| AnyComponentNode::new_root_routing(C::default(), dom::get_root_element()));
 
         let mut pages = self.pages;
         pages.insert(path, PageRenderer::new(generator));
@@ -52,6 +50,7 @@ impl<T> RouterBuilder<T> {
         }
     }
 
+    /// Adds provided not found page to application. All routes which cannot be resolved will be redirected to this page. Adding more than one **not found page** results in undefined behavior.
     pub fn add_not_found_page<C>(self, path: &'static str) -> RouterBuilder<Valid>
     where
         C: Component + Default + 'static,
@@ -67,6 +66,7 @@ impl<T> RouterBuilder<T> {
 }
 
 impl RouterBuilder<Valid> {
+    /// Builds [router](Router). If **not found page** was *not* specified, default one is provided under /404 route.
     pub fn build(self) -> Router {
         let mut pages = self.pages;
         let mut not_found_path = self.not_found_path;
@@ -76,10 +76,7 @@ impl RouterBuilder<Valid> {
             pages.insert(
                 NOT_FOUND_PATH,
                 PageRenderer::new(|| {
-                    AnyComponentNode::new_root_routing(
-                        NotFoundComponent,
-                        wal::virtual_dom::dom::get_root_element(),
-                    )
+                    AnyComponentNode::new_root_routing(NotFoundComponent, dom::get_root_element())
                 }),
             );
         }
@@ -95,11 +92,11 @@ mod tests {
         builder::{Invalid, Valid},
         not_found_component::NOT_FOUND_PATH,
     };
-    use std::any::{Any, TypeId};
-    use wal::{
+    use crate::{
         component::{behavior::Behavior, Component},
         virtual_dom::{VNode, VText},
     };
+    use std::any::{Any, TypeId};
     use wasm_bindgen_test::wasm_bindgen_test;
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
@@ -115,7 +112,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn invalid() {
-        let invalid = RouterBuilder::new();
+        let invalid = RouterBuilder::default();
         assert_eq!(TypeId::of::<RouterBuilder<Invalid>>(), invalid.type_id());
         assert_eq!(invalid.not_found_path, None);
     }
@@ -142,7 +139,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn valid_one_page() {
-        let valid = RouterBuilder::new().add_page::<Root>("/");
+        let valid = RouterBuilder::default().add_page::<Root>("/");
         assert_eq!(TypeId::of::<RouterBuilder<Valid>>(), valid.type_id());
         assert!(valid.pages.contains_key("/"));
         assert_eq!(valid.pages.len(), 1);
@@ -171,7 +168,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn valid_multiple_pages() {
-        let valid = RouterBuilder::new()
+        let valid = RouterBuilder::default()
             .add_page::<Root>("/")
             .add_page::<Root2>("/2");
         assert_eq!(TypeId::of::<RouterBuilder<Valid>>(), valid.type_id());
@@ -183,7 +180,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn build_valid_multiple_pages() {
-        let valid = RouterBuilder::new()
+        let valid = RouterBuilder::default()
             .add_page::<Root>("/")
             .add_page::<Root2>("/2");
         assert_eq!(TypeId::of::<RouterBuilder<Valid>>(), valid.type_id());
@@ -203,7 +200,7 @@ mod tests {
     #[wasm_bindgen_test]
     fn build_valid_custom_not_found_page() {
         let path = "/not-found";
-        let valid = RouterBuilder::new().add_not_found_page::<Root>(path);
+        let valid = RouterBuilder::default().add_not_found_page::<Root>(path);
         assert_eq!(TypeId::of::<RouterBuilder<Valid>>(), valid.type_id());
         assert!(valid.pages.contains_key(path));
         assert_eq!(valid.pages.len(), 1);
@@ -219,7 +216,7 @@ mod tests {
     #[wasm_bindgen_test]
     fn build_valid_default_not_found_page() {
         let path = "/";
-        let valid = RouterBuilder::new().add_page::<Root>(path);
+        let valid = RouterBuilder::default().add_page::<Root>(path);
         assert_eq!(TypeId::of::<RouterBuilder<Valid>>(), valid.type_id());
         assert!(valid.pages.contains_key(path));
         assert_eq!(valid.pages.len(), 1);
@@ -234,7 +231,7 @@ mod tests {
 
     #[wasm_bindgen_test]
     fn build() {
-        let valid = RouterBuilder::new()
+        let valid = RouterBuilder::default()
             .add_page::<Root>("/")
             .add_page::<Root2>("/2")
             .build();

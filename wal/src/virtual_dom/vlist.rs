@@ -5,17 +5,20 @@ use crate::utils::debug;
 
 use super::VNode;
 
+/// A list of nodes of virtual DOM tree. It undergoes virtual DOM manipulations and patching algorithm optimizations.
 #[derive(PartialEq, Debug)]
 pub struct VList {
     _key: Option<String>, // TODO: add logic for key attribute
-    pub nodes: Vec<VNode>,
+    pub(crate) nodes: Vec<VNode>,
 }
 
 impl VList {
+    /// Creates a [VList] out of [vector](Vec) of [VNodes](VNode). Optional key works as an easy comparison option, if keys match, old [VList] is used.
     pub fn new(nodes: Vec<VNode>, key: Option<String>) -> VList {
         VList { nodes, _key: key }
     }
 
+    /// Creates an empty [VList]. Optional key works as an easy comparison option, if keys match, old [VList] is used.
     pub fn new_empty(key: Option<String>) -> VList {
         VList {
             nodes: Vec::new(),
@@ -23,7 +26,7 @@ impl VList {
         }
     }
 
-    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
+    pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching list");
         let mut old_virt: Option<VList> = None;
 
@@ -52,13 +55,13 @@ impl VList {
         self.render(old_virt, ancestor);
     }
 
-    pub fn erase(&self) {
+    pub(crate) fn erase(&self) {
         for node in self.nodes.iter() {
             node.erase();
         }
     }
 
-    pub fn set_depth(&mut self, depth: u32) {
+    pub(crate) fn set_depth(&mut self, depth: u32) {
         debug::log(format!("VList: Setting depth: {depth}"));
         for child in self.nodes.iter_mut() {
             child.set_depth(depth);

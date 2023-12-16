@@ -4,13 +4,23 @@ use crate::utils::debug;
 
 use super::{dom, VNode};
 
+/// Node in virtual DOM tree representing [Text](https://developer.mozilla.org/en-US/docs/Web/API/Text). It undergoes virtual DOM manipulations and patching algorithm optimizations.
 #[derive(PartialEq, Debug)]
 pub struct VText {
-    pub text: String,
-    pub dom: Option<Text>,
+    pub(crate) text: String,
+    pub(crate) dom: Option<Text>,
 }
 
 impl VText {
+    /// Constructor for [VText] out of any object implementing trait [ToString].
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// let vtext1 = VText::new(321);
+    /// let vtext2 = VText::new("321");
+    /// assert_eq!(vtext1, vtext2);
+    /// ```
     pub fn new<T: ToString>(text: T) -> VText {
         VText {
             text: text.to_string(),
@@ -18,7 +28,7 @@ impl VText {
         }
     }
 
-    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
+    pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching TextNode");
         let mut old_virt: Option<VText> = None;
 
@@ -54,7 +64,7 @@ impl VText {
         self.check_if_parents_match(ancestor);
     }
 
-    pub fn erase(&self) {
+    pub(crate) fn erase(&self) {
         if let Some(text) = &self.dom {
             dom::remove_node(text);
         }
@@ -62,8 +72,6 @@ impl VText {
 }
 
 impl VText {
-    /// Renders virtual text node over concrete DOM Text object. If the last VText
-    /// isnt None and text value is the same, function does nothing
     fn render(&mut self, last: Option<VText>, ancestor: &Node) {
         match last {
             // Different value => just change node value
