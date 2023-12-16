@@ -60,27 +60,25 @@ impl AnyComponentNode {
         if to_patch {
             node_rc.borrow_mut().view_and_patch();
         }
-        // else {
-        //     node_rc.borrow_mut().view();
-        // }
 
         node_rc
     }
 
-    pub fn view(&mut self) {
-        let mut new_vdom = self.component.view(&mut self.behavior);
-        debug::log("view: set_depth");
-        new_vdom.set_depth(self.depth.unwrap() + 1);
-        self.vdom = Some(new_vdom);
+    pub(crate) fn view(&mut self) {
+        self.vdom = Some(self.view_internal());
     }
 
     pub(crate) fn view_and_patch(&mut self) {
-        let mut new_vdom = self.component.view(&mut self.behavior);
-        debug::log("view_and_path: set_depth");
-        new_vdom.set_depth(self.depth.unwrap() + 1);
+        let mut new_vdom = self.view_internal();
         new_vdom.patch(self.vdom.take(), &self.ancestor);
         self.vdom = Some(new_vdom);
         self.to_rerender = false;
+    }
+
+    fn view_internal(&mut self) -> VNode {
+        let mut new_vdom = self.component.view(&mut self.behavior);
+        new_vdom.set_depth(self.depth.unwrap() + 1);
+        new_vdom
     }
 
     pub(crate) fn update(&mut self, message: Box<dyn Any>) -> bool {

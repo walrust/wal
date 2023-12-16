@@ -21,7 +21,8 @@ pub(crate) type AnyProps = Option<Box<dyn Any>>;
 pub(crate) type ComponentNodeGenerator =
     Box<dyn Fn(AnyProps, &Node) -> Rc<RefCell<AnyComponentNode>> + 'static>;
 
-/// Representation of custom component node, there is no direct translation of [VComponent] to DOM node, but its evalutaion does.
+/// Special VNode type, which represents custom component node.
+/// There is no direct translation of [VComponent] to a single DOM node, but it translates to a subtree of DOM nodes.
 pub struct VComponent {
     props: AnyProps,
     hash: PropertiesHash,
@@ -29,7 +30,6 @@ pub struct VComponent {
     key: Option<String>,
     depth: Option<u32>,
 
-    // Sth stinks here
     pub(crate) comp: Option<Rc<RefCell<AnyComponentNode>>>,
 }
 
@@ -116,7 +116,7 @@ impl VComponent {
 
     pub(crate) fn erase(&self) {
         if let Some(node) = self.comp.as_ref() {
-            debug::log("Erasing vcomponent, feels kinda fucking sus");
+            debug::log("Erasing vcomponent");
             node.borrow_mut().vdom.as_ref().unwrap().erase();
         }
     }

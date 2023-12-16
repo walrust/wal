@@ -26,7 +26,7 @@ impl PageRenderer {
 
 thread_local! {
     /// Static [Router] instance.
-    pub static ROUTER: RefCell<Router> = RefCell::new(Router::empty());
+    pub(crate) static ROUTER: RefCell<Router> = RefCell::new(Router::empty());
 }
 
 struct CurrentPage {
@@ -34,7 +34,7 @@ struct CurrentPage {
     pub page: Rc<RefCell<AnyComponentNode>>,
 }
 
-/// Router of the application. Handles routing in the application and resolves correcly paths.
+/// Router of the application. Handles routing in the application and correctly resolves paths.
 pub struct Router {
     pages: HashMap<&'static str, PageRenderer>,
     not_found_path: Option<&'static str>,
@@ -69,15 +69,13 @@ impl Router {
     /// struct MainPage;
     /// impl Component for MainPage {...}
     ///
-    /// ...
+    /// //..
     ///
-    /// fn main() {
-    ///     // Start of the application
-    ///     RouterBuilder::default()
-    ///         .add_page::<MainPage>("/")
-    ///         .build()
-    ///         .start();
-    /// }
+    /// // Start of the application
+    /// RouterBuilder::default()
+    ///     .add_page::<MainPage>("/")
+    ///     .build()
+    ///     .start();
     /// ```
     pub fn start(self) {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));

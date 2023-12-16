@@ -2,16 +2,17 @@ use web_sys::Node;
 
 use super::{VComponent, VElement, VList, VText};
 
-/// VNode is enum representing node in virtual DOM tree. Provides a wrapper over different types of nodes and concise and convinient API for vdom manipulation.
+/// VNode is enum representing node in virtual DOM tree.
+/// Provides a wrapper over different types of nodes along with concise and convinient API for VDOM manipulation.
 #[derive(PartialEq, Debug)]
 pub enum VNode {
     /// Represents [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) in DOM and contains [VElement],
     Element(VElement),
-    /// Represents [Text](https://developer.mozilla.org/en-US/docs/Web/API/Text) in DOM contains [VText],
+    /// Represents [Text](https://developer.mozilla.org/en-US/docs/Web/API/Text) in DOM and contains [VText],
     Text(VText),
-    /// Does not have direct representation in DOM tree, it represents custom component node and contains [VComponent],
+    /// Represents a series of adjacent [virtual nodes](VNode) located at the same depth, contains [VList],
     List(VList),
-    /// A list of nodes of virtual DOM tree, contains [VList],
+    /// Represents user-defined custom component, contains [VComponent].
     Component(VComponent),
 }
 

@@ -19,7 +19,7 @@ impl Component for NotFoundComponent {
     }
 
     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-        VText::new("Page was not found :((").into()
+        VText::new("Page was not found").into()
     }
 
     fn update(&mut self, _message: Self::Message) -> bool {

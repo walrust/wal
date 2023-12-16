@@ -8,7 +8,9 @@ use crate::{
 };
 use std::{collections::HashMap, marker::PhantomData};
 
-/// Struct representing [RouterBuilder] state. In [Invalid] state, it is not possible to create application.
+/// Struct representing [RouterBuilder] state.
+/// In [Invalid] state, it is not possible to create application.
+/// RouterBuilder is in invalid state as long as there are no pages added.
 pub struct Invalid;
 /// Struct representing [RouterBuilder] state. In [Valid] state, it is possible to create application.
 pub struct Valid;
