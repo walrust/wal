@@ -97,7 +97,9 @@ impl VElement {
     fn render(&mut self, last: Option<&VElement>, ancestor: &Node) {
         match last {
             // comparison over user-defined key, if match dont do anything
-            Some(last) if last.key == self.key => {}
+            Some(last) if last.key.is_some() && last.key == self.key => {
+                dom::append_child(ancestor, self.dom.as_ref().unwrap());
+            }
 
             Some(last) if last.tag_name == self.tag_name => {
                 debug::log("\t\tComparing attrs");
