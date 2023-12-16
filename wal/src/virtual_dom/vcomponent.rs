@@ -26,7 +26,7 @@ pub struct VComponent {
     props: AnyProps,
     hash: PropertiesHash,
     generator: ComponentNodeGenerator,
-    _key: Option<String>, // TODO: add logic for key attribute
+    key: Option<String>,
     depth: Option<u32>,
 
     // Sth stinks here
@@ -57,7 +57,7 @@ impl VComponent {
             props: Some(Box::new(props)),
             generator,
             hash,
-            _key: key,
+            key,
             depth: None,
             comp: None,
         }
@@ -128,9 +128,13 @@ impl VComponent {
 
     fn render(&mut self, last: Option<VComponent>, ancestor: &Node) {
         match last {
-            Some(old_vcomp) if old_vcomp.hash == self.hash => {
+            Some(mut old_vcomp) if self.key.is_some() && old_vcomp.key == self.key => {
+                debug::log("\t\tKeys are equal");
+                self.comp = old_vcomp.comp.take();
+            }
+            Some(mut old_vcomp) if old_vcomp.hash == self.hash => {
                 debug::log("\t\tHashes are equal");
-                self.comp = old_vcomp.comp.clone();
+                self.comp = old_vcomp.comp.take();
             }
             Some(old_vcomp) => {
                 debug::log("\t\tHashes differ");
@@ -215,7 +219,14 @@ mod tests {
             Tmp
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-            VText::new(VALID_TEXT).into()
+            VElement::new(
+                "div".into(),
+                [(String::from("result"), String::from(VALID_TEXT))].into(),
+                vec![],
+                None,
+                vec![],
+            )
+            .into()
         }
         fn update(&mut self, _message: Self::Message) -> bool {
             false
@@ -287,7 +298,14 @@ mod tests {
             Comp
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-            VText::new("I dont love Rust").into()
+            VElement::new(
+                "div".into(),
+                [(String::from("result"), String::from("I dont love Rust"))].into(),
+                vec![],
+                None,
+                vec![],
+            )
+            .into()
         }
         fn update(&mut self, _message: Self::Message) -> bool {
             false
@@ -295,7 +313,7 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    fn patch_last_comp() {
+    fn patch_last_comp_diff_keys() {
         let ancestor = dom::create_element("div");
         dom::set_attribute(&ancestor, "id", function_name!());
         dom::append_child(&dom::get_root_element(), &ancestor);
@@ -305,6 +323,22 @@ mod tests {
         comp.patch(None, &ancestor);
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
+        target.patch(Some(comp), &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_comp_same_keys() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let key = Some(String::from("Same_key"));
+        let mut comp = VNode::Component(VComponent::new::<Comp>((), key.clone()));
+        comp.set_depth(0);
+        comp.patch(None, &ancestor);
+
+        let mut target = VComponent::new::<Tmp>((), key);
         target.set_depth(0);
         target.patch(Some(comp), &ancestor);
     }
