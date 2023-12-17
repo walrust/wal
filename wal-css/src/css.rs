@@ -1,6 +1,7 @@
 use std::{collections::HashMap, ops::Index};
 use web_sys::Element;
 
+/// TO DO: ADD DOCS
 pub struct Css {
     stylesheet_id: u8,
     element: Element,

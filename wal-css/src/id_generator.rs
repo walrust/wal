@@ -1,4 +1,4 @@
-pub struct IdGenerator {
+pub(crate) struct IdGenerator {
     next_id: u8,
 }
 
