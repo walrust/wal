@@ -7,7 +7,7 @@ thread_local! {
     static ID_GENERATOR: Rc<RefCell<IdGenerator>> = Rc::new(RefCell::new(IdGenerator::new()));
 }
 
-pub(crate) struct CssManager {
+pub struct CssManager {
     document: Document,
 }
 
