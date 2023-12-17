@@ -1,7 +1,27 @@
 use std::{collections::HashMap, ops::Index};
 use web_sys::Element;
 
-/// TO DO: ADD DOCS
+/// Css struct allows to reference the stylesheet selectors from appended stylesheet
+/// inside the [rsx macro](../../wal_rsx/macro.rsx.html).
+///
+/// In order to referecne a selector from the stylesheet use the indexing operator with
+/// the name of the selector as an argument.
+///
+/// # Example usage
+/// ```
+/// use wal_css::css:Css;
+/// use wal_css::css_stylesheet;
+///
+/// thread_local! {
+///     static CSS: Css = css_stylesheet!("path-to-css-file");
+/// }
+/// // ...
+/// CSS.with(|css| {
+///     rsx! {
+///         <div class={format!("{} {}", css["class1"], css["class2"])} />
+///     }
+/// })
+/// ```
 pub struct Css {
     stylesheet_id: u8,
     element: Element,
