@@ -1,14 +1,14 @@
 pub mod builder;
-pub mod not_found_component;
+pub(crate) mod not_found_component;
 
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
+use crate::{component::node::AnyComponentNode, virtual_dom::dom};
 use gloo::utils::{body, history, window};
-use wal::{component::node::AnyComponentNode, virtual_dom::dom};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{Element, Event, EventTarget};
 
-pub struct PageRenderer {
+pub(crate) struct PageRenderer {
     generator: Box<dyn Fn() -> Rc<RefCell<AnyComponentNode>>>,
 }
 
@@ -25,7 +25,8 @@ impl PageRenderer {
 }
 
 thread_local! {
-    pub static ROUTER: RefCell<Router> = RefCell::new(Router::empty());
+    /// Static [Router] instance.
+    pub(crate) static ROUTER: RefCell<Router> = RefCell::new(Router::empty());
 }
 
 struct CurrentPage {
@@ -33,6 +34,7 @@ struct CurrentPage {
     pub page: Rc<RefCell<AnyComponentNode>>,
 }
 
+/// Router of the application. Handles routing in the application and correctly resolves paths.
 pub struct Router {
     pages: HashMap<&'static str, PageRenderer>,
     not_found_path: Option<&'static str>,
@@ -59,6 +61,22 @@ impl Router {
         }
     }
 
+    /// Start of the application. Moves router instance. Should be called only *once* in application.
+    ///
+    /// # Example
+    /// ```
+    /// #[derive(Default)]
+    /// struct MainPage;
+    /// impl Component for MainPage {...}
+    ///
+    /// //..
+    ///
+    /// // Start of the application
+    /// RouterBuilder::default()
+    ///     .add_page::<MainPage>("/")
+    ///     .build()
+    ///     .start();
+    /// ```
     pub fn start(self) {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
 
@@ -143,7 +161,7 @@ impl Router {
 
 #[cfg(test)]
 mod tests {
-    use wal::{
+    use crate::{
         component::{behavior::Behavior, Component},
         virtual_dom::{VNode, VText},
     };

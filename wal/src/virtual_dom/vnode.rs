@@ -2,16 +2,22 @@ use web_sys::Node;
 
 use super::{VComponent, VElement, VList, VText};
 
+/// VNode is enum representing node in virtual DOM tree.
+/// Provides a wrapper over different types of nodes along with concise and convinient API for VDOM manipulation.
 #[derive(PartialEq, Debug)]
 pub enum VNode {
+    /// Represents [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) in DOM and contains [VElement],
     Element(VElement),
+    /// Represents [Text](https://developer.mozilla.org/en-US/docs/Web/API/Text) in DOM and contains [VText],
     Text(VText),
+    /// Represents a series of adjacent [virtual nodes](VNode) located at the same depth, contains [VList],
     List(VList),
+    /// Represents user-defined custom component, contains [VComponent].
     Component(VComponent),
 }
 
 impl VNode {
-    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
+    pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         match self {
             VNode::Element(velement) => velement.patch(last, ancestor),
             VNode::Text(vtext) => vtext.patch(last, ancestor),
@@ -20,12 +26,21 @@ impl VNode {
         };
     }
 
-    pub fn erase(&self) {
+    pub(crate) fn erase(&self) {
         match self {
             VNode::Element(v) => v.erase(),
             VNode::Text(v) => v.erase(),
             VNode::List(v) => v.erase(),
             VNode::Component(v) => v.erase(),
+        }
+    }
+
+    pub(crate) fn set_depth(&mut self, depth: u32) {
+        match self {
+            VNode::Component(vcomp) => vcomp.set_depth(depth),
+            VNode::List(vlist) => vlist.set_depth(depth),
+            VNode::Element(velem) => velem.set_depth(depth),
+            VNode::Text(_) => {}
         }
     }
 }

@@ -34,7 +34,7 @@ impl UpdateMessage {
             if to_rerender {
                 Scheduler::add_rerender_message(
                     self.any_component_node,
-                    any_component_node.borrow().depth,
+                    any_component_node.borrow().depth.expect("Depth is not set"),
                 );
             }
         } else {
@@ -97,10 +97,10 @@ impl Ord for SchedulerMessage {
 }
 
 thread_local! {
-    pub static SCHEDULER_INSTANCE: RefCell<Scheduler> = RefCell::new(Scheduler::new());
+    pub(crate) static SCHEDULER_INSTANCE: RefCell<Scheduler> = RefCell::new(Scheduler::new());
 }
 
-pub struct Scheduler {
+pub(crate) struct Scheduler {
     messages: BinaryHeap<SchedulerMessage>,
     is_handle_messages_scheduled: bool,
 }
@@ -135,7 +135,7 @@ impl Scheduler {
         }
     }
 
-    pub fn add_update_message(
+    pub(crate) fn add_update_message(
         message: Box<dyn Any>,
         any_component_node: Weak<RefCell<AnyComponentNode>>,
     ) {
@@ -146,7 +146,10 @@ impl Scheduler {
         Self::add_message(message);
     }
 
-    pub fn add_rerender_message(any_component_node: Weak<RefCell<AnyComponentNode>>, depth: u32) {
+    pub(crate) fn add_rerender_message(
+        any_component_node: Weak<RefCell<AnyComponentNode>>,
+        depth: u32,
+    ) {
         let message = SchedulerMessage::Rerender(RerenderMessage {
             any_component_node,
             depth,

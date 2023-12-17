@@ -21,17 +21,32 @@ pub(crate) type AnyProps = Option<Box<dyn Any>>;
 pub(crate) type ComponentNodeGenerator =
     Box<dyn Fn(AnyProps, &Node) -> Rc<RefCell<AnyComponentNode>> + 'static>;
 
+/// Special VNode type, which represents custom component node.
+/// There is no direct translation of [VComponent] to a single DOM node, but it translates to a subtree of DOM nodes.
 pub struct VComponent {
     props: AnyProps,
     hash: PropertiesHash,
     generator: ComponentNodeGenerator,
-    _key: Option<String>, // TODO: add logic for key attribute
+    key: Option<String>,
+    depth: Option<u32>,
 
-    // Sth stinks here
-    pub comp: Option<Rc<RefCell<AnyComponentNode>>>,
+    pub(crate) comp: Option<Rc<RefCell<AnyComponentNode>>>,
 }
 
 impl VComponent {
+    /// Creates [VComponent] out of provided properties. Function is generic, therefore type of [Component] ***C*** has to be specified.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// struct ExampleComponent;
+    /// impl Component for ExampleComponent {
+    ///     type Properties = ();
+    ///     ...
+    /// }
+    /// let props = ();
+    /// let vcomp = VComponent::new::<ExampleComponent>(props, None);
+    /// ```
     pub fn new<C>(props: C::Properties, key: Option<String>) -> VComponent
     where
         C: Component + 'static,
@@ -42,7 +57,8 @@ impl VComponent {
             props: Some(Box::new(props)),
             generator,
             hash,
-            _key: key,
+            key,
+            depth: None,
             comp: None,
         }
     }
@@ -69,7 +85,7 @@ impl VComponent {
         AnyComponentNode::new(C::new(*props), ancestor.clone())
     }
 
-    pub fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
+    pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching component");
         let mut old_virt: Option<VComponent> = None;
 
@@ -98,24 +114,35 @@ impl VComponent {
         self.render(old_virt, ancestor);
     }
 
-    pub fn erase(&self) {
+    pub(crate) fn erase(&self) {
         if let Some(node) = self.comp.as_ref() {
-            debug::log("Erasing vcomponent, feels kinda fucking sus");
+            debug::log("Erasing vcomponent");
             node.borrow_mut().vdom.as_ref().unwrap().erase();
         }
     }
 
+    pub(crate) fn set_depth(&mut self, depth: u32) {
+        debug::log(format!("VComponent: Setting depth: {depth}"));
+        self.depth = Some(depth);
+    }
+
     fn render(&mut self, last: Option<VComponent>, ancestor: &Node) {
         match last {
-            Some(old_vcomp) if old_vcomp.hash == self.hash => {
+            Some(mut old_vcomp) if self.key.is_some() && old_vcomp.key == self.key => {
+                debug::log("\t\tKeys are equal");
+                self.comp = old_vcomp.comp.take();
+            }
+            Some(mut old_vcomp) if old_vcomp.hash == self.hash => {
                 debug::log("\t\tHashes are equal");
-                self.comp = old_vcomp.comp.clone();
+                self.comp = old_vcomp.comp.take();
             }
             Some(old_vcomp) => {
                 debug::log("\t\tHashes differ");
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();
+                    any_component_node.depth = self.depth;
+                    any_component_node.view();
                     any_component_node.patch(old_vcomp.comp.clone(), ancestor);
                 }
                 self.comp = Some(any_component_node_rc);
@@ -125,6 +152,8 @@ impl VComponent {
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();
+                    any_component_node.depth = self.depth;
+                    any_component_node.view();
                     any_component_node.patch(None, ancestor);
                 }
                 self.comp = Some(any_component_node_rc);
@@ -190,7 +219,14 @@ mod tests {
             Tmp
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-            VText::new(VALID_TEXT).into()
+            VElement::new(
+                "div".into(),
+                [(String::from("result"), String::from(VALID_TEXT))].into(),
+                vec![],
+                None,
+                vec![],
+            )
+            .into()
         }
         fn update(&mut self, _message: Self::Message) -> bool {
             false
@@ -204,6 +240,7 @@ mod tests {
         dom::append_child(&dom::get_root_element(), &ancestor);
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(None, &ancestor);
     }
 
@@ -223,6 +260,7 @@ mod tests {
         });
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(Some(text), &ancestor);
     }
 
@@ -241,12 +279,13 @@ mod tests {
             tag_name: "div".into(),
             attr: [("id".into(), "I dont love Rust".into())].into(),
             event_handlers: vec![],
-            _key: None,
+            key: None,
             children: vec![],
             dom: Some(current),
         });
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(Some(elem), &ancestor);
     }
 
@@ -259,7 +298,14 @@ mod tests {
             Comp
         }
         fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
-            VText::new("I dont love Rust").into()
+            VElement::new(
+                "div".into(),
+                [(String::from("result"), String::from("I dont love Rust"))].into(),
+                vec![],
+                None,
+                vec![],
+            )
+            .into()
         }
         fn update(&mut self, _message: Self::Message) -> bool {
             false
@@ -267,15 +313,33 @@ mod tests {
     }
 
     #[wasm_bindgen_test]
-    fn patch_last_comp() {
+    fn patch_last_comp_diff_keys() {
         let ancestor = dom::create_element("div");
         dom::set_attribute(&ancestor, "id", function_name!());
         dom::append_child(&dom::get_root_element(), &ancestor);
 
         let mut comp = VNode::Component(VComponent::new::<Comp>((), None));
+        comp.set_depth(0);
         comp.patch(None, &ancestor);
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
+        target.patch(Some(comp), &ancestor);
+    }
+
+    #[wasm_bindgen_test]
+    fn patch_last_comp_same_keys() {
+        let ancestor = dom::create_element("div");
+        dom::set_attribute(&ancestor, "id", function_name!());
+        dom::append_child(&dom::get_root_element(), &ancestor);
+
+        let key = Some(String::from("Same_key"));
+        let mut comp = VNode::Component(VComponent::new::<Comp>((), key.clone()));
+        comp.set_depth(0);
+        comp.patch(None, &ancestor);
+
+        let mut target = VComponent::new::<Tmp>((), key);
+        target.set_depth(0);
         target.patch(Some(comp), &ancestor);
     }
 
@@ -289,9 +353,11 @@ mod tests {
             vec![VText::new("I dont love Rust").into()],
             None,
         ));
+        list.set_depth(0);
         list.patch(None, &ancestor);
 
         let mut target = VComponent::new::<Tmp>((), None);
+        target.set_depth(0);
         target.patch(Some(list), &ancestor);
     }
 }
