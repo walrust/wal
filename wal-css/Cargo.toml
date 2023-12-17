@@ -2,6 +2,14 @@
 name = "wal-css"
 version = "0.1.0"
 edition = "2021"
+authors = ["Wojciech Kutak", "Karol Kącki", "Marcin Latoszek"]
+repository = "https://github.com/walrust/wal"
+homepage = "https://github.com/walrust/wal"
+documentation = "https://docs.rs/wal-css/"
+license = "MIT OR Apache-2.0"
+keywords = ["web", "wasm", "frontend", "webasm", "webassembly", "spa"]
+categories = ["gui", "web-programming", "wasm"]
+description = "A framework for creating client-side single-page apps using Rust."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
