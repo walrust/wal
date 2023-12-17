@@ -86,8 +86,8 @@ impl ToTokens for Link {
         let children = &self.children;
 
         tokens.extend(quote_spanned! { self.error_span() =>
-            ::wal::virtual_dom::VNode::Element(
-                ::wal::virtual_dom::VElement::new(
+            ::wal_core::virtual_dom::VNode::Element(
+                ::wal_core::virtual_dom::VElement::new(
                     ::std::string::String::from("a"),
                     ::std::collections::HashMap::from([
                         #(#attributes,)*

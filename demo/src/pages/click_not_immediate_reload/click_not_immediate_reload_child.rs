@@ -1,4 +1,4 @@
-use wal::{
+use wal_core::{
     component::{callback::Callback, Component},
     events::MouseEvent,
 };
@@ -41,8 +41,8 @@ impl Component for ClickNotImmediateReloadChild {
 
     fn view(
         &self,
-        behavior: &mut impl wal::component::behavior::Behavior<Self>,
-    ) -> wal::virtual_dom::VNode {
+        behavior: &mut impl wal_core::component::behavior::Behavior<Self>,
+    ) -> wal_core::virtual_dom::VNode {
         let update_counter_on_click = behavior.create_callback(|_event: MouseEvent| ());
 
         let props = self.props.clone();

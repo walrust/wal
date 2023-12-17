@@ -25,8 +25,8 @@ impl ToTokens for Literal {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let literal = &self.0;
         tokens.extend(
-            quote_spanned! { literal.span() => ::wal::virtual_dom::VNode::Text(
-                ::wal::virtual_dom::VText::new(#literal)
+            quote_spanned! { literal.span() => ::wal_core::virtual_dom::VNode::Text(
+                ::wal_core::virtual_dom::VText::new(#literal)
             )},
         );
     }

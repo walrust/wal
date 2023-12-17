@@ -1,5 +1,5 @@
 [package]
-name = "wal"
+name = "wal-core"
 version = "0.1.0"
 edition = "2021"
 authors = ["Wojciech Kutak", "Karol Kącki", "Marcin Latoszek"]
@@ -14,12 +14,13 @@ description = "A framework for creating client-side single-page apps using Rust.
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wal-rsx = { version = "0.1.0", path = "../wal-rsx" }
 gloo = { version = "0.10.0", features = ["utils"] }
 wasm-bindgen-futures = "0.4"
 wasm-bindgen = "0.2"
 itertools = "0.11"
 console_error_panic_hook = "0.1.7"
+
+[dev-dependencies]
 wasm-bindgen-test = "0.3"
 
 [dependencies.web-sys]

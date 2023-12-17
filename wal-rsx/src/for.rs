@@ -36,7 +36,7 @@ impl ToTokens for For<syn::Expr> {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let expr = &self.0;
         tokens.extend(quote_spanned!(expr.span() =>
-            ::wal::virtual_dom::VNode::from_iter(#expr)
+            ::wal_core::virtual_dom::VNode::from_iter(#expr)
         ));
     }
 }
@@ -46,7 +46,7 @@ impl ToTokens for For<syn::ExprBlock> {
         let expr = &self.0;
         tokens.extend(quote_spanned!(expr.span() =>
             #[allow(unused_braces)]
-            ::wal::virtual_dom::VNode::from_iter(#expr)
+            ::wal_core::virtual_dom::VNode::from_iter(#expr)
         ));
     }
 }

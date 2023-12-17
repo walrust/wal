@@ -64,8 +64,8 @@ impl ToTokens for Fragment {
         let key = self.start_tag.get_key_attribute_token_stream();
 
         tokens.extend(quote_spanned! {self.error_span() =>
-            ::wal::virtual_dom::VNode::List(
-                ::wal::virtual_dom::VList::new(
+            ::wal_core::virtual_dom::VNode::List(
+                ::wal_core::virtual_dom::VList::new(
                     ::std::vec![#(#children),*],
                     #key
                 )

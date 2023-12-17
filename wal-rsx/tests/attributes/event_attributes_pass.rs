@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use wal::{
+use wal_core::{
     component::callback::Callback,
     events::{onclick, oncopy, EventHandler},
     virtual_dom::{VElement, VNode},
@@ -15,14 +15,15 @@ fn main() {
 }
 
 fn single_specialized_event_attribute() {
-    let rsx = rsx! { <div onclick={Callback::new(|_event: wal::events::MouseEvent| {})}></div> };
+    let rsx =
+        rsx! { <div onclick={Callback::new(|_event: wal_core::events::MouseEvent| {})}></div> };
     assert_eq!(
         rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
             vec![EventHandler::new(onclick(Callback::new(
-                |_event: wal::events::MouseEvent| {}
+                |_event: wal_core::events::MouseEvent| {}
             )))],
             None,
             Vec::new(),
@@ -31,14 +32,14 @@ fn single_specialized_event_attribute() {
 }
 
 fn single_unspecialized_event_attribute() {
-    let rsx = rsx! { <div oncopy={Callback::new(|_event: wal::events::Event| {})}></div> };
+    let rsx = rsx! { <div oncopy={Callback::new(|_event: wal_core::events::Event| {})}></div> };
     assert_eq!(
         rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::new(),
             vec![EventHandler::new(oncopy(Callback::new(
-                |_event: wal::events::Event| {}
+                |_event: wal_core::events::Event| {}
             )))],
             None,
             Vec::new(),
@@ -49,8 +50,8 @@ fn single_unspecialized_event_attribute() {
 fn multiple_event_attributes() {
     let rsx = rsx! {
         <div
-            onclick={Callback::new(|_event: wal::events::MouseEvent| {})}
-            oncopy={Callback::new(|_event: wal::events::Event| {})}>
+            onclick={Callback::new(|_event: wal_core::events::MouseEvent| {})}
+            oncopy={Callback::new(|_event: wal_core::events::Event| {})}>
         </div>
     };
     assert_eq!(
@@ -59,8 +60,10 @@ fn multiple_event_attributes() {
             "div",
             HashMap::new(),
             vec![
-                EventHandler::new(onclick(Callback::new(|_event: wal::events::MouseEvent| {}))),
-                EventHandler::new(oncopy(Callback::new(|_event: wal::events::Event| {}))),
+                EventHandler::new(onclick(Callback::new(
+                    |_event: wal_core::events::MouseEvent| {}
+                ))),
+                EventHandler::new(oncopy(Callback::new(|_event: wal_core::events::Event| {}))),
             ],
             None,
             Vec::new(),

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use wal::virtual_dom::{VElement, VList, VNode};
+use wal_core::virtual_dom::{VElement, VList, VNode};
 use wal_rsx::rsx;
 
 fn main() {

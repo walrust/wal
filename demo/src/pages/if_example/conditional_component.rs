@@ -1,4 +1,4 @@
-use wal::component::Component;
+use wal_core::component::Component;
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
 use wal_rsx::rsx;
@@ -22,9 +22,9 @@ impl Component for ConditionComponent {
 
     fn view(
         &self,
-        behavior: &mut impl wal::component::behavior::Behavior<Self>,
-    ) -> wal::virtual_dom::VNode {
-        let click = behavior.create_callback(|_event: wal::events::MouseEvent| ());
+        behavior: &mut impl wal_core::component::behavior::Behavior<Self>,
+    ) -> wal_core::virtual_dom::VNode {
+        let click = behavior.create_callback(|_event: wal_core::events::MouseEvent| ());
 
         CSS.with(|css| {
             rsx! {

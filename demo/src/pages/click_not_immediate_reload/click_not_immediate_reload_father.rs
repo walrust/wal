@@ -1,7 +1,7 @@
 use crate::pages::click_not_immediate_reload::click_not_immediate_reload_child::{
     ClickNotImmediateReloadChild, ClickNotImmediateReloadChildProperties,
 };
-use wal::{
+use wal_core::{
     component::{behavior::Behavior, Component},
     virtual_dom::VNode,
 };

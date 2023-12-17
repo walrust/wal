@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wal = { path = "../wal" }
+wal-core = { path = "../wal-core" }
 wal-rsx = { path = "../wal-rsx" }
 wal-css = { path = "../wal-css" }
 wasm-bindgen = "0.2.87"

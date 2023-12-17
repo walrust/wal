@@ -21,7 +21,7 @@ path = "tests/tests.rs"
 [dev-dependencies]
 trybuild = { version = "1.0", features = ["diff"] }
 web-sys = { version = "0.3", features = ["DragEvent", "MouseEvent"] }
-wal = { path = "../wal" }
+wal-core = { path = "../wal-core" }
 
 [dependencies]
 proc-macro2 = "1.0"

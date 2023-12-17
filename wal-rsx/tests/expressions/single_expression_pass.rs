@@ -1,4 +1,4 @@
-use wal::virtual_dom::{VNode, VText};
+use wal_core::virtual_dom::{VNode, VText};
 use wal_rsx::rsx;
 
 include!("../utils/display_struct.rs");

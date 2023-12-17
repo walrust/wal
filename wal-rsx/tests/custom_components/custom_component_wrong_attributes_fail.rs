@@ -1,4 +1,4 @@
-use wal::{
+use wal_core::{
     component::{behavior::Behavior, Component},
     virtual_dom::VNode,
 };

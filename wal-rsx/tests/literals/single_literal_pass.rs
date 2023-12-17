@@ -1,4 +1,4 @@
-use wal::virtual_dom::{VList, VNode, VText};
+use wal_core::virtual_dom::{VList, VNode, VText};
 use wal_rsx::rsx;
 
 fn main() {

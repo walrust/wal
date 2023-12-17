@@ -37,8 +37,8 @@ impl ToTokens for Component {
         let key = self.attributes.get_key_attribute_token_stream();
 
         tokens.extend(quote_spanned! { self.error_span() =>
-            ::wal::virtual_dom::VNode::Component(
-                ::wal::virtual_dom::VComponent::new::<#ty>(#props, #key)
+            ::wal_core::virtual_dom::VNode::Component(
+                ::wal_core::virtual_dom::VComponent::new::<#ty>(#props, #key)
             )
         });
     }

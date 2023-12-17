@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use wal::virtual_dom::{VElement, VNode, VText};
+use wal_core::virtual_dom::{VElement, VNode, VText};
 use wal_rsx::rsx;
 
 include!("../utils/display_struct.rs");

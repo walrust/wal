@@ -220,11 +220,11 @@ impl ToTokens for IfBody {
         let IfBody(body) = self;
 
         tokens.extend(quote! {
-            if let ::wal::virtual_dom::VNode::List(_) = #body {
+            if let ::wal_core::virtual_dom::VNode::List(_) = #body {
                 #body
             } else {
-                ::wal::virtual_dom::VNode::List (
-                    ::wal::virtual_dom::VList::new(vec![#body], None)
+                ::wal_core::virtual_dom::VNode::List (
+                    ::wal_core::virtual_dom::VList::new(vec![#body], None)
                 )
             }
         });

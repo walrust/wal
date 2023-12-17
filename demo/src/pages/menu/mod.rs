@@ -1,4 +1,4 @@
-use wal::component::Component;
+use wal_core::component::Component;
 use wal_css::css::Css;
 use wal_css::css_stylesheet;
 use wal_rsx::rsx;
@@ -20,8 +20,8 @@ impl Component for MenuComponent {
 
     fn view(
         &self,
-        _behavior: &mut impl wal::component::behavior::Behavior<Self>,
-    ) -> wal::virtual_dom::VNode {
+        _behavior: &mut impl wal_core::component::behavior::Behavior<Self>,
+    ) -> wal_core::virtual_dom::VNode {
         CSS.with(|css| {
             rsx!(
                 <div class={&css["container"]}>

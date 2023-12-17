@@ -38,12 +38,13 @@ impl ToTokens for Root {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
             Self::Empty => tokens.extend(quote! {
-                ::wal::virtual_dom::VNode::List (
-                    ::wal::virtual_dom::VList::new_empty(None)
+                ::wal_core::virtual_dom::VNode::List (
+                    ::wal_core::virtual_dom::VList::new_empty(None)
                 )
             }),
-            Self::Expression(expr) => tokens
-                .extend(quote_spanned! { expr.span() => ::wal::virtual_dom::VNode::from(#expr) }),
+            Self::Expression(expr) => tokens.extend(
+                quote_spanned! { expr.span() => ::wal_core::virtual_dom::VNode::from(#expr) },
+            ),
             Self::For(rsx_for) => rsx_for.to_tokens(tokens),
             Self::Forest(forest) => forest.to_tokens(tokens),
         };

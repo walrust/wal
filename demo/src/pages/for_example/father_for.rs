@@ -1,5 +1,5 @@
 use crate::pages::for_example::child_for::ChildForComponent;
-use wal::{
+use wal_core::{
     component::{behavior::Behavior, Component},
     events::MouseEvent,
     virtual_dom::VNode,

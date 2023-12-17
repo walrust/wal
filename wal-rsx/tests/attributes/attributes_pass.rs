@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use wal::{
+use wal_core::{
     component::callback::Callback,
     events::{onclick, EventHandler},
     virtual_dom::{VElement, VList, VNode},
@@ -112,14 +112,14 @@ fn multiple_expression_and_literal_attributes() {
 }
 
 fn attributes_and_event_attributes() {
-    let rsx = rsx! { <div attr1="val1" onclick={Callback::new(|_event: wal::events::MouseEvent| {})} attr2="val2"></div> };
+    let rsx = rsx! { <div attr1="val1" onclick={Callback::new(|_event: wal_core::events::MouseEvent| {})} attr2="val2"></div> };
     assert_eq!(
         rsx,
         VNode::Element(new_velement_str(
             "div",
             HashMap::from([("attr1", "val1"), ("attr2", "val2")]),
             vec![EventHandler::new(onclick(Callback::new(
-                |_event: wal::events::MouseEvent| {}
+                |_event: wal_core::events::MouseEvent| {}
             )))],
             None,
             Vec::new(),

@@ -133,9 +133,9 @@ impl ElementAttributes {
         self.events
             .iter()
             .map(|(ident, expr_block)| -> proc_macro2::TokenStream {
-                quote_spanned!(expr_block.span() => ::wal::events::EventHandler::new(
+                quote_spanned!(expr_block.span() => ::wal_core::events::EventHandler::new(
                     #[allow(unused_braces)]
-                    ::wal::events::#ident(#expr_block)
+                    ::wal_core::events::#ident(#expr_block)
                 ))
             })
             .collect()

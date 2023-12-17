@@ -53,7 +53,7 @@ impl ComponentAttributes {
         &self,
         component_type: &Type,
     ) -> proc_macro2::TokenStream {
-        let props_type = quote_spanned!(component_type.span() => <#component_type as ::wal::component::Component>::Properties);
+        let props_type = quote_spanned!(component_type.span() => <#component_type as ::wal_core::component::Component>::Properties);
 
         self.props.as_ref().map_or_else(
             || quote_spanned!(component_type.span() => <#props_type as ::std::default::Default>::default()),

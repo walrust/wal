@@ -4,7 +4,7 @@ use pages::{
     for_example::father_for::FatherForComponent,
     if_example::conditional_component::ConditionComponent, menu::MenuComponent,
 };
-use wal::router::builder::RouterBuilder;
+use wal_core::router::builder::RouterBuilder;
 
 mod pages;
 

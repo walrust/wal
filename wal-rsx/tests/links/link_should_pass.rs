@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use wal::{
+use wal_core::{
     events::EventHandler,
     virtual_dom::{VElement, VNode, VText},
 };

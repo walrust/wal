@@ -1,4 +1,4 @@
-use wal::{
+use wal_core::{
     component::{behavior::Behavior, callback::Callback, Component},
     events::{InputEvent, MouseEvent},
     virtual_dom::VNode,

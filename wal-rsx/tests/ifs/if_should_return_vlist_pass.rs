@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use wal::virtual_dom::{VElement, VList, VNode, VText};
+use wal_core::virtual_dom::{VElement, VList, VNode, VText};
 use wal_rsx::rsx;
 
 include!("../utils/wrap_in_list.rs");
