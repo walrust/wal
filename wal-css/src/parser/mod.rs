@@ -7,7 +7,7 @@ mod parsing_functions;
 mod types;
 
 /// generates css with prefixed selectors and stylesheet selector mapping
-pub fn process_css(input: &str, prefix: &str) -> (String, HashMap<String, String>) {
+pub(crate) fn process_css(input: &str, prefix: &str) -> (String, HashMap<String, String>) {
     let cleared_input = clear_css(input);
     let (_, stylesheet) = parse_stylesheet(&cleared_input).unwrap();
 
