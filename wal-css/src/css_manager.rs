@@ -29,12 +29,31 @@ pub struct CssManager {
 
 #[allow(dead_code)]
 impl CssManager {
+    /// Creates new instance of CssManager struct.
+    ///
+    /// # Example usage
+    /// ```
+    /// use wal_css::css_manager::CssManager;
+    /// let manager = CssManager::new();
+    /// ```
     pub fn new() -> Self {
         CssManager {
             document: window().unwrap().document().unwrap(),
         }
     }
 
+    /// Attaches css string passed as an argument as a new stylesheet.
+    /// The selectors will be prepended with a newly generated id and the resulting CSS will be added
+    /// to the application as a new style tag. The method will return the [Css](../css/struct.Css.html) object, which can be used to reference the stylesheet selectors
+    /// inside the [rsx macro](../../wal_rsx/macro.rsx.html).
+    ///
+    /// # Example usage
+    /// ```
+    /// use wal_css::css_manager::CssManager;
+    ///
+    /// let manager = CssManager::new();
+    /// manager.attach_css(".class1 { background-color: red; }");
+    /// ```
     pub fn attach_css(&mut self, css: &str) -> Css {
         // generate new id and prefix for the css stylesheet
         let id = ID_GENERATOR.with(|gen| gen.as_ref().borrow_mut().get_new_id());
