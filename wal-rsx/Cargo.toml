@@ -1,6 +1,6 @@
 [package]
 name = "wal-rsx"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Wojciech Kutak", "Karol Kącki", "Marcin Latoszek"]
 repository = "https://github.com/walrust/wal"
