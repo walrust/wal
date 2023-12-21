@@ -65,7 +65,7 @@ impl Tree {
         input: ParseStream,
         forked_input: ParseStream,
     ) -> syn::Result<Self> {
-        let ident = forked_input.parse::<proc_macro2::Ident>()?.to_string();
+        let ident = forked_input.parse::<syn::Ident>()?.to_string(); // parsing ident
 
         let tree = if forked_input.peek(syn::token::Eq) {
             Self::Fragment(input.parse()?)

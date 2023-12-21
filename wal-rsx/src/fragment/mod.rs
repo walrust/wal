@@ -1,5 +1,5 @@
-use fragment_end_tag::FragmentEndTag;
-use fragment_start_tag::FragmentStartTag;
+use fragment_closing_tag::FragmentClosingTag;
+use fragment_opening_tag::FragmentOpeningTag;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
@@ -8,45 +8,48 @@ use syn::{
 
 use super::tree::Tree;
 
-mod fragment_end_tag;
-mod fragment_start_tag;
+mod fragment_closing_tag;
+mod fragment_opening_tag;
 
 pub(crate) struct Fragment {
-    start_tag: FragmentStartTag,
+    opening_tag: FragmentOpeningTag,
     children: Vec<Tree>,
-    end_tag: FragmentEndTag,
+    closing_tag: FragmentClosingTag,
 }
 
 impl Parse for Fragment {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek2(syn::token::Slash) {
-            let end_tag = input.parse::<FragmentEndTag>()?;
+            let closing_tag = input.parse::<FragmentClosingTag>()?;
             return Err(syn::Error::new_spanned(
-                end_tag.error_spanned(),
+                closing_tag.error_spanned(),
                 "This closing fragment does not have a corresponding opening fragment. (hint: try adding `<>`)",
             ));
         }
 
-        let start_tag = input.parse::<FragmentStartTag>()?;
-        let children = Self::parse_children(input, &start_tag)?;
-        let end_tag = input.parse::<FragmentEndTag>()?;
+        let opening_tag = input.parse::<FragmentOpeningTag>()?;
+        let children = Self::parse_children(input, &opening_tag)?;
+        let closing_tag = input.parse::<FragmentClosingTag>()?;
 
         Ok(Fragment {
-            start_tag,
+            opening_tag,
             children,
-            end_tag,
+            closing_tag,
         })
     }
 }
 
 impl Fragment {
-    fn parse_children(input: ParseStream, start_tag: &FragmentStartTag) -> syn::Result<Vec<Tree>> {
+    fn parse_children(
+        input: ParseStream,
+        opening_tag: &FragmentOpeningTag,
+    ) -> syn::Result<Vec<Tree>> {
         let mut children = Vec::new();
 
-        while !FragmentEndTag::peek(input) {
+        while !FragmentClosingTag::peek(input) {
             if input.is_empty() {
                 return Err(syn::Error::new_spanned(
-                    start_tag.error_spanned(),
+                    opening_tag.error_spanned(),
                     "This opening fragment does not have a coressponding closing fragment. (hint: try adding `</>`)",
                 ));
             }
@@ -61,7 +64,7 @@ impl Fragment {
 impl ToTokens for Fragment {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let children = &self.children;
-        let key = self.start_tag.get_key_attribute_token_stream();
+        let key = self.opening_tag.get_key_attribute_token_stream();
 
         tokens.extend(quote_spanned! {self.error_span() =>
             ::wal_core::virtual_dom::VNode::List(
@@ -80,8 +83,8 @@ impl Fragment {
     }
 
     fn error_spanned(&self) -> impl ToTokens {
-        let start_error_spanned = self.start_tag.error_spanned();
-        let end_error_spanned = self.end_tag.error_spanned();
+        let start_error_spanned = self.opening_tag.error_spanned();
+        let end_error_spanned = self.closing_tag.error_spanned();
         quote!(#start_error_spanned #end_error_spanned)
     }
 }

@@ -1,5 +1,6 @@
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{
+    ext::IdentExt,
     parse::{Parse, ParseStream},
     spanned::Spanned,
 };
@@ -13,7 +14,7 @@ pub(crate) struct NormalAttribute {
 
 impl Parse for NormalAttribute {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let ident = input.parse()?;
+        let ident = proc_macro2::Ident::parse_any(input)?;
         input.parse::<syn::token::Eq>()?;
         let value = input.parse()?;
 
@@ -35,7 +36,7 @@ impl Attribute for NormalAttribute {
 
 impl NormalAttribute {
     pub(crate) fn peek(input: ParseStream) -> bool {
-        input.peek(syn::Ident)
+        input.peek(proc_macro2::Ident::peek_any)
     }
 
     pub(crate) fn get_key_attribute_token_stream(

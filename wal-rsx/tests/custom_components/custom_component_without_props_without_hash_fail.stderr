@@ -5,7 +5,7 @@ error[E0277]: the trait bound `PropsWithoutHash: Hash` is not satisfied
   |                       ^^^^^^^^^^^^^^^^ the trait `Hash` is not implemented for `PropsWithoutHash`
   |
 note: required by a bound in `wal_core::component::Component::Properties`
- --> $WORKSPACE/wal/src/component/mod.rs
+ --> $WORKSPACE/wal-core/src/component/mod.rs
   |
   |     type Properties: Hash + 'static;
   |                      ^^^^ required by this bound in `Component::Properties`

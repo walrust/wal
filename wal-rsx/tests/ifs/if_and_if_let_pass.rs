@@ -1,7 +1,5 @@
-use wal_core::virtual_dom::{VList, VNode, VText};
+use wal_core::virtual_dom::{VNode, VText};
 use wal_rsx::rsx;
-
-include!("../utils/wrap_in_list.rs");
 
 fn main() {
     let rsx = rsx! {
@@ -11,5 +9,5 @@ fn main() {
         else if let Some(val) = Some("hello4") { val }
         else { "hello5" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello4"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello4")));
 }

@@ -7,7 +7,7 @@ use crate::attributes::{
 
 use super::TO_ATTR;
 
-pub(crate) struct LinkStartTag {
+pub(crate) struct LinkOpeningTag {
     lt: syn::token::Lt,
     pub(crate) name: proc_macro2::Ident,
     pub(crate) to: NormalAttribute,
@@ -16,7 +16,7 @@ pub(crate) struct LinkStartTag {
     gt: syn::token::Gt,
 }
 
-impl Parse for LinkStartTag {
+impl Parse for LinkOpeningTag {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let lt = input.parse()?;
         let name = input.parse()?;
@@ -38,7 +38,7 @@ impl Parse for LinkStartTag {
         let slash = input.parse().ok();
         let gt = input.parse()?;
 
-        Ok(LinkStartTag {
+        Ok(LinkOpeningTag {
             lt,
             name,
             to: to.unwrap(),
@@ -49,7 +49,7 @@ impl Parse for LinkStartTag {
     }
 }
 
-impl LinkStartTag {
+impl LinkOpeningTag {
     fn process_attribute(
         key: &mut Option<NormalAttribute>,
         to: &mut Option<NormalAttribute>,
@@ -72,7 +72,7 @@ impl LinkStartTag {
     }
 }
 
-impl LinkStartTag {
+impl LinkOpeningTag {
     pub(crate) fn is_self_closing(&self) -> bool {
         self.slash.is_some()
     }

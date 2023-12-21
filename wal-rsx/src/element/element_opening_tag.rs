@@ -3,7 +3,7 @@ use syn::parse::Parse;
 
 use super::element_attributes::ElementAttributes;
 
-pub(crate) struct ElementStartTag {
+pub(crate) struct ElementOpeningTag {
     lt: syn::token::Lt,
     pub(crate) name: proc_macro2::Ident,
     pub(crate) attributes: ElementAttributes,
@@ -11,7 +11,7 @@ pub(crate) struct ElementStartTag {
     gt: syn::token::Gt,
 }
 
-impl Parse for ElementStartTag {
+impl Parse for ElementOpeningTag {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let lt = input.parse()?;
         let name = input.parse()?;
@@ -19,7 +19,7 @@ impl Parse for ElementStartTag {
         let slash = input.parse().ok();
         let gt = input.parse()?;
 
-        Ok(ElementStartTag {
+        Ok(ElementOpeningTag {
             lt,
             name,
             attributes,
@@ -29,7 +29,7 @@ impl Parse for ElementStartTag {
     }
 }
 
-impl ElementStartTag {
+impl ElementOpeningTag {
     pub(crate) fn is_self_closing(&self) -> bool {
         self.slash.is_some()
     }

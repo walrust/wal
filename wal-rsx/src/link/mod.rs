@@ -4,71 +4,71 @@ use syn::{
     spanned::Spanned,
 };
 
-use self::{link_end_tag::LinkEndTag, link_start_tag::LinkStartTag};
+use self::{link_closing_tag::LinkClosingTag, link_opening_tag::LinkOpeningTag};
 
 use super::tree::Tree;
 
-mod link_end_tag;
-mod link_start_tag;
+mod link_closing_tag;
+mod link_opening_tag;
 
 pub(crate) const LINK_TAG: &str = "Link";
 const TO_ATTR: &str = "to";
 
 pub(crate) struct Link {
-    start_tag: LinkStartTag,
+    opening_tag: LinkOpeningTag,
     children: Vec<Tree>,
-    end_tag: Option<LinkEndTag>,
+    closing_tag: Option<LinkClosingTag>,
 }
 
 impl Parse for Link {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         if input.peek2(syn::token::Slash) {
-            let end_tag = input.parse::<LinkEndTag>()?;
+            let closing_tag = input.parse::<LinkClosingTag>()?;
             return Err(syn::Error::new_spanned(
-                end_tag.error_spanned(),
+                closing_tag.error_spanned(),
                 format!(
                     "This closing tag does not have a corresponding opening tag. (hint: try adding `<{}>`)",
-                    end_tag.name
+                    closing_tag.name
                 )
             ));
         }
 
-        let start_tag = input.parse::<LinkStartTag>()?;
-        if start_tag.is_self_closing() {
+        let opening_tag = input.parse::<LinkOpeningTag>()?;
+        if opening_tag.is_self_closing() {
             return Ok(Link {
-                start_tag,
+                opening_tag,
                 children: Vec::new(),
-                end_tag: None,
+                closing_tag: None,
             });
         }
 
-        let children = Self::parse_children(&start_tag, input)?;
-        let end_tag = input.parse()?;
+        let children = Self::parse_children(&opening_tag, input)?;
+        let closing_tag = input.parse()?;
 
         Ok(Link {
-            start_tag,
+            opening_tag,
             children,
-            end_tag: Some(end_tag),
+            closing_tag: Some(closing_tag),
         })
     }
 }
 
 impl Link {
-    fn parse_children(start_tag: &LinkStartTag, input: ParseStream) -> syn::Result<Vec<Tree>> {
+    fn parse_children(opening_tag: &LinkOpeningTag, input: ParseStream) -> syn::Result<Vec<Tree>> {
         let mut children = Vec::new();
 
         loop {
             if input.is_empty() {
                 return Err(syn::Error::new_spanned(
-                    start_tag.error_spanned(),
+                    opening_tag.error_spanned(),
                     format!(
-                        "This start tag does not have a corresponding end tag. (hint: try adding `</{}>`)",
-                        start_tag.name
+                        "This opening tag does not have a corresponding closing tag. (hint: try adding `</{}>`)",
+                        opening_tag.name
                     ),
                 ));
             }
 
-            if LinkEndTag::peek(input) {
+            if LinkClosingTag::peek(input) {
                 break;
             }
 
@@ -81,8 +81,8 @@ impl Link {
 
 impl ToTokens for Link {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let attributes = self.start_tag.get_to_attribute_token_stream();
-        let key = self.start_tag.get_key_attribute_token_stream();
+        let attributes = self.opening_tag.get_to_attribute_token_stream();
+        let key = self.opening_tag.get_key_attribute_token_stream();
         let children = &self.children;
 
         tokens.extend(quote_spanned! { self.error_span() =>
@@ -107,8 +107,8 @@ impl Link {
     }
 
     fn error_spanned(&self) -> impl ToTokens {
-        let start_error_spanned = self.start_tag.error_spanned();
-        let end_error_spanned = self.end_tag.as_ref().map(LinkEndTag::error_spanned);
+        let start_error_spanned = self.opening_tag.error_spanned();
+        let end_error_spanned = self.closing_tag.as_ref().map(LinkClosingTag::error_spanned);
         if end_error_spanned.is_some() {
             quote!(#start_error_spanned #end_error_spanned)
         } else {

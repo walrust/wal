@@ -1,4 +1,4 @@
-use crate::{utils::debug, virtual_dom::VNode};
+use crate::virtual_dom::VNode;
 use std::{any::Any, cell::RefCell, fmt, rc::Rc};
 use web_sys::Node;
 

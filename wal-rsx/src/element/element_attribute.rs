@@ -1,4 +1,7 @@
-use syn::parse::{Parse, ParseStream};
+use syn::{
+    ext::IdentExt,
+    parse::{Parse, ParseStream},
+};
 
 use crate::attributes::{
     event_attribute::{EventAttribute, IsEvent},
@@ -21,7 +24,7 @@ pub(crate) enum ElementAttribute {
 impl Parse for ElementAttribute {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let forked_input = input.fork();
-        let ident: proc_macro2::Ident = forked_input.parse()?;
+        let ident = proc_macro2::Ident::parse_any(&forked_input)?;
 
         if ident == KEY_ATTR {
             Ok(ElementAttribute::Key(input.parse()?))
@@ -39,6 +42,6 @@ impl Parse for ElementAttribute {
 
 impl ElementAttribute {
     pub(crate) fn peek(input: ParseStream) -> bool {
-        input.peek(syn::Ident)
+        input.peek(proc_macro2::Ident::peek_any)
     }
 }

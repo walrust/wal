@@ -1,4 +1,7 @@
-use syn::parse::{Parse, ParseStream};
+use syn::{
+    ext::IdentExt,
+    parse::{Parse, ParseStream},
+};
 
 use crate::attributes::{
     normal_attribute::NormalAttribute, props_attribute::PropsAttribute, KEY_ATTR,
@@ -33,6 +36,6 @@ impl Parse for ComponentAttribute {
 
 impl ComponentAttribute {
     pub(crate) fn peek(input: ParseStream) -> bool {
-        input.peek(syn::Ident)
+        input.peek(proc_macro2::Ident::peek_any)
     }
 }

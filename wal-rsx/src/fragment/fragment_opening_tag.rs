@@ -3,18 +3,18 @@ use syn::parse::Parse;
 
 use crate::attributes::{normal_attribute::NormalAttribute, KEY_ATTR};
 
-pub(crate) struct FragmentStartTag {
+pub(crate) struct FragmentOpeningTag {
     lt: syn::token::Lt,
     key: Option<NormalAttribute>,
     gt: syn::token::Gt,
 }
 
-impl Parse for FragmentStartTag {
+impl Parse for FragmentOpeningTag {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let lt = input.parse()?;
 
         if input.peek(syn::token::Gt) {
-            return Ok(FragmentStartTag {
+            return Ok(FragmentOpeningTag {
                 lt,
                 key: None,
                 gt: input.parse()?,
@@ -38,7 +38,7 @@ impl Parse for FragmentStartTag {
 
         let gt = input.parse()?;
 
-        Ok(FragmentStartTag {
+        Ok(FragmentOpeningTag {
             lt,
             key: Some(attribute),
             gt,
@@ -46,7 +46,7 @@ impl Parse for FragmentStartTag {
     }
 }
 
-impl FragmentStartTag {
+impl FragmentOpeningTag {
     pub(crate) fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;

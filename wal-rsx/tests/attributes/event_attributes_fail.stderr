@@ -44,7 +44,7 @@ error[E0308]: mismatched types
   --> tests/attributes/event_attributes_fail.rs:15:26
    |
 15 |     rsx! { <div onclick={Callback::new(|_event: wal_core::events::Event| {})}></div> };
-   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Callback<MouseEvent>`, found `Callback<Event>`
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Callback<MouseEvent>`, found `Callback<Event>`
    |
    = note: expected struct `Callback<MouseEvent>`
               found struct `Callback<Event>`
@@ -53,7 +53,7 @@ error[E0308]: mismatched types
   --> tests/attributes/event_attributes_fail.rs:16:26
    |
 16 |     rsx! { <div onclick={Callback::new(|_event: wal_core::events::DragEvent| {})}></div> };
-   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Callback<MouseEvent>`, found `Callback<DragEvent>`
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Callback<MouseEvent>`, found `Callback<DragEvent>`
    |
    = note: expected struct `Callback<MouseEvent>`
               found struct `Callback<DragEvent>`

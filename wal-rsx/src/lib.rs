@@ -24,11 +24,13 @@ mod tree;
 /// A simple usage could look like this:
 ///
 /// ```
+/// use wal_rsx::rsx;
+///
 /// rsx! {
 ///     <div class="container">
 ///         <h1>{ "Hello, world!" }</h1>
 ///     </div>
-/// }
+/// };
 /// ```
 /// But this macro supports much more than that simple example
 ///
@@ -48,7 +50,9 @@ mod tree;
 /// The example usage of literals:
 ///
 /// ```
-/// rsx! { 1 }
+/// use wal_rsx::rsx;
+///
+/// rsx! { 1 };
 /// ```
 ///
 /// ## Expressions
@@ -58,14 +62,18 @@ mod tree;
 /// The example usage of expressions:
 ///
 /// ```
-/// rsx! { <div> { 1 + 1 } </div> }
+/// use wal_rsx::rsx;
+///
+/// rsx! { <div> { 1 + 1 } </div> };
 /// ```
 ///
 /// The important note is that expressions must be wrapped in curly braces `{}`.
 /// The only exception is when the expression is the only element in a macro:
 ///
 /// ```
-/// rsx! { 1 + 1 }
+/// use wal_rsx::rsx;
+///
+/// rsx! { 1 + 1 };
 /// ```
 ///
 /// ## Elements
@@ -83,12 +91,14 @@ mod tree;
 /// The example usage of elements:
 ///
 /// ```
+/// use wal_rsx::rsx;
+///
 /// rsx! {
 ///     <div>
 ///         <h1> { "Hello, world!" } </h1>
 ///     </div>
 ///     <div/>
-/// }
+/// };
 /// ```
 ///
 /// #### Attributes
@@ -103,7 +113,9 @@ mod tree;
 /// The example usage of normal attributes:
 ///
 /// ```
-/// rsx! { <div class="container" id={"main"}  /> }
+/// use wal_rsx::rsx;
+///
+/// rsx! { <div class="container" id={"main"}  /> };
 /// ```
 ///
 /// ###### Event attributes
@@ -118,11 +130,15 @@ mod tree;
 /// The example usage of event attributes:
 ///
 /// ```
+/// use wal_rsx::rsx;
+/// use wal_core::component::callback::Callback;
+/// use wal_core::events::MouseEvent;
+///
 /// rsx! {
 ///     <button onclick={Callback::new(|event: MouseEvent| {
 ///         // define any action here that should be executed when the button is clicked
 ///     })} />
-/// }
+/// };
 /// ```
 ///
 /// ###### Wal class attribute
@@ -132,16 +148,20 @@ mod tree;
 /// but it is a common case while using wal-css which is a recommended way of styling in wal.
 /// It might leed to code like this:
 ///
-/// ```
+/// ```no_run
+/// use wal_rsx::rsx;
+/// use wal_css::css::Css;
+/// use wal_css::css_stylesheet;
+///
 /// thread_local! {
-///     static CSS: Css = css_stylesheet!("path-to-css-file");
+///     static CSS: Css = css_stylesheet!("path-to-css-file.css");
 /// }
 /// // ...
 /// CSS.with(|css| {
 ///     rsx! {
 ///         <div class={format!("{} {}", css["class1"], css["class2"])} />
-///     }
-/// })
+///     };
+/// });
 /// ```
 ///
 /// The solution to this problem is to use a `wal_class` attribute.
@@ -149,16 +169,20 @@ mod tree;
 /// Elements of this array must implement [Display](::std::fmt::Display) trait, so that they support [to_string()](::std::string::ToString::to_string) function.
 /// The usage of this attribute simplifies the code above to this:
 ///
-/// ```
+/// ```no_run
+/// use wal_rsx::rsx;
+/// use wal_css::css::Css;
+/// use wal_css::css_stylesheet;
+///
 /// thread_local! {
-///     static CSS: Css = css_stylesheet!("path-to-css-file");
+///     static CSS: Css = css_stylesheet!("path-to-css-file.css");
 /// }
 /// // ...
 /// CSS.with(|css| {
 ///     rsx! {
 ///         <div wal_class=[css["class1"], css["class2"]] />
-///     }
-/// })
+///     };
+/// });
 /// ```
 ///
 /// Both attributes `class` and `wal_class` can be used at the same time.
@@ -179,7 +203,9 @@ mod tree;
 /// The example usage of `key` attribute:
 ///
 /// ```
-/// rsx! { <div key="key1" /> }
+/// use wal_rsx::rsx;
+///
+/// rsx! { <div key="key1" /> };
 /// ```
 ///
 /// ## Fragments
@@ -197,21 +223,25 @@ mod tree;
 /// The example usage of fragments:
 ///
 /// ```
+/// use wal_rsx::rsx;
+///
 /// rsx! {
 ///     <>
 ///         <div/>
 ///         <div/>
 ///     </>
-/// }
+/// };
 /// ```
 ///
 /// The example above is equivalent to:
 ///
 /// ```
+/// use wal_rsx::rsx;
+///
 /// rsx! {
 ///     <div/>
 ///     <div/>
-/// }
+/// };
 /// ```
 ///
 /// ## For loops
@@ -225,30 +255,37 @@ mod tree;
 ///
 /// - simple example displaying every element of a vector using [to_string()](::std::string::ToString::to_string) function from [Display](::std::fmt::Display) trait
 /// ```
+/// use wal_rsx::rsx;
+///
 /// rsx! {
 ///     <div>
 ///         for { vec!["a", "b", "c"] }
 ///     </div>
-/// }
+/// };
 /// ```
 ///
 /// - more complex example displaying every element of a vector after some transformation
 /// ```
+/// use wal_rsx::rsx;
+///
 /// rsx! {
 ///     <div>
 ///         for {
 ///             vec!["a", "b", "c"]
+///                 .iter()
 ///                 .map(|x| rsx! { <div> { x } </div> })
 ///         }
 ///     </div>
-/// }
+/// };
 /// ```
 ///
 /// The important note is that collection must be wrapped in curly braces `{}`.
 /// The only exception is when the for loop is the only element in a macro:
 ///
 /// ```
-/// rsx! { for [0, 1, 2] }
+/// use wal_rsx::rsx;
+///
+/// rsx! { for [0, 1, 2] };
 /// ```
 ///
 /// ## If expressions
@@ -259,6 +296,8 @@ mod tree;
 /// The example usage of if expressions:
 ///
 /// ```
+/// use wal_rsx::rsx;
+///
 /// rsx! {
 ///     if true {
 ///         <div/>
@@ -269,7 +308,7 @@ mod tree;
 ///     } else {
 ///         <div/>
 ///     }
-/// }
+/// };
 /// ```
 ///
 /// ## Links
@@ -289,9 +328,11 @@ mod tree;
 /// The example usage of links:
 ///
 /// ```
+/// use wal_rsx::rsx;
+///
 /// rsx! {
 ///    <Link to="/path"> "Click me to change route" </Link>
-/// }
+/// };
 /// ```
 ///
 /// ## Custom components
@@ -307,24 +348,43 @@ mod tree;
 /// The example usage of custom components:
 ///
 /// ```
+/// use wal_rsx::rsx;
+/// use wal_core::component::Component;
+/// use wal_core::component::behavior::Behavior;
+/// use wal_core::virtual_dom::VNode;
+///
 /// struct MyComponent {
-///    x: i32,
+///     x: i32,
 /// }
 ///
+/// #[derive(Hash)]
 /// struct MyComponentProps {
-///   x: i32,
+///     x: i32,
 /// }
 ///
 /// impl Component for MyComponent {
 ///     type Properties = MyComponentProps;
-///     // ...
+///
+///     type Message = ();
+///
+///     fn new(props: Self::Properties) -> Self {
+///         Self { x: props.x }
+///     }
+///
+///     fn view(&self, _behavior: &mut impl Behavior<Self>) -> VNode {
+///         rsx! { <div> { self.x } </div> }
+///     }
+///     
+///     fn update(&mut self, _message: Self::Message) -> bool {
+///         false
+///     }
 /// }
 ///
 /// // ...
 ///
 /// rsx! {
 ///     <MyComponent props= MyComponentProps { x: 1 } />
-/// }
+/// };
 /// ```
 ///
 /// ## Empty
@@ -333,7 +393,9 @@ mod tree;
 /// The example usage of empty input:
 ///
 /// ```
-/// rsx! {}
+/// use wal_rsx::rsx;
+///
+/// rsx! {};
 /// ```
 #[proc_macro]
 pub fn rsx(input: TokenStream) -> TokenStream {

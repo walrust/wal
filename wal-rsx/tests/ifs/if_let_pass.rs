@@ -1,8 +1,6 @@
 use wal_core::virtual_dom::{VList, VNode, VText};
 use wal_rsx::rsx;
 
-include!("../utils/wrap_in_list.rs");
-
 fn main() {
     if_let_true();
     if_let_false();
@@ -20,7 +18,7 @@ fn if_let_true() {
     let rsx = rsx! {
         if let Some(_val) = Some("hello") { "hello" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello")));
 }
 
 fn if_let_false() {
@@ -34,7 +32,7 @@ fn if_let_true_using_value_from_let() {
     let rsx = rsx! {
         if let Some(val) = Some("hello") { val }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello")));
 }
 
 fn if_let_true_else() {
@@ -42,7 +40,7 @@ fn if_let_true_else() {
         if let Some(_val) = Some("hello") { "hello" }
         else { "hello2" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello")));
 }
 
 fn if_let_false_else() {
@@ -50,7 +48,7 @@ fn if_let_false_else() {
         if let Some(_val) = None::<i32> { "hello" }
         else { "hello2" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello2"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello2")));
 }
 
 fn if_let_true_else_if_let() {
@@ -58,7 +56,7 @@ fn if_let_true_else_if_let() {
         if let Some(_val) = Some("hello") { "hello" }
         else if let Some(..) = None::<i32> { "hello2" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello")));
 }
 
 fn if_let_false_else_if_let_true() {
@@ -66,7 +64,7 @@ fn if_let_false_else_if_let_true() {
         if let Some(_val) = None::<i32> { "hello" }
         else if let Some(_val) = Some("hello2") { "hello2" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello2"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello2")));
 }
 
 fn if_let_else_if_lets() {
@@ -75,7 +73,7 @@ fn if_let_else_if_lets() {
         else if let Some(_val) = Some("hello2") { "hello2" }
         else if let Some(..) = None::<i32> { "hello3" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello2"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello2")));
 }
 
 fn if_let_else_if_lets_else() {
@@ -85,7 +83,7 @@ fn if_let_else_if_lets_else() {
         else if let Some(..) = None::<i32> { "hello3" }
         else { "hello4" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello2"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello2")));
 }
 
 fn if_let_false_else_if_lets_false_else() {
@@ -95,5 +93,5 @@ fn if_let_false_else_if_lets_false_else() {
         else if let Some(..) = None::<i32> { "hello3" }
         else { "hello4" }
     };
-    assert_eq!(rsx, wrap_in_list(VNode::Text(VText::new("hello4"))));
+    assert_eq!(rsx, VNode::Text(VText::new("hello4")));
 }

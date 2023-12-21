@@ -1,21 +1,21 @@
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 
-pub(crate) struct FragmentEndTag {
+pub(crate) struct FragmentClosingTag {
     lt: syn::token::Lt,
     gt: syn::token::Gt,
 }
 
-impl Parse for FragmentEndTag {
+impl Parse for FragmentClosingTag {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let lt = input.parse()?;
         input.parse::<syn::token::Slash>()?;
         let gt = input.parse()?;
-        Ok(FragmentEndTag { lt, gt })
+        Ok(FragmentClosingTag { lt, gt })
     }
 }
 
-impl FragmentEndTag {
+impl FragmentClosingTag {
     pub(crate) fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;

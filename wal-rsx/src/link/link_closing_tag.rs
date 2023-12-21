@@ -3,23 +3,23 @@ use syn::parse::{Parse, ParseStream};
 
 use super::LINK_TAG;
 
-pub(crate) struct LinkEndTag {
+pub(crate) struct LinkClosingTag {
     lt: syn::token::Lt,
     pub(crate) name: proc_macro2::Ident,
     gt: syn::token::Gt,
 }
 
-impl Parse for LinkEndTag {
+impl Parse for LinkClosingTag {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let lt = input.parse()?;
         input.parse::<syn::token::Slash>()?;
         let name = input.parse()?;
         let gt = input.parse()?;
-        Ok(LinkEndTag { lt, name, gt })
+        Ok(LinkClosingTag { lt, name, gt })
     }
 }
 
-impl LinkEndTag {
+impl LinkClosingTag {
     pub(crate) fn error_spanned(&self) -> impl ToTokens {
         let lt = &self.lt;
         let gt = &self.gt;
@@ -35,7 +35,7 @@ impl LinkEndTag {
         }
 
         match forked_input.parse::<proc_macro2::Ident>() {
-            Ok(end_tag_name) => end_tag_name == LINK_TAG,
+            Ok(closing_tag_name) => closing_tag_name == LINK_TAG,
             Err(_) => false,
         }
     }

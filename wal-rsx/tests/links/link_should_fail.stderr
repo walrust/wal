@@ -52,7 +52,7 @@ error: `Link` requires `to` attribute
 14 |     rsx! { <Link> };
    |             ^^^^
 
-error: This start tag does not have a corresponding end tag. (hint: try adding `</Link>`)
+error: This opening tag does not have a corresponding closing tag. (hint: try adding `</Link>`)
   --> tests/links/link_should_fail.rs:15:12
    |
 15 |     rsx! { <Link to="value"> };
