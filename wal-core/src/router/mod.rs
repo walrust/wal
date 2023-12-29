@@ -130,11 +130,11 @@ impl Router {
     fn click(e: Event) {
         let target = e.target().unwrap().unchecked_into::<Element>();
         let matches = target
-            .matches(&("[".to_owned() + Self::WAL_ROUTING_ATTR + "]"))
+            .closest(&format!("[{}]", Self::WAL_ROUTING_ATTR))
             .unwrap();
-        if matches {
+        if let Some(el) = matches {
             e.prevent_default();
-            Self::navigate_to(target.get_attribute("href").unwrap().as_str());
+            Self::navigate_to(el.get_attribute("href").unwrap().as_str());
         }
     }
 
