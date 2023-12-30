@@ -52,32 +52,35 @@ impl VElement {
     pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
         debug::log("Patching element");
         let mut old_virt: Option<VElement> = None;
+        self.dom = None;
 
         match last {
             None => {
                 debug::log("\tCreating element for the first time");
-                self.dom = None;
             }
             Some(VNode::Element(mut velement)) => {
                 debug::log("\tComparing two elements");
-                self.dom = velement.dom.take();
+                if velement
+                    .dom
+                    .as_ref()
+                    .is_some_and(|x| x.parent_node().unwrap().eq(ancestor))
+                {
+                    self.dom = velement.dom.take();
+                }
                 old_virt = Some(velement);
             }
             Some(VNode::Text(v)) => {
                 debug::log("\tCreating element for the first time and swapping with existing text");
-                self.dom = None;
                 v.erase();
             }
             Some(VNode::Component(v)) => {
                 debug::log(
                     "\tCreating element for the first time and swapping with existing comp node",
                 );
-                self.dom = None;
                 v.erase();
             }
             Some(VNode::List(v)) => {
                 debug::log("\tCreating element for the first time and swapping with list");
-                self.dom = None;
                 v.erase();
             }
         }
