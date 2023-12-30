@@ -1,7 +1,7 @@
 pub mod builder;
 pub(crate) mod not_found_component;
 
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, path, rc::Rc, thread::panicking};
 
 use crate::{component::node::AnyComponentNode, virtual_dom::dom};
 use gloo::utils::{body, history, window};
@@ -109,7 +109,10 @@ impl Router {
             }
 
             let old_current = router.current.take();
-            let page_renderer = router.pages.get_mut(pathname.as_str()).unwrap();
+            let page_renderer = router
+                .pages
+                .get(pathname.as_str())
+                .unwrap_or_else(|| router.pages.get(router.not_found_path.unwrap()).unwrap());
             let new_page = page_renderer.render();
             let old_page = old_current.map(|x| x.page);
 
@@ -139,12 +142,12 @@ impl Router {
     }
 
     fn navigate_to(url: &str) {
-        let mut url = url;
-        ROUTER.with(|router| {
-            if !router.borrow().pages.contains_key(url) {
-                url = router.borrow().not_found_path.unwrap();
-            }
-        });
+        // let mut url = url;
+        // ROUTER.with(|router| {
+        //     if !router.borrow().pages.contains_key(url) {
+        //         url = router.borrow().not_found_path.unwrap();
+        //     }
+        // });
 
         history()
             .push_state_with_url(&JsValue::null(), "", Some(url))
