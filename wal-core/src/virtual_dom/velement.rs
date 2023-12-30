@@ -62,8 +62,8 @@ impl VElement {
                     .is_some_and(|x| x.parent_node().is_some_and(|y| y.eq(ancestor)))
                 {
                     self.dom = velement.dom.take();
+                    old_virt = Some(velement);
                 }
-                old_virt = Some(velement);
             }
             Some(VNode::Text(v)) => {
                 v.erase();

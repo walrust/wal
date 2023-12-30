@@ -32,15 +32,15 @@ impl VText {
 
         match last {
             None => {}
-            Some(VNode::Text(mut vtext)) => {
+            Some(VNode::Text(vtext)) => {
                 if vtext
                     .dom
                     .as_ref()
                     .is_some_and(|x| x.parent_node().is_some_and(|y| y.eq(ancestor)))
                 {
-                    self.dom = vtext.dom.take();
+                    self.dom = vtext.dom.clone();
+                    old_virt = Some(vtext);
                 }
-                old_virt = Some(vtext);
             }
             Some(VNode::Element(v)) => {
                 v.erase();
