@@ -27,14 +27,17 @@ pub(crate) mod debug {
 pub mod debug {
     #[cfg(not(debug_assertions))]
     #[inline]
+    #[allow(dead_code)]
     pub fn log(_text: impl ToString) {}
 
     #[cfg(not(debug_assertions))]
     #[inline]
+    #[allow(dead_code)]
     pub fn alert(_text: impl ToString) {}
 
     #[cfg(not(debug_assertions))]
     #[inline]
+    #[allow(dead_code)]
     pub fn warn(_text: impl ToString) {}
 }
 

@@ -280,7 +280,9 @@ mod tests {
     ) -> Rc<RefCell<AnyComponentNode>> {
         let ancestor = get_body();
         let component = T::new(props);
-        AnyComponentNode::new_root(component, ancestor)
+        let anycomp = AnyComponentNode::new_root_routing(component, ancestor);
+        anycomp.borrow_mut().view_and_patch();
+        anycomp
     }
 
     fn create_update_message<T: Component>(
