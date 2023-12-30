@@ -1,9 +1,6 @@
 use web_sys::Node;
 
-use crate::{
-    component::{node::AnyComponentNode, Component},
-    utils::debug,
-};
+use crate::component::{node::AnyComponentNode, Component};
 
 use std::{
     any::{Any, TypeId},
@@ -80,33 +77,26 @@ impl VComponent {
         let props = props
             .unwrap()
             .downcast::<C::Properties>()
-            .expect("Trying to unpack others component props");
+            .expect("Trying to unpack others component properties");
 
         AnyComponentNode::new(C::new(*props), ancestor.clone())
     }
 
     pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
-        debug::log("Patching component");
         let mut old_virt: Option<VComponent> = None;
 
         match last {
             Some(VNode::Component(vcomp)) => {
-                debug::log("\tComparing two components");
                 old_virt = Some(vcomp);
             }
             Some(VNode::Element(v)) => {
-                debug::log("\tNew component over element");
                 v.erase();
             }
             Some(VNode::Text(v)) => {
-                debug::log("\tNew component over text");
                 v.erase();
             }
-            None => {
-                debug::log("\tCreating the comp for the first time");
-            }
+            None => {}
             Some(VNode::List(v)) => {
-                debug::log("\tNew component over list");
                 v.erase();
             }
         }
@@ -116,28 +106,23 @@ impl VComponent {
 
     pub(crate) fn erase(&self) {
         if let Some(node) = self.comp.as_ref() {
-            debug::log("Erasing vcomponent");
             node.borrow_mut().vdom.as_ref().unwrap().erase();
         }
     }
 
     pub(crate) fn set_depth(&mut self, depth: u32) {
-        debug::log(format!("VComponent: Setting depth: {depth}"));
         self.depth = Some(depth);
     }
 
     fn render(&mut self, last: Option<VComponent>, ancestor: &Node) {
         match last {
             Some(mut old_vcomp) if self.key.is_some() && old_vcomp.key == self.key => {
-                debug::log("\t\tKeys are equal");
                 self.comp = old_vcomp.comp.take();
             }
             Some(mut old_vcomp) if old_vcomp.hash == self.hash => {
-                debug::log("\t\tHashes are equal");
                 self.comp = old_vcomp.comp.take();
             }
             Some(old_vcomp) => {
-                debug::log("\t\tHashes differ");
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();
@@ -148,7 +133,6 @@ impl VComponent {
                 self.comp = Some(any_component_node_rc);
             }
             None => {
-                debug::log("\t\tThere was no component before");
                 let any_component_node_rc = (self.generator)(self.props.take(), ancestor);
                 {
                     let mut any_component_node = any_component_node_rc.borrow_mut();

@@ -1,9 +1,7 @@
 use std::{hash::Hash, rc::Rc};
 
-use crate::utils::debug;
-
 /// Callback is a wrapper around a function that is used to send messages to the [Component](../trait.Component.html).
-/// 
+///
 /// `IN` is the type of the input of the wrapped function.
 /// Meaning if we would like to send a message to the [component](../trait.Component.html) we need to provide input of type `IN`.
 /// Callback should be used for defining child to parent [component](../trait.Component.html) communication and subscribing
@@ -30,7 +28,6 @@ impl<IN> Callback<IN> {
 
     /// Function that calls the [Callback] using the provided `input`.
     pub fn emit(&self, input: IN) {
-        debug::log("Emitting callback");
         (self.wrapper)(input);
     }
 }

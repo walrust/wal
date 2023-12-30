@@ -17,8 +17,6 @@ pub(crate) mod dom {
     use gloo::utils::{body, document};
     use web_sys::{Element, Event, Node, Text};
 
-    use crate::utils::debug;
-
     pub const ROOT_ELEMENT_ID: &str = "walrust-root";
 
     pub fn get_root_element() -> Node {
@@ -26,11 +24,6 @@ pub(crate) mod dom {
             document()
                 .get_element_by_id(ROOT_ELEMENT_ID)
                 .unwrap_or_else(|| {
-                    let message = format!(
-                        "There was no '{}' element, adding default one",
-                        ROOT_ELEMENT_ID
-                    );
-                    debug::log(message);
                     let root = document().create_element("div").unwrap();
                     set_attribute(&root, "id", ROOT_ELEMENT_ID);
                     append_child(&body(), &root);

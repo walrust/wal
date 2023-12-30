@@ -1,4 +1,5 @@
 #[cfg(debug_assertions)]
+#[allow(dead_code)]
 pub(crate) mod debug {
     use gloo::{
         console::{log, warn},
@@ -11,33 +12,29 @@ pub(crate) mod debug {
     }
 
     #[inline]
-    #[allow(dead_code)]
     pub(crate) fn alert(text: impl ToString) {
         dialogs::alert(text.to_string().as_str())
     }
 
     #[inline]
-    #[allow(dead_code)]
     pub(crate) fn warn(text: impl ToString) {
         warn!(text.to_string().as_str())
     }
 }
 
 #[cfg(not(debug_assertions))]
+#[allow(dead_code)]
 pub mod debug {
     #[cfg(not(debug_assertions))]
     #[inline]
-    #[allow(dead_code)]
     pub fn log(_text: impl ToString) {}
 
     #[cfg(not(debug_assertions))]
     #[inline]
-    #[allow(dead_code)]
     pub fn alert(_text: impl ToString) {}
 
     #[cfg(not(debug_assertions))]
     #[inline]
-    #[allow(dead_code)]
     pub fn warn(_text: impl ToString) {}
 }
 

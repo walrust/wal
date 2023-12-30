@@ -1,8 +1,6 @@
 use itertools::{EitherOrBoth, Itertools};
 use web_sys::Node;
 
-use crate::utils::debug;
-
 use super::VNode;
 
 /// A list of nodes of virtual DOM tree. It undergoes virtual DOM manipulations and patching algorithm optimizations.
@@ -27,27 +25,20 @@ impl VList {
     }
 
     pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
-        debug::log("Patching list");
         let mut old_virt: Option<VList> = None;
 
         match last {
-            None => {
-                debug::log("\tCreating list for the first time");
-            }
+            None => {}
             Some(VNode::List(vlist)) => {
-                debug::log("\tComparing two lists");
                 old_virt = Some(vlist);
             }
             Some(VNode::Text(v)) => {
-                debug::log("\tCreating list for the first time and swapping with existing text");
                 v.erase();
             }
             Some(VNode::Element(v)) => {
-                debug::log("\tCreating list for the first time and swapping with existing element");
                 v.erase();
             }
             Some(VNode::Component(v)) => {
-                debug::log("\tCreating list for the first time and swapping with existing comp");
                 v.erase();
             }
         }
@@ -62,7 +53,6 @@ impl VList {
     }
 
     pub(crate) fn set_depth(&mut self, depth: u32) {
-        debug::log(format!("VList: Setting depth: {depth}"));
         for child in self.nodes.iter_mut() {
             child.set_depth(depth);
         }

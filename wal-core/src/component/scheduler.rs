@@ -2,7 +2,7 @@ use std::{any::Any, cell::RefCell, collections::BinaryHeap, rc::Weak};
 
 use wasm_bindgen_futures::spawn_local;
 
-use crate::utils::{any_utils::raw_memory_compare, debug};
+use crate::utils::any_utils::raw_memory_compare;
 
 use super::node::AnyComponentNode;
 
@@ -37,8 +37,6 @@ impl UpdateMessage {
                     any_component_node.borrow().depth.expect("Depth is not set"),
                 );
             }
-        } else {
-            debug::log("Weak reference to AnyComponentNode is not attached to AnyComponentNode");
         }
     }
 }
@@ -53,8 +51,6 @@ impl RerenderMessage {
     fn handle(self) {
         if let Some(any_component_node) = self.any_component_node.upgrade() {
             any_component_node.borrow_mut().view_and_patch();
-        } else {
-            debug::log("Weak reference to AnyComponentNode is not attached to AnyComponentNode");
         }
     }
 }
