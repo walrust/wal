@@ -1,2 +1,2 @@
 [workspace]
-members = ["wal*", "demo"]
+members = ["wal*", "demo", "replacing-whole-100-children"]

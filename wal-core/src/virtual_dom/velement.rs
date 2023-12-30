@@ -60,7 +60,15 @@ impl VElement {
             }
             Some(VNode::Element(mut velement)) => {
                 debug::log("\tComparing two elements");
-                self.dom = velement.dom.take();
+                if velement
+                    .dom
+                    .as_ref()
+                    .is_some_and(|x| x.parent_node().unwrap().eq(ancestor))
+                {
+                    self.dom = velement.dom.take();
+                } else {
+                    self.dom = None;
+                }
                 old_virt = Some(velement);
             }
             Some(VNode::Text(v)) => {
