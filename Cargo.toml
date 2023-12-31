@@ -1,6 +1,2 @@
 [workspace]
-members = [
-    "wal",
-    "wal-macros",
-    "examples/*",
-]
+members = ["wal*", "demo"]

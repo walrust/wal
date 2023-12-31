@@ -1,0 +1,28 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
+
+a {
+  color: rgb(210, 210, 210);
+  padding: 2vw;
+  border-radius: 15px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  background-color: #058c42;
+  text-decoration: inherit;
+  font-size: large;
+
+  &:hover {
+    transform: scale(1.2);
+    transition: 1s;
+  }
+}
