@@ -8,6 +8,8 @@ use gloo::utils::{body, history, window};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{Element, Event, EventTarget};
 
+use self::not_found_component::NotFoundComponent;
+
 pub(crate) struct PageRenderer {
     generator: Box<dyn Fn() -> Rc<RefCell<AnyComponentNode>>>,
 }
@@ -37,7 +39,7 @@ struct CurrentPage {
 /// Router of the application. Handles routing in the application and correctly resolves paths.
 pub struct Router {
     pages: HashMap<&'static str, PageRenderer>,
-    not_found_path: Option<&'static str>,
+    not_found_page: PageRenderer,
     current: Option<CurrentPage>,
 }
 
@@ -45,18 +47,20 @@ impl Router {
     pub(crate) fn empty() -> Router {
         Router {
             pages: [].into(),
-            not_found_path: None,
+            not_found_page: PageRenderer::new(|| {
+                AnyComponentNode::new_root_routing(NotFoundComponent, dom::get_root_element())
+            }),
             current: None,
         }
     }
 
     pub(crate) fn new(
         pages: HashMap<&'static str, PageRenderer>,
-        not_found_path: Option<&'static str>,
+        not_found_page: PageRenderer,
     ) -> Router {
         Router {
             pages,
-            not_found_path,
+            not_found_page,
             current: None,
         }
     }
@@ -111,7 +115,7 @@ impl Router {
             let page_renderer = router
                 .pages
                 .get(pathname.as_str())
-                .unwrap_or_else(|| router.pages.get(router.not_found_path.unwrap()).unwrap());
+                .unwrap_or(&router.not_found_page);
             let new_page = page_renderer.render();
             let old_page = old_current.map(|x| x.page);
 
@@ -162,8 +166,6 @@ mod tests {
     };
     use wasm_bindgen_test::wasm_bindgen_test;
 
-    use crate::router::not_found_component::NOT_FOUND_PATH;
-
     use super::{builder::RouterBuilder, Router, ROUTER};
     wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
@@ -174,7 +176,6 @@ mod tests {
         let empty = Router::empty();
 
         assert_eq!(empty.pages.len(), 0);
-        assert!(empty.not_found_path.is_none());
         assert!(empty.current.is_none());
     }
 
@@ -203,8 +204,7 @@ mod tests {
         let router = RouterBuilder::default().add_page::<Root>("/").build();
 
         assert!(router.pages.contains_key("/"));
-        assert_eq!(router.pages.len(), 2);
-        assert_eq!(router.not_found_path, Some(NOT_FOUND_PATH));
+        assert_eq!(router.pages.len(), 1);
         assert!(router.current.is_none());
     }
 
@@ -218,7 +218,6 @@ mod tests {
         ROUTER.with(move |router| {
             let router = router.borrow();
             assert!(router.pages.keys().all(|x| router2.pages.contains_key(*x)));
-            assert_eq!(router.not_found_path, router2.not_found_path);
             assert!(router.current.is_some());
             if let Some(cur) = &router.current {
                 assert_eq!(cur.path, "/");
@@ -250,12 +249,13 @@ mod tests {
 
         router.start();
 
-        Router::navigate_to("url");
+        let url = "url";
+        Router::navigate_to(url);
         ROUTER.with(move |router| {
             let router = router.borrow();
             assert!(router.current.is_some());
             if let Some(cur) = &router.current {
-                assert_eq!(cur.path, NOT_FOUND_PATH);
+                assert_eq!(cur.path, format!("/{url}"));
             }
         });
         Router::navigate_to("/2");
