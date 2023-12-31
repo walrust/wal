@@ -3,8 +3,6 @@ use crate::{
     virtual_dom::{VNode, VText},
 };
 
-pub(crate) const NOT_FOUND_PATH: &str = "/404";
-
 pub(crate) struct NotFoundComponent;
 impl Default for NotFoundComponent {
     fn default() -> Self {

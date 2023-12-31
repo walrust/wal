@@ -1,6 +1,6 @@
 [package]
 name = "wal-core"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Wojciech Kutak", "Karol Kącki", "Marcin Latoszek"]
 repository = "https://github.com/walrust/wal"

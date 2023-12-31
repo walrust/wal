@@ -2,7 +2,7 @@ use itertools::{EitherOrBoth, Itertools};
 use std::collections::{HashMap, HashSet};
 use web_sys::{Element, Node};
 
-use crate::{events::EventHandler, utils::debug, virtual_dom::dom};
+use crate::{events::EventHandler, virtual_dom::dom};
 
 use super::VNode;
 
@@ -50,37 +50,28 @@ impl VElement {
     }
 
     pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
-        debug::log("Patching element");
         let mut old_virt: Option<VElement> = None;
         self.dom = None;
 
         match last {
-            None => {
-                debug::log("\tCreating element for the first time");
-            }
+            None => {}
             Some(VNode::Element(mut velement)) => {
-                debug::log("\tComparing two elements");
                 if velement
                     .dom
                     .as_ref()
-                    .is_some_and(|x| x.parent_node().unwrap().eq(ancestor))
+                    .is_some_and(|x| x.parent_node().is_some_and(|y| y.eq(ancestor)))
                 {
                     self.dom = velement.dom.take();
+                    old_virt = Some(velement);
                 }
-                old_virt = Some(velement);
             }
             Some(VNode::Text(v)) => {
-                debug::log("\tCreating element for the first time and swapping with existing text");
                 v.erase();
             }
             Some(VNode::Component(v)) => {
-                debug::log(
-                    "\tCreating element for the first time and swapping with existing comp node",
-                );
                 v.erase();
             }
             Some(VNode::List(v)) => {
-                debug::log("\tCreating element for the first time and swapping with list");
                 v.erase();
             }
         }
@@ -97,7 +88,6 @@ impl VElement {
     }
 
     pub(crate) fn set_depth(&mut self, depth: u32) {
-        debug::log(format!("VElement: Setting depth: {depth}"));
         for child in self.children.iter_mut() {
             child.set_depth(depth);
         }
@@ -113,7 +103,6 @@ impl VElement {
             }
 
             Some(last) if last.tag_name == self.tag_name => {
-                debug::log("\t\tComparing attrs");
                 let target = self
                     .dom
                     .as_mut()
@@ -135,7 +124,6 @@ impl VElement {
             _ => {
                 // inverted check, if last == None || last = Some(x) that x.tag_name !=
                 // self.tag_name => Swap whole element
-                debug::log("\t\tRendering new node");
                 let el = dom::create_element(&self.tag_name);
 
                 // add attributes

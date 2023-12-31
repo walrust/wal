@@ -1,7 +1,5 @@
 use web_sys::{Node, Text};
 
-use crate::utils::debug;
-
 use super::{dom, VNode};
 
 /// Node in virtual DOM tree representing [Text](https://developer.mozilla.org/en-US/docs/Web/API/Text). It undergoes virtual DOM manipulations and patching algorithm optimizations.
@@ -29,33 +27,28 @@ impl VText {
     }
 
     pub(crate) fn patch(&mut self, last: Option<VNode>, ancestor: &Node) {
-        debug::log("Patching TextNode");
         let mut old_virt: Option<VText> = None;
+        self.dom = None;
 
         match last {
-            None => {
-                debug::log("\tCreating text for the first time");
-                self.dom = None;
-            }
+            None => {}
             Some(VNode::Text(vtext)) => {
-                self.dom = vtext.dom.clone();
-                old_virt = Some(vtext);
+                if vtext
+                    .dom
+                    .as_ref()
+                    .is_some_and(|x| x.parent_node().is_some_and(|y| y.eq(ancestor)))
+                {
+                    self.dom = vtext.dom.clone();
+                    old_virt = Some(vtext);
+                }
             }
             Some(VNode::Element(v)) => {
-                debug::log("\tCreating text for the first time and swapping with existing element");
-                self.dom = None;
                 v.erase();
             }
             Some(VNode::Component(v)) => {
-                debug::log(
-                    "\tCreating text for the first time and swapping with existing comp node",
-                );
-                self.dom = None;
                 v.erase();
             }
             Some(VNode::List(v)) => {
-                debug::log("\tCreating text for the first time and swapping with list");
-                self.dom = None;
                 v.erase();
             }
         }
