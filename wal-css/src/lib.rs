@@ -1,7 +1,7 @@
 pub mod css;
 pub mod css_manager;
-pub mod id_generator;
-pub mod parser;
+mod id_generator;
+mod parser;
 
 /// css_stylesheet macro allows to attach new css stylesheets to the application directly from CSS files.
 ///
