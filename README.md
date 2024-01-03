@@ -5,9 +5,9 @@ Front-end framework for creating Single Page Applications written in Rust.
 ## About
 
 Wal is a Rust library designed to allow the creaction of front-end web applications leveraging Rust and WebAssembly. It consists of three crates:
-- wal-core - main creat which provides most fuinctionalities,
-- wal-rsx - crate which provides the developer with usefull rsx  HTML-like syntax,
-- wal-css - crate which allows usage of local CSS styling with limited scope
+- `wal-core` - main crate which provides most fuinctionalities: components interface, routing, VDOM calculation, rendering and handling HTML events,
+- `wal-rsx` - crate which provides the developer with useful HTML-like syntax called `rsx`,
+- `wal-css` - crate which allows usage of local CSS styling with limited scopes.
 
 The library allows creating SPA applications with the use of re-usable interactive components. 
 
