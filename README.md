@@ -20,6 +20,6 @@ The library allows creating SPA applications with the use of re-usable interacti
 - [project template](https://github.com/walrust/template)
 
 ## Used Technologies
-[WebAssembly](https://webassembly.org/)
-[wasm-bindgen](https://github.com/rustwasm/wasm-bindgen)
-[Trunk](https://github.com/trunk-rs/trunk)
+- [WebAssembly](https://webassembly.org/)
+- [wasm-bindgen](https://github.com/rustwasm/wasm-bindgen)
+- [Trunk](https://github.com/trunk-rs/trunk)
