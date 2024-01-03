@@ -1,6 +1,6 @@
 # Wal
 
-Front-end framework for Single Page Applications written in Rust. 
+Front-end framework for creating Single Page Applications written in Rust. 
 
 ## About
 
