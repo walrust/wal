@@ -1,6 +1,7 @@
 macro_rules! define_events {
     ($($event:ident),*) => {
         $(
+            #[doc(hidden)]
             pub struct $event(web_sys::$event);
 
             impl Deref for $event {
@@ -24,6 +25,7 @@ macro_rules! define_events {
 macro_rules! event_creators {
     ($($handler_name:ident ($event_type:ty)),*) => {
         $(
+            #[doc(hidden)]
             struct $handler_name {
                 event_type: Cow<'static, str>,
                 callback: Callback<$event_type>,
@@ -62,6 +64,7 @@ macro_rules! event_creators {
 macro_rules! unspecialized_event_creators_constructor {
     ($($event_name:ident),*) => {
         $(
+            #[doc(hidden)]
             #[allow(dead_code)]
             pub fn $event_name(callback: Callback<Event>) -> Box<dyn EventCreator> {
                 Box::new(UnspecializedEventCreator {
@@ -76,6 +79,7 @@ macro_rules! unspecialized_event_creators_constructor {
 macro_rules! event_creators_constructor {
     ($($event_name:ident ($event_type:ty) ),*) => {
         $(
+            #[doc(hidden)]
             pub fn $event_name(callback: Callback<$event_type>) -> Box<dyn EventCreator> {
                 Box::new(<$event_type as EventCreatorType>::Creator::new(
                     Cow::from(stringify!($event_name)[2..].to_string()),

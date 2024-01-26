@@ -1,7 +1,12 @@
+#[doc(hidden)]
 pub mod vcomponent;
+#[doc(hidden)]
 pub mod velement;
+#[doc(hidden)]
 pub mod vlist;
+#[doc(hidden)]
 pub mod vnode;
+#[doc(hidden)]
 pub mod vtext;
 
 pub use self::vcomponent::VComponent;

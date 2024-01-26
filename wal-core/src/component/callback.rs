@@ -1,6 +1,6 @@
 use std::{hash::Hash, rc::Rc};
 
-/// Callback is a wrapper around a function that is used to send messages to the [Component](../trait.Component.html).
+/// Callback is a wrapper around a function that is used to send messages to the [Component](../component/trait.Component.html).
 ///
 /// `IN` is the type of the input of the wrapped function.
 /// Meaning if we would like to send a message to the [component](../trait.Component.html) we need to provide input of type `IN`.

@@ -25,6 +25,7 @@ define_events!(
     WheelEvent
 );
 
+#[doc(hidden)]
 pub trait EventCreator {
     fn get_event_type(&self) -> Cow<'static, str>;
     fn create_callback(&self) -> Box<dyn FnMut(&web_sys::Event)>;
@@ -46,6 +47,7 @@ trait EventCreatorType {
     type Creator: EventCreator;
 }
 
+#[doc(hidden)]
 pub struct UnspecializedEventCreator {
     pub event_type: Cow<'static, str>,
     pub callback: Callback<Event>,
@@ -207,6 +209,7 @@ event_creators_constructor! {
     onwheel(WheelEvent)
 }
 
+#[doc(hidden)]
 #[derive(Debug)]
 pub struct EventHandler {
     event_creator: Box<dyn EventCreator>,
