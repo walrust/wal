@@ -1,4 +1,4 @@
-# WAL-CSS
+# Wal-css
 Wal-css is a part of the wal project that enables the programmer to use global styling within the application created in wal.
 
 Wal-css provides macro *css_stylesheet* to link the css file to the program and encapsulate it inside Css struct. 
