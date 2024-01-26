@@ -1,13 +1,21 @@
+//! This module provides implementations of [Behavior] trait and [Callback] structs.
+
 use crate::virtual_dom::VNode;
 use std::any::Any;
 use std::hash::Hash;
 
-use self::behavior::{AnyComponentBehavior, Behavior};
+use self::behavior::{AnyComponentBehavior};
 
+#[doc(hidden)]
 pub mod behavior;
+#[doc(hidden)]
 pub mod callback;
+
 pub(crate) mod node;
 pub(crate) mod scheduler;
+
+pub use self::behavior::Behavior;
+pub use self::callback::Callback;
 
 /// Trait for defining custom component.
 ///
