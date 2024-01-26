@@ -1,4 +1,4 @@
-//! This module provides implementations of [Behavior] trait and [Callback] structs.
+//! This module provides implementations of [Behavior](./behavior/trait.Behavior.html) trait and [Callbacks](./callback/struct.Callback.html) structs.
 
 use crate::virtual_dom::VNode;
 use std::any::Any;
