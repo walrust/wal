@@ -36,7 +36,7 @@ pub trait Component: Sized {
     fn new(props: Self::Properties) -> Self;
 
     /// Function that returns a view of the component.
-    /// It uses [Behavior](behavior::Behavior) to create [Callbacks](callback::Callback) that are responsible to send [Messages](#associatedtype.Message) to the component.
+    /// It uses [Behavior] to create [Callbacks](Callback) that are responsible to send [Messages](#associatedtype.Message) to the component.
     /// Defining the views is done using [rsx](../../wal_rsx/macro.rsx.html) macro.
     /// Using the macro is not mandatory but it is recommended and makes in unnecessary to know the complex structure of [VNode].
     fn view(&self, behavior: &mut impl Behavior<Self>) -> VNode;
