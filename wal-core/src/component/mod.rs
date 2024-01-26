@@ -4,7 +4,7 @@ use crate::virtual_dom::VNode;
 use std::any::Any;
 use std::hash::Hash;
 
-use self::behavior::{AnyComponentBehavior};
+use self::behavior::AnyComponentBehavior;
 
 #[doc(hidden)]
 pub mod behavior;
