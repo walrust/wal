@@ -1,4 +1,6 @@
+#[doc(hidden)]
 pub mod builder;
+pub use self::builder::RouterBuilder;
 pub(crate) mod not_found_component;
 
 use std::{cell::RefCell, collections::HashMap, rc::Rc};

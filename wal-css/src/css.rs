@@ -1,3 +1,5 @@
+//! Module provides the implementation of the [Css] struct.
+
 use std::{collections::HashMap, ops::Index};
 use web_sys::Element;
 

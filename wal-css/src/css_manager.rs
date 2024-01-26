@@ -1,3 +1,5 @@
+//! Module provides the implementation of the [CssManager] struct.
+
 use std::{cell::RefCell, rc::Rc};
 use web_sys::{window, Document, Element};
 
