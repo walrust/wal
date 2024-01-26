@@ -9,8 +9,11 @@ rsx! {
     <div id="identifier" class="class">
         { 1 + 1 }
     </div>
-    <button onclick={|event: MouseEvent| {
-        println!("I love wal rsx!");
-    }}> "I love wal rsx!" </button>
+    <button
+        onclick={|event: MouseEvent| {
+            println!("I love wal rsx!");
+        }}>
+        "I love wal rsx!"
+    </button>
 }
 ```
